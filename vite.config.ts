@@ -16,7 +16,7 @@ export default defineConfig({
     contentCollections(),
   ],
   server: {
-    open: true,
+    open: false,
     port: 3000,
     allowedHosts: ["wholehearted-eleanor-nocturnal.ngrok-free.dev"],
   },
