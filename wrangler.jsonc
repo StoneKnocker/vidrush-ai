@@ -20,7 +20,7 @@
         "SEND_FROM_EMAIL": "support@vidrushai.com",
         "R2_ACCOUNT_ID": "d6fd0c73bd457f8cf7bacd8f66ac63a4",
         "R2_ACCESS_KEY_ID": "9ab844348a065605623905aaa51505f9",
-        "R2_BUCKET_NAME": "ai-photography",
+        "R2_BUCKET_NAME": "vidrush-ai",
         "PAYMENT_PROVIDER": "creem"
       },
       // KV namespaces configuration.
@@ -35,15 +35,15 @@
       "d1_databases": [
         {
           "binding": "DB",
-          "database_name": "ai-photography",
-          "database_id": "c1fd074f-e43a-4326-823d-e13698ed2930",
+          "database_name": "vidrush-ai",
+          "database_id": "0adbbc36-652d-4d21-af78-34667a23fa32",
           "migrations_dir": "drizzle"
         }
       ],
       // R2 buckets configuration.
       "r2_buckets": [
         {
-          "bucket_name": "ai-photography",
+          "bucket_name": "vidrush-ai",
           "binding": "R2"
         }
       ]
@@ -60,7 +60,7 @@
         "SEND_FROM_EMAIL": "support@vidrushai.com",
         "R2_ACCOUNT_ID": "d6fd0c73bd457f8cf7bacd8f66ac63a4",
         "R2_ACCESS_KEY_ID": "9ab844348a065605623905aaa51505f9",
-        "R2_BUCKET_NAME": "ai-photography",
+        "R2_BUCKET_NAME": "vidrush-ai",
         "PAYMENT_PROVIDER": "creem"
       },
       // KV namespaces configuration.
@@ -75,15 +75,15 @@
       "d1_databases": [
         {
           "binding": "DB",
-          "database_name": "ai-photography",
-          "database_id": "c1fd074f-e43a-4326-823d-e13698ed2930",
+          "database_name": "vidrush-ai",
+          "database_id": "0adbbc36-652d-4d21-af78-34667a23fa32",
           "migrations_dir": "drizzle"
         }
       ],
       // R2 buckets configuration.
       "r2_buckets": [
         {
-          "bucket_name": "ai-photography",
+          "bucket_name": "vidrush-ai",
           "binding": "R2"
         }
       ]
