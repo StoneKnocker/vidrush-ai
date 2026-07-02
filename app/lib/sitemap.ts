@@ -17,7 +17,6 @@ type SitemapEntry = {
 const staticPublicPaths = [
   "/",
   "/blog",
-  "/cyberrealistic-pony",
   "/privacy-policy",
   "/cookie-policy",
   "/terms-and-conditions",

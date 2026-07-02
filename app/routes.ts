@@ -17,7 +17,6 @@ export default [
         route("blog", "routes/pages/blog.tsx"),
         route("blog/:slug", "routes/pages/blog-post.tsx"),
         route("playground", "routes/pages/playground.tsx"),
-        route("cyberrealistic-pony", "routes/pages/cyberrealistic-pony.tsx"),
         route("feedback", "routes/pages/feedback.tsx"),
         route("_test", "routes/_test.tsx"),
         ...prefix("user", [

@@ -51,9 +51,6 @@ const Header: React.FC = () => {
             <Link to="/playground" className={desktopNavLinkClass}>
               {t("header.playground")}
             </Link>
-            <Link to="/cyberrealistic-pony" className={desktopNavLinkClass}>
-              CyberRealistic Pony
-            </Link>
           </nav>
 
           {/* Right: Actions */}
@@ -91,9 +88,6 @@ const Header: React.FC = () => {
         <div className="slide-in-from-top-5 absolute top-16 right-0 left-0 flex animate-in flex-col gap-4 border-[#3d3a39] border-b bg-[#050507] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.7)] duration-200 md:hidden">
           <Link to="/playground" className={mobileNavLinkClass}>
             {t("header.playground")}
-          </Link>
-          <Link to="/cyberrealistic-pony" className={mobileNavLinkClass}>
-            CyberRealistic Pony
           </Link>
 
           <div className="mt-4 flex flex-col gap-3 border-[#3d3a39] border-t pt-4">

@@ -157,7 +157,6 @@ export default function Footer() {
       title: t("footer.service"),
       links: [
         { label: t("header.playground"), to: "/playground" },
-        { label: "CyberRealistic Pony", to: "/cyberrealistic-pony" },
         { label: "Pollo AI", href: "https://pollo.ai?ref=mgq1nzk" },
       ],
     },
