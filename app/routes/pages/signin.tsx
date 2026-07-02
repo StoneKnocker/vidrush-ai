@@ -104,7 +104,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="landing-theme container relative grid h-screen flex-col items-center justify-center bg-background text-foreground max-w-none lg:grid-cols-2 lg:px-0">
+    <div className="landing-theme container relative grid h-screen max-w-none flex-col items-center justify-center bg-background text-foreground lg:grid-cols-2 lg:px-0">
       {/* Left Panel: Branding / Visuals */}
       <div className="relative hidden h-full flex-col border-[#3d3a39] border-r bg-[#050507] p-10 text-white lg:flex">
         <div className="absolute inset-0 bg-[#050507]" />

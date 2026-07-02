@@ -1,4 +1,4 @@
-export const DEFAULT_APP_NAME = "CyberRealistic";
+export const DEFAULT_APP_NAME = "VidRush AI";
 
 export interface PublicEnv {
   SEND_FROM_EMAIL?: string;

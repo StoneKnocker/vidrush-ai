@@ -105,9 +105,9 @@ export default function PlaygroundRoute({ loaderData }: Route.ComponentProps) {
                     className={
                       "relative flex-1 px-5 py-3 font-medium text-sm transition-all" +
                       (isActive
-                        ? " bg-[#050507] text-[#f2f2f2]"
-                        : " bg-transparent text-[#7d7875] hover:bg-[#111115] hover:text-[#b8b3b0]") +
-                      (i === 0 ? "" : " border-[#3d3a39] border-l")
+                        ? "bg-[#050507] text-[#f2f2f2]"
+                        : "bg-transparent text-[#7d7875] hover:bg-[#111115] hover:text-[#b8b3b0]") +
+                      (i === 0 ? "" : "border-[#3d3a39] border-l")
                     }
                   >
                     {isActive && (
