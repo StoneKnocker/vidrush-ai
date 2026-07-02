@@ -42,6 +42,7 @@ export default [
   route("admin/creations", "routes/pages/admin/creations.tsx"),
 
   // sitemap
+  route("robots.txt", "routes/robots.ts"),
   route("sitemap.xml", "routes/sitemap.ts"),
 
   ...prefix("api", [
