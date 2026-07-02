@@ -1,0 +1,26 @@
+import { cloudflare } from "@cloudflare/vite-plugin";
+import contentCollections from "@content-collections/remix-vite";
+import { reactRouter } from "@react-router/dev/vite";
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "vite";
+import tsconfigPaths from "vite-tsconfig-paths";
+
+export default defineConfig({
+  plugins: [
+    cloudflare({
+      viteEnvironment: { name: "ssr" },
+    }),
+    tailwindcss(),
+    reactRouter(),
+    tsconfigPaths(),
+    contentCollections(),
+  ],
+  server: {
+    open: true,
+    port: 3000,
+    allowedHosts: ["wholehearted-eleanor-nocturnal.ngrok-free.dev"],
+  },
+  build: {
+    minify: true,
+  },
+});

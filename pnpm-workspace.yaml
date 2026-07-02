@@ -1,0 +1,8 @@
+packages:
+  - "."
+
+allowBuilds:
+  esbuild: true
+  lefthook: false
+  sharp: true
+  workerd: true

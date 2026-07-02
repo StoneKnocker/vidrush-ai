@@ -1,0 +1,311 @@
+{
+  "meta": {
+    "title": "CyberRealistic Pony - High-Fidelity Photorealism Meets Pony Diffusion",
+    "description": "Unlock robust pose control and natural skin textures. CyberRealistic Pony is a premier fine-tune of Pony Diffusion V6 XL, optimized for complex character interactions, custom poses, and lifelike render quality."
+  },
+  "hero": {
+    "enabled": true,
+    "id": "hero",
+    "title": "Generate <span className=\"text-[#ff6b6b] drop-shadow-[0_0_22px_rgba(255,107,107,0.35)]\">Anatomically Coherent Realism</span> with Precision",
+    "description": "Say goodbye to rigid templates and compromised poses. CyberRealistic Pony blends the robust prompt compliance of Pony Diffusion V6 XL with the organic skin textures and cinematic lighting of the CyberRealistic ecosystem, delivering highly controllable character rendering directly.",
+    "image": {
+      "src": "https://cdn.cyberrealistic.org/cyberrealistic/cyberrealistic-pony-hero.webp",
+      "alt": "CyberRealistic Pony high-fidelity character generation workflow"
+    },
+    "buttons": [
+      {
+        "label": "Start Creating",
+        "to": "/playground",
+        "variant": "primary",
+        "icon": "sparkles"
+      },
+      {
+        "label": "View on Hugging Face",
+        "href": "https://huggingface.co/cyberdelia/CyberRealisticPony",
+        "variant": "secondary",
+        "icon": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg"
+      }
+    ]
+  },
+  "branding": {
+    "enabled": true,
+    "id": "branding",
+    "title": "The premier foundation for expressive character control",
+    "description": "Developed by Cyberdelia, CyberRealistic Pony addresses the limitations of standard realistic models by inheriting Pony's exceptional compliance with complex actions and multi-subject scenes.",
+    "items": [
+      { "title": "Pony V6 XL Foundation", "icon": "user" },
+      { "title": "Anatomical Coherence", "icon": "user-check" },
+      { "title": "Baked-In Custom VAE", "icon": "cpu" },
+      { "title": "Multi-Subject Precision", "icon": "users" },
+      { "title": "Creative Flexibility", "icon": "palette" },
+      { "title": "Optimized Embeddings", "icon": "layers" }
+    ]
+  },
+  "introduce": {
+    "enabled": true,
+    "id": "introduce",
+    "title": "Break free from rigid, static portraits",
+    "description": "Standard realistic SDXL models often struggle when generating dynamic angles, interactions, or unconventional outfits. CyberRealistic Pony utilizes Pony's deep text encoder training to interpret complex actions while maintaining realistic skin and eye textures.",
+    "image": {
+      "src": "https://cdn.cyberrealistic.org/cyberrealistic/cyberrealistic-pony-showcase-1.webp",
+      "alt": "Dynamic pose comparison between standard photorealism models and CyberRealistic Pony"
+    },
+    "imagePosition": "right",
+    "items": [
+      {
+        "title": "Exceptional Pose & Interaction Control",
+        "description": "Generates complex body movements, multi-character interactions, and creative angles with significantly lower rates of anatomical failure.",
+        "icon": "maximize"
+      },
+      {
+        "title": "Harmonized Tagging System",
+        "description": "Seamlessly interprets structured Danbooru tags alongside natural language, giving you complete artistic command over character attributes.",
+        "icon": "text-cursor-input"
+      },
+      {
+        "title": "Organic Photorealistic Shading",
+        "description": "Overcomes the typical 'flat' or 'anime-style' shading of standard Pony models, introducing moody cinematic lighting and rich pore-level skin details.",
+        "icon": "palette"
+      }
+    ]
+  },
+  "benefit": {
+    "enabled": true,
+    "id": "benefit",
+    "title": "Why CyberRealistic Pony is preferred for expressive characters",
+    "description": "Whether you are a concept artist, character designer, or digital creator, you need more than just a static portrait. CyberRealistic Pony delivers flexible, production-ready assets with superior composition stability.",
+    "image": {
+      "src": "https://cdn.cyberrealistic.org/cyberrealistic/cyberrealistic-pony-showcase-2.webp",
+      "alt": "Digital artist utilizing CyberRealistic Pony in a node-based ComfyUI workflow"
+    },
+    "imagePosition": "left",
+    "items": [
+      {
+        "title": "Exceptional pose and action dynamics",
+        "description": "Achieve high physical accuracy and complex styling options with a model trained for robust physical interactions.",
+        "icon": "sparkles",
+        "bullets": [
+          "Consistent anatomy even in complex, physical actions",
+          "High compliance with highly specific character designs and outfits",
+          "Maintains depth, perspective, and clothing physics"
+        ]
+      },
+      {
+        "title": "Simplified pipeline and custom nodes",
+        "description": "Drop the model into your workflow and leverage its specialized assets for consistent outputs.",
+        "icon": "workflow",
+        "bullets": [
+          "Fully compatible with standard SDXL interfaces like WebUI, Forge, and ComfyUI",
+          "Custom baked-in VAE designed to resolve over-saturation issues",
+          "Smooth integration with custom positive and negative embeddings"
+        ]
+      },
+      {
+        "title": "Continuous model evolution",
+        "description": "Benefit from developmental cycles focused on balancing realism with structural compliance.",
+        "icon": "rocket",
+        "bullets": [
+          "v1.0 combined Pony V6 with basic realistic textures",
+          "v8.5 optimized contrast and skin rendering consistency",
+          "v18.0 CoreShift delivers refined light dispersion and advanced pose coherence"
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "enabled": true,
+    "id": "usage",
+    "title": "How to create with CyberRealistic Pony",
+    "description": "Experience highly responsive character rendering by configuring your workflow with these optimized parameters.",
+    "items": [
+      {
+        "title": "1. Load Checkpoint & Embeddings",
+        "description": "Load the latest CyberRealistic Pony safetensors and place the custom positive/negative embeddings in your folder.",
+        "icon": "settings"
+      },
+      {
+        "title": "2. Structure the Hybrid Prompt",
+        "description": "Start with quality tags (e.g., 'score_9, score_8_up, score_7_up') or the positive embedding, followed by descriptive tags.",
+        "icon": "pen-tool"
+      },
+      {
+        "title": "3. Set Generation Parameters",
+        "description": "Configure your sampler to DPM++ 2M Karras, steps to 30+, CFG scale to 5, and set Clip Skip to 2.",
+        "icon": "monitor"
+      },
+      {
+        "title": "4. Optimize with Hires.fix",
+        "description": "Perform a 1.55x upscale using 4x_NickelbackFS_72000_G with a denoising strength of 0.45 for rich textures.",
+        "icon": "layers"
+      }
+    ]
+  },
+  "feature": {
+    "enabled": true,
+    "id": "feature",
+    "title": "Optimized features for character concept artists",
+    "description": "Tuned continuously to maximize creative freedom, CyberRealistic Pony sets a high standard for controllable photorealism.",
+    "items": [
+      {
+        "title": "Deep Concept Understanding",
+        "description": "Trained to parse complex human interactions and multi-subject details with minimal prompt bleed.",
+        "icon": "brain-circuit",
+        "bullets": [
+          "Comprehends complex physical interactions",
+          "Follows highly detailed, multi-character prompts",
+          "Minimizes prompt bleed across distinct subjects"
+        ]
+      },
+      {
+        "title": "Custom Baked-in VAE",
+        "description": "Engineered specifically to counter Pony's tendency toward over-saturation, keeping colors natural.",
+        "icon": "cpu",
+        "bullets": [
+          "Engineered specifically to counter Pony's over-saturation",
+          "Provides natural skin shading and neutral tones",
+          "No external VAE loading required"
+        ]
+      },
+      {
+        "title": "Pony V6 XL Architecture",
+        "description": "Inherits a massive dataset of stylized actions, character designs, and anatomically demanding configurations.",
+        "icon": "database",
+        "bullets": [
+          "Vast training on specific poses and costumes",
+          "Robust anatomy and consistent hand rendering",
+          "Compatible with massive community LoRA ecosystem"
+        ]
+      },
+      {
+        "title": "Creative Freedom & Safety",
+        "description": "An uncensored fine-tune that is equally capable of generating safe-for-work concepts and highly stylized digital art.",
+        "icon": "globe",
+        "bullets": [
+          "Fully uncensored for maximum creative flexibility",
+          "Excellent for safe-for-work and experimental concepts",
+          "No forced aesthetic styles"
+        ]
+      },
+      {
+        "title": "Positive & Negative Embeddings",
+        "description": "Specially calibrated Textual Inversion embeddings suppress underlying 2D structures to guide generations toward realistic light and shadow.",
+        "icon": "layers",
+        "bullets": [
+          "Specially calibrated to suppress underlying anime aesthetics",
+          "Guides the model toward organic photographic rendering",
+          "Improves clarity in small facial features"
+        ]
+      },
+      {
+        "title": "Active Development & Catalyst Builds",
+        "description": "Developed alongside experimental Catalyst offshoots to implement community-vetted rendering optimizations.",
+        "icon": "users",
+        "bullets": [
+          "Experimental Catalyst builds test bleeding-edge training",
+          "Rapid community feedback loops",
+          "Frequent mainline upgrades based on verified data"
+        ]
+      }
+    ]
+  },
+  "stats": {
+    "enabled": true,
+    "id": "stats",
+    "title": "Redefining character realism",
+    "description": "Pioneered by Cyberdelia to bring lifelike textures to the most expressive base model in the open-source community.",
+    "items": [
+      {
+        "label": "Base Model",
+        "value": "Pony Diffusion V6 XL",
+        "description": "Built on the premier open-source architecture for character positioning and anatomical compliance.",
+        "icon": "maximize"
+      },
+      {
+        "label": "Prompt System",
+        "value": "Pony Tagging + NLP",
+        "description": "Utilizes standard score tagging alongside natural language for granular aesthetic control.",
+        "icon": "message-square"
+      },
+      {
+        "label": "Latest Version",
+        "value": "v18.0 CoreShift",
+        "description": "The current stable release, optimized for lighting distribution and enhanced physical coherence.",
+        "icon": "check-circle"
+      }
+    ]
+  },
+  "testimonial": {
+    "enabled": true,
+    "id": "testimonial",
+    "title": "What creators are saying about CyberRealistic Pony",
+    "description": "The preferred choice for creators, LoRA trainers, and agencies who require precise character control and lifelike rendering.",
+    "items": [
+      {
+        "quote": "The prompt adherence is outstanding. I can actually generate a character sitting in a very specific, complex pose without their limbs breaking apart, all while keeping the skin looking photorealistic.",
+        "author": "Character Concept Artist",
+        "role": "Game Studio",
+        "rating": "★★★★★"
+      },
+      {
+        "quote": "CyberRealistic Pony completely solved my issues with stiff, static portraits. It understands action and physical interactions beautifully.",
+        "author": "AI Illustrator",
+        "role": "Digital Freelancer",
+        "rating": "★★★★★"
+      },
+      {
+        "quote": "Using the custom positive and negative embeddings makes a massive difference. You get the incredible composition power of Pony without any of the flat, cartoonish shading.",
+        "author": "Workflow Developer",
+        "role": "Creative Agency",
+        "rating": "★★★★★"
+      }
+    ]
+  },
+  "faq": {
+    "enabled": true,
+    "id": "faq",
+    "title": "Frequently asked questions",
+    "description": "Everything you need to know about CyberRealistic Pony, its parameters, and how to use it.",
+    "items": [
+      {
+        "question": "What is CyberRealistic Pony?",
+        "answer": "CyberRealistic Pony is an open-source, SDXL fine-tune that blends the expressive composition and robust prompt compliance of Pony Diffusion V6 XL with the photorealistic aesthetic of CyberRealistic."
+      },
+      {
+        "question": "How is it different from CyberRealistic XL?",
+        "answer": "CyberRealistic XL is built on standard SDXL 1.0, using natural language to generate realistic scenery and portraiture. CyberRealistic Pony is built on Pony V6, utilizing specific score tags or custom embeddings to generate highly complex poses, interactions, and customized characters with realistic skin textures."
+      },
+      {
+        "question": "What are the recommended quality tags?",
+        "answer": "For standard Pony-style prompting, we recommend beginning your positive prompt with 'score_9, score_8_up, score_7_up, (your subject)'. You can also use the custom positive embedding 'CyberRealisticPony_POSV1' to bypass manual tag typing and achieve a natural photographic style."
+      },
+      {
+        "question": "What are the recommended sampler settings?",
+        "answer": "We recommend using DPM++ 2M Karras, 30+ steps, a CFG scale of 5, and setting Clip Skip to 2. The native generation resolution is 832x1216 or 896x1152."
+      },
+      {
+        "question": "Does this model require a separate VAE?",
+        "answer": "No, CyberRealistic Pony features a custom baked-in VAE optimized to reduce over-saturation, so you do not need to download or select an external VAE."
+      },
+      {
+        "question": "Can I use it for commercial projects?",
+        "answer": "Yes, the model is distributed under the CreativeML Open RAIL++-M license, which permits commercial use of generated images, provided you follow standard licensing restrictions."
+      },
+      {
+        "question": "What are the positive and negative embeddings?",
+        "answer": "These are custom Textual Inversion files (like 'CyberRealistic Positive/Negative - Pony') developed by Cyberdelia. They are placed in your embeddings folder and help guide the model's underlying anime-heavy weights toward realistic photographic textures."
+      }
+    ]
+  },
+  "cta": {
+    "enabled": true,
+    "id": "cta",
+    "title": "Take control of your character generation",
+    "description": "Stop fighting rigid templates. Generate dynamic, expressive, and highly realistic characters with CyberRealistic Pony today.",
+    "button": {
+      "label": "Start Creating",
+      "to": "/playground",
+      "variant": "primary",
+      "icon": "sparkles"
+    }
+  }
+}

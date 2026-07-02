@@ -1,0 +1,352 @@
+{
+  "meta": {
+    "title": "CyberRealistic XL - High-Fidelity Photorealistic AI Generation",
+    "description": "Experience natural photorealism and robust scenic coherence. CyberRealistic XL is a leading open-source SDXL base model optimized for lifelike human textures, complex compositions, and straightforward prompting."
+  },
+  "hero": {
+    "enabled": true,
+    "id": "hero",
+    "title": "Generate <span className=\"text-[#38bdf8] drop-shadow-[0_0_22px_rgba(56,189,248,0.35)]\">High-Fidelity Photorealistic Images</span> with Ease",
+    "description": "Avoid artificial textures and complex negative prompting. CyberRealistic XL delivers highly realistic human features, skin textures, and balanced lighting directly from simple, descriptive natural language prompts.",
+    "image": {
+      "src": "https://cdn.cyberrealistic.org/cyberrealistic/cyberrealistic-xl-hero.webp",
+      "alt": "CyberRealistic XL high-fidelity photorealistic image generation workflow"
+    },
+    "buttons": [
+      {
+        "label": "Start Creating",
+        "to": "/playground",
+        "variant": "primary",
+        "icon": "sparkles"
+      },
+      {
+        "label": "View on Hugging Face",
+        "href": "https://huggingface.co/cyberdelia/CyberRealisticXL",
+        "variant": "secondary",
+        "icon": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg"
+      }
+    ]
+  },
+  "branding": {
+    "enabled": true,
+    "id": "branding",
+    "title": "The solid foundation for photorealistic AI generation",
+    "description": "Developed by Cyberdelia, CyberRealistic XL addresses the common pitfalls of generic SDXL base models, serving as a reliable and flexible canvas for creators, fine-tuners, and developers.",
+    "items": [
+      {
+        "title": "Realistic Skin Textures",
+        "icon": "user"
+      },
+      {
+        "title": "Baked-In VAE",
+        "icon": "cpu"
+      },
+      {
+        "title": "Straightforward Prompting",
+        "icon": "message-square"
+      },
+      {
+        "title": "Coherent Anatomy",
+        "icon": "user-check"
+      },
+      {
+        "title": "Versatile Compositions",
+        "icon": "layout"
+      },
+      {
+        "title": "LoRA & ControlNet Ready",
+        "icon": "layers"
+      }
+    ]
+  },
+  "introduce": {
+    "enabled": true,
+    "id": "introduce",
+    "title": "Highly realistic output with minimal prompting complexity",
+    "description": "Many photorealistic checkpoints require extensive negative embeddings and overly specific, complex parameters just to avoid basic rendering errors. CyberRealistic XL uses continuous custom blends and rigorous testing to yield clean, balanced results naturally.",
+    "image": {
+      "src": "https://cdn.cyberrealistic.org/cyberrealistic/cyberrealistic-xl-showcase-1.webp",
+      "alt": "Comparison between standard SDXL rendering and CyberRealistic XL's lifelike textures"
+    },
+    "imagePosition": "right",
+    "items": [
+      {
+        "title": "High-Fidelity Skin & Eye Rendering",
+        "description": "Captures fine skin pores, hair detail, and sharp light reflections in eyes for genuine photographic quality.",
+        "icon": "eye"
+      },
+      {
+        "title": "Robust Composition Coherence",
+        "description": "Excels at rendering multi-subject scenes, action shots, and unconventional camera angles with a lower rate of structural failure.",
+        "icon": "maximize"
+      },
+      {
+        "title": "Simplicity in Usage",
+        "description": "Engineered to deliver solid, studio-grade results using short, descriptive natural language prompts without mandatory clutter.",
+        "icon": "palette"
+      }
+    ]
+  },
+  "benefit": {
+    "enabled": true,
+    "id": "benefit",
+    "title": "Why CyberRealistic XL is a popular choice for photorealistic AI",
+    "description": "Photographers, digital designers, and AI creators need precise control over lighting, composition, and human anatomy. CyberRealistic XL bridges the gap between digital generation and authentic photographic aesthetics.",
+    "image": {
+      "src": "https://cdn.cyberrealistic.org/cyberrealistic/cyberrealistic-xl-showcase-2.webp",
+      "alt": "Digital creator utilizing CyberRealistic XL in a professional node-based workflow"
+    },
+    "imagePosition": "left",
+    "items": [
+      {
+        "title": "Exceptional detail & light physics",
+        "description": "Achieve high visual fidelity with natural light scattering, structural accuracy, and balanced tones.",
+        "icon": "sparkles",
+        "bullets": [
+          "Consistent character anatomy and hands",
+          "Realistic cinematic and natural lighting setups",
+          "Preserves micro-details in clothing and hair textures"
+        ]
+      },
+      {
+        "title": "Seamless pipeline integration",
+        "description": "Drop the model into your existing configuration and generate immediately with native compatibility.",
+        "icon": "workflow",
+        "bullets": [
+          "Full support for ComfyUI, Automatic1111, and Forge",
+          "Baked-in VAE ensures predictable colors out of the box",
+          "Works cleanly with popular SDXL ControlNets and IP-Adapters"
+        ]
+      },
+      {
+        "title": "Continuous model evolution",
+        "description": "Benefit from a model that has been iteratively refined through systematic community feedback.",
+        "icon": "rocket",
+        "bullets": [
+          "v1.0 introduced the photorealistic SDXL foundation",
+          "v6.0 integrated advanced training branches for richer contrast",
+          "v10.0 delivers refined lighting and reduced digital artifacts"
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "enabled": true,
+    "id": "usage",
+    "title": "How to create with CyberRealistic XL",
+    "description": "Generate high-quality photography by following these simple setup and sampling recommendations.",
+    "items": [
+      {
+        "title": "1. Load the Checkpoint",
+        "description": "Download the latest CyberRealistic XL safetensors and place it in your stable-diffusion-webui or ComfyUI models directory.",
+        "icon": "settings"
+      },
+      {
+        "title": "2. Keep Your Prompt Simple",
+        "description": "Write your prompt in descriptive natural language (e.g., 'A candid portrait of a woman at a coffee shop, natural light, shallow depth of field').",
+        "icon": "pen-tool"
+      },
+      {
+        "title": "3. Configure Sampler Settings",
+        "description": "Set your sampler to DPM++ 2M SDE Karras, steps to 30+, and CFG scale between 3 and 5 for optimal results.",
+        "icon": "monitor"
+      },
+      {
+        "title": "4. Upscale with Hires.fix",
+        "description": "Perform a 1.5x upscale with a low denoising strength (0.3 - 0.35) using 4x_NickelbackFS_72000_G for optimal sharpness.",
+        "icon": "layers"
+      }
+    ]
+  },
+  "feature": {
+    "enabled": true,
+    "id": "feature",
+    "title": "Advanced capabilities for professional workflows",
+    "description": "Packed with continuous refinement and custom optimizations, CyberRealistic XL sets a reliable benchmark for open-source photorealistic models.",
+    "items": [
+      {
+        "title": "Baked-In VAE & Color Tuning",
+        "description": "No more washed-out colors. The integrated VAE is optimized for rich contrast, natural skin tones, and neutral light temperatures.",
+        "icon": "brain-circuit",
+        "bullets": [
+          "Reduced desaturation issues",
+          "Natural skin tones and neutral lighting",
+          "Predictable rendering without extra files"
+        ]
+      },
+      {
+        "title": "Complex Composition Engine",
+        "description": "Unlike generic photorealism models that struggle with dynamic action, this model maintains high coherence during motion.",
+        "icon": "layout",
+        "bullets": [
+          "Handles action shots and movement",
+          "Maintains coherence in multi-subject scenes",
+          "Consistent spatial and depth perspective"
+        ]
+      },
+      {
+        "title": "Optimized CFG Sensitivity",
+        "description": "Engineered to deliver exceptional fidelity even at lower CFG scales, keeping generations clean and avoiding artifacting.",
+        "icon": "cpu",
+        "bullets": [
+          "Maintains high quality at lower CFG scales (3-5)",
+          "Reduces visual noise and digital artifacting",
+          "High fidelity to prompt descriptors"
+        ]
+      },
+      {
+        "title": "Open Permissions Ethos",
+        "description": "Released under flexible, creator-friendly terms to foster a collaborative and growing generation ecosystem.",
+        "icon": "globe",
+        "bullets": [
+          "Permitted commercial use for generated images",
+          "Encourages community merge development",
+          "Free for personal and research projects"
+        ]
+      },
+      {
+        "title": "Catalyst Integration",
+        "description": "Leverages developmental findings from the experimental branch to enhance visual contrast and details.",
+        "icon": "zap",
+        "bullets": [
+          "Leverages findings from the experimental branch",
+          "Refined micro-contrast levels",
+          "Improved structural integrity in complex environments"
+        ]
+      },
+      {
+        "title": "Unrivaled Community Ecosystem",
+        "description": "Serving as a robust base for derivative fine-tunes, it remains fully compatible with thousands of community tools.",
+        "icon": "users",
+        "bullets": [
+          "Thousands of compatible LoRAs available",
+          "Active community support and recipe sharing",
+          "Extensive compatibility with regional prompters"
+        ]
+      }
+    ]
+  },
+  "showcase": {
+    "enabled": false,
+    "id": "showcase",
+    "title": "What you can generate with CyberRealistic XL",
+    "description": "From close-up portraits to complex environments, see how CyberRealistic XL preserves the details of real photography.",
+    "items": [
+      {
+        "title": "High-Fidelity Portraits",
+        "description": "Generate lifelike portraits with accurate skin texture and natural eye reflections.",
+        "image": "assets/showcase/portrait-concept.webp"
+      },
+      {
+        "title": "Scenic & Environmental Shots",
+        "description": "Coherent landscapes and street photography with balanced lighting.",
+        "image": "assets/showcase/scenic-concept.webp"
+      },
+      {
+        "title": "Dynamic Action Compositions",
+        "description": "Action scenes and complex body poses with reduced anatomical errors.",
+        "image": "assets/showcase/action-concept.webp"
+      }
+    ]
+  },
+  "stats": {
+    "enabled": true,
+    "id": "stats",
+    "title": "A reliable standard for photorealistic AI",
+    "description": "Meticulously crafted by developer Cyberdelia to push SDXL technology to its photorealistic limits.",
+    "items": [
+      {
+        "label": "Base Model",
+        "value": "SDXL 1.0",
+        "description": "Built on the Stable Diffusion XL 1.0 architecture for native detail and high resolution.",
+        "icon": "maximize"
+      },
+      {
+        "label": "Prompt System",
+        "value": "Natural Language",
+        "description": "Eliminates the need for long, repetitive prompt structures to achieve realism.",
+        "icon": "message-square"
+      },
+      {
+        "label": "Latest Version",
+        "value": "v10.0 Redux",
+        "description": "The current stable release, bringing optimized coherence and lifelike lighting.",
+        "icon": "check-circle"
+      }
+    ]
+  },
+  "testimonial": {
+    "enabled": true,
+    "id": "testimonial",
+    "title": "What creators are saying about CyberRealistic XL",
+    "description": "The preferred choice for creators, LoRA trainers, and agencies who require reliable outputs and lifelike textures.",
+    "items": [
+      {
+        "quote": "The skin textures and lighting are remarkably lifelike. I spend significantly less time post-processing to remove the generic 'AI shine' from portraits.",
+        "author": "AI Photographer",
+        "role": "Freelance Studio",
+        "rating": "★★★★★"
+      },
+      {
+        "quote": "As a trainer, CyberRealistic XL v6.0 and v10.0 provide one of the cleanest base models. The composition flexibility is outstanding.",
+        "author": "Model Fine-tuner",
+        "role": "Civitai Creator",
+        "rating": "★★★★★"
+      },
+      {
+        "quote": "Being able to use simple natural language while maintaining control over complex poses and multi-character scenes has made my workflow much faster.",
+        "author": "Creative Director",
+        "role": "Digital Agency",
+        "rating": "★★★★★"
+      }
+    ]
+  },
+  "faq": {
+    "enabled": true,
+    "id": "faq",
+    "title": "Frequently asked questions",
+    "description": "Everything you need to know about CyberRealistic XL, its parameters, and how to use it.",
+    "items": [
+      {
+        "question": "What is CyberRealistic XL?",
+        "answer": "CyberRealistic XL is an open-source, SDXL-based photorealistic image generation model developed by Cyberdelia."
+      },
+      {
+        "question": "How is it different from CyberRealistic Pony?",
+        "answer": "CyberRealistic XL is built on standard SDXL 1.0, focusing on realistic environments, scenery, and natural human textures using simple natural language. CyberRealistic Pony is based on Pony Diffusion V6, which is optimized for complex poses, stylized characters, and NSFW content, but requires specific 'score_9' tags and custom negative embeddings."
+      },
+      {
+        "question": "How should I format my prompts?",
+        "answer": "Unlike other models, CyberRealistic XL does not require overly long or repetitive prompt templates. Simply write a natural English description of your scene, and add basic photography terms if needed (e.g., 'RAW photo, golden hour, shallow depth of field')."
+      },
+      {
+        "question": "What are the recommended generation settings?",
+        "answer": "For optimal results, use the DPM++ 2M SDE Karras sampler, 30+ steps, a CFG scale between 3 and 5, and an initial resolution of 832x1216 or 896x1152. A 1.5x upscale with a low denoising strength (0.3 - 0.35) is highly recommended."
+      },
+      {
+        "question": "Do I need to load an external VAE?",
+        "answer": "No, CyberRealistic XL has a baked-in VAE, so you do not need to download or apply an external VAE file in your WebUI or ComfyUI."
+      },
+      {
+        "question": "Can I use this model commercially?",
+        "answer": "Yes, the model allows commercial use of generated images under the CreativeML Open RAIL++-M license. Please refer to the official model page on Civitai or Hugging Face for the complete and updated terms."
+      },
+      {
+        "question": "What is the difference between the main version and the Catalyst version?",
+        "answer": "CyberRealistic XL is the stable, production-ready release. CyberRealistic XL Catalyst is an experimental branch where the author tests new merge ratios and training techniques. Successful elements from the Catalyst version are periodically integrated into the main model updates."
+      }
+    ]
+  },
+  "cta": {
+    "enabled": true,
+    "id": "cta",
+    "title": "Experience realistic AI photography today",
+    "description": "Stop struggling with complex negative prompts. Build highly realistic, cohesive scenes with CyberRealistic XL.",
+    "button": {
+      "label": "Start Creating",
+      "to": "/playground",
+      "variant": "primary",
+      "icon": "sparkles"
+    }
+  }
+}

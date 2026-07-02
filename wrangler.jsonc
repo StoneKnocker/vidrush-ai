@@ -1,0 +1,108 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cyberrealistic",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2025-04-04",
+  "compatibility_flags": ["nodejs_compat"],
+  // Assets configuration.
+  "assets": {
+    "directory": "./build/client/"
+  },
+  "env": {
+    "dev": {
+      "vars": {
+        "APP_NAME": "CyberRealistic",
+        "APP_URL": "http://localhost:3000",
+        "R2_DOMAIN": "https://cdn.cyberrealistic.org",
+        "ENVIRONMENT": "development",
+        "NEED_MOCK": "0",
+        "GOOGLE_CLIENT_ID": "xxx",
+        "SEND_FROM_EMAIL": "support@cyberrealistic.org",
+        "R2_ACCOUNT_ID": "d6fd0c73bd457f8cf7bacd8f66ac63a4",
+        "R2_ACCESS_KEY_ID": "9ab844348a065605623905aaa51505f9",
+        "R2_BUCKET_NAME": "ai-photography",
+        "PAYMENT_PROVIDER": "creem"
+      },
+      // KV namespaces configuration.
+      "kv_namespaces": [
+        {
+          "binding": "APP_KV",
+          "id": "514cc3047a144200be5571592d584727",
+          "preview_id": "app_kv_preview_id"
+        }
+      ],
+      // D1 databases configuration.
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "ai-photography",
+          "database_id": "c1fd074f-e43a-4326-823d-e13698ed2930",
+          "migrations_dir": "drizzle"
+        }
+      ],
+      // R2 buckets configuration.
+      "r2_buckets": [
+        {
+          "bucket_name": "ai-photography",
+          "binding": "R2"
+        }
+      ]
+    },
+    "prod": {
+      "name": "cyberrealistic",
+      "vars": {
+        "APP_NAME": "CyberRealistic",
+        "APP_URL": "https://cyberrealistic.org",
+        "R2_DOMAIN": "https://cdn.cyberrealistic.org",
+        "ENVIRONMENT": "production",
+        "NEED_MOCK": "0",
+        "GOOGLE_CLIENT_ID": "xxx",
+        "SEND_FROM_EMAIL": "support@cyberrealistic.org",
+        "R2_ACCOUNT_ID": "d6fd0c73bd457f8cf7bacd8f66ac63a4",
+        "R2_ACCESS_KEY_ID": "9ab844348a065605623905aaa51505f9",
+        "R2_BUCKET_NAME": "ai-photography",
+        "PAYMENT_PROVIDER": "creem"
+      },
+      // KV namespaces configuration.
+      "kv_namespaces": [
+        {
+          "binding": "APP_KV",
+          "id": "514cc3047a144200be5571592d584727",
+          "preview_id": "app_kv_preview_id"
+        }
+      ],
+      // D1 databases configuration.
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "ai-photography",
+          "database_id": "c1fd074f-e43a-4326-823d-e13698ed2930",
+          "migrations_dir": "drizzle"
+        }
+      ],
+      // R2 buckets configuration.
+      "r2_buckets": [
+        {
+          "bucket_name": "ai-photography",
+          "binding": "R2"
+        }
+      ]
+    }
+  },
+  "observability": {
+    // Configures automatic observability settings for telemetry data emitted from your Worker.
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  }
+}

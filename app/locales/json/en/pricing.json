@@ -1,0 +1,210 @@
+{
+  "meta": {
+    "title": "{{appName}} Pricing",
+    "description": "Choose the {{appName}} plan that fits your VRChat avatar workflow. Start free, subscribe for monthly credits, or buy extra credit packs when you need more generations."
+  },
+  "page": {
+    "title": "{{appName}} pricing for every stage of avatar creation",
+    "description": "Start with free credits, upgrade for ongoing avatar work, and add extra credit packs whenever you need more generations, textures, or rigging jobs.",
+    "modeToggle": {
+      "subscriptions": "Subscriptions",
+      "payAsYouGo": "Credit Packs"
+    },
+    "billingToggle": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "saveText": "Save 34%"
+    },
+    "trustText": "Simple pricing for creating, texturing, and rigging VRChat avatars with {{appName}}",
+    "unsureSection": {
+      "title": "Not sure which {{appName}} plan fits you?",
+      "description": "Choose Free if you want to test the workflow, Creator if you build avatars regularly, and Pro if you generate lots of variants or work on multiple assets every month.",
+      "linkText": "Talk to us about the right plan"
+    }
+  },
+  "faq": {
+    "title": "{{appName}} pricing questions",
+    "description": "Everything you need to know about credits, plans, billing, and how much avatar work each option can support.",
+    "items": [
+      {
+        "question": "How do {{appName}} credits work?",
+        "answer": "Credits are used when you run generation and asset workflow tasks in {{appName}}. Different actions cost different amounts depending on the workload. <strong class=\"font-semibold text-slate-900\">Text to Image uses 5 credits</strong>, while more advanced actions like 3D generation and auto rigging use more."
+      },
+      {
+        "question": "What do common actions cost?",
+        "answer": "Current usage is simple: Text to 3D costs 10 credits without texture or 20 with texture, Image to 3D costs 20 or 30, Multiview to 3D costs 20 or 30, Text to Image costs 5, and <strong class=\"font-semibold text-slate-900\">Auto Rigging costs 35 credits</strong>."
+      },
+      {
+        "question": "How much can I create with a plan?",
+        "answer": "It depends on your workflow. For example, 120 credits can cover around 24 Text to Image generations, 6 Text to 3D jobs with texture, or a mixed workflow across concept, model, texture, and rigging. Higher plans are better if you create multiple variants or refine assets often."
+      },
+      {
+        "question": "What changes between the plans?",
+        "answer": "The main difference is how many credits you get each month. <strong class=\"font-semibold text-slate-900\">Free is for trying the workflow</strong>, Creator is for regular avatar creation, and Pro is for heavy usage, more iteration, and larger monthly output."
+      },
+      {
+        "question": "Can I buy extra credits without upgrading my plan?",
+        "answer": "Yes. Credit packs are available separately, so you can stay on your current subscription and add more credits whenever you need extra generations, textures, or rigging runs."
+      },
+      {
+        "question": "Is there a way to try {{appName}} before paying?",
+        "answer": "Yes. The Free plan includes one-time starter credits so you can test the core avatar workflow before committing to a subscription."
+      },
+      {
+        "question": "What happens to unused subscription credits?",
+        "answer": "Unused subscription credits are best treated as monthly usage credits for active workflows. You can explain the exact rollover policy in product docs or billing settings, but this pricing page should position them as tied to the current billing period."
+      },
+      {
+        "question": "Do credit packs expire?",
+        "answer": "Credit packs work best as flexible top-ups for extra usage. You can define the final expiration policy in billing, but they should be presented here as a way to extend usage without changing plans."
+      },
+      {
+        "question": "How do I manage or cancel my subscription?",
+        "answer": "You can upgrade, downgrade, or cancel your {{appName}} subscription from your billing settings. Any plan changes apply to future billing cycles based on your payment provider setup."
+      }
+    ]
+  },
+  "subscriptionPlans": [
+    {
+      "id": "free",
+      "name": "Free",
+      "description": "For trying the avatar workflow and generating your first results.",
+      "cycles": {
+        "monthly": {
+          "id": "free-monthly",
+          "price": 0
+        },
+        "yearly": {
+          "id": "free-yearly",
+          "price": 0
+        }
+      },
+      "features": [
+        "20 one-time credits",
+        "Basic model processing",
+        "Basic customization options",
+        "Public asset access"
+      ],
+      "cta": "Start for Free",
+      "popular": false,
+      "enterprise": false
+    },
+    {
+      "id": "creator",
+      "name": "Creator",
+      "description": "For regular VRChat avatar creation and iteration.",
+      "cycles": {
+        "monthly": {
+          "id": "creator-monthly",
+          "price": 29
+        },
+        "yearly": {
+          "id": "creator-yearly",
+          "price": 19
+        }
+      },
+      "features": [
+        "350 credits / month",
+        "Priority model processing",
+        "Advanced customization options",
+        "Private asset access",
+        "Buy extra credits anytime"
+      ],
+      "cta": "Choose Creator",
+      "popular": false,
+      "enterprise": false
+    },
+    {
+      "id": "pro",
+      "name": "Pro",
+      "description": "For high-volume creators, power users, and small teams.",
+      "cycles": {
+        "monthly": {
+          "id": "pro-monthly",
+          "price": 59
+        },
+        "yearly": {
+          "id": "pro-yearly",
+          "price": 39
+        }
+      },
+      "features": [
+        "900 credits / month",
+        "Priority model processing",
+        "Advanced customization options",
+        "Private asset access",
+        "Buy extra credits anytime"
+      ],
+      "cta": "Choose Pro",
+      "popular": true,
+      "enterprise": false
+    },
+    {
+      "id": "enterprise",
+      "name": "Custom",
+      "description": "For teams with larger volume, custom workflow needs, or special billing requirements.",
+      "cycles": {
+        "monthly": {
+          "id": "enterprise-monthly",
+          "price": "Custom"
+        },
+        "yearly": {
+          "id": "enterprise-yearly",
+          "price": "Custom"
+        }
+      },
+      "features": [
+        "Custom monthly credit volume",
+        "Priority model processing",
+        "Advanced customization options",
+        "Private asset access",
+        "Flexible billing options",
+        "Team-oriented usage planning",
+        "Priority support for larger workflows",
+        "Custom onboarding available"
+      ],
+      "cta": "Contact Sales",
+      "popular": false,
+      "enterprise": true
+    }
+  ],
+  "creditPacks": [
+    {
+      "id": "pack-700",
+      "name": "700 Credit Pack",
+      "credits": 700,
+      "price": 49,
+      "perCredit": "$0.07 per credit",
+      "features": [
+        "Best for heavier extra usage",
+        "Good for multiple textured 3D generations",
+        "Works well with Creator or Pro plans"
+      ],
+      "cta": "Buy Pack",
+      "popular": false
+    },
+    {
+      "id": "pack-1500",
+      "name": "1500 Credit Pack",
+      "credits": 1500,
+      "price": 99,
+      "perCredit": "$0.066 per credit",
+      "features": [
+        "Best value pack",
+        "Built for large batches and repeated iteration",
+        "Ideal for power users and teams"
+      ],
+      "cta": "Buy Pack",
+      "popular": false
+    }
+  ],
+  "badges": {
+    "mostPopular": "MOST POPULAR",
+    "bestValue": "BEST VALUE"
+  },
+  "labels": {
+    "billedYearly": "Billed yearly",
+    "credits": "Credits",
+    "perMonth": "/mo"
+  }
+}
