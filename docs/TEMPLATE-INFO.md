@@ -46,12 +46,13 @@ titsdrop里的 key/secret 对所有bucket有效，直接复制即可
 - cf 域名解析,
   - 不阻止 / 内容信号策略
   - 爬虫开启配置: 域名 => 缓存 => 配置 => Crawler Hints
-  - support邮箱配置, www跳转配置
-  - cdn.xxx.com r2配置
 - preject-rebrand skill:
   - .env配置修改
   - wrangler.jsonc  配置
   - public-env.shared DEFAULT_APP_NAME 修改
+- setup-cloudflare-resource skill:
+  - support邮箱配置, www跳转配置
+  - cdn.xxx.com r2配置
 - logo-surf skill
 - sitemap 内容修改
 - app/locales/json 文件内容处理
