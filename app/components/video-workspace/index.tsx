@@ -5,14 +5,11 @@ import { VideoPreview } from "./video-preview";
 
 type GenerationTab = "multi-reference" | "image-to-video" | "text-to-video";
 
-export interface VideoWorkspaceProps {
-  // No external props for the demo clone; all data is internal/mock.
-}
+export type VideoWorkspaceProps = {};
 
 export function VideoWorkspace(_props: VideoWorkspaceProps) {
-  const [activeTab, setActiveTab] = React.useState<GenerationTab>(
-    "multi-reference",
-  );
+  const [activeTab, setActiveTab] =
+    React.useState<GenerationTab>("multi-reference");
 
   return (
     <>
@@ -33,7 +30,7 @@ export function VideoWorkspace(_props: VideoWorkspaceProps) {
       `}</style>
       <div
         className={cn(
-          "seedance-workspace flex flex-col lg:flex-row items-start gap-8 my-4 h-full mx-auto p-6",
+          "seedance-workspace mx-auto my-4 flex h-full flex-col items-start gap-8 p-6 lg:flex-row",
           "rounded-3xl border border-border/50 bg-card shadow-xl",
         )}
         style={{
@@ -49,9 +46,11 @@ export function VideoWorkspace(_props: VideoWorkspaceProps) {
           ["--input" as string]: "223.8136 0.0000% 20.3885%",
           ["--ring" as string]: "223.8136 0.0000% 45.1519%",
           ["--color-primary" as string]: "hsl(223.8136 0.0001% 89.8161%)",
-          ["--color-primary-foreground" as string]: "hsl(223.8136 0.0000% 9.0527%)",
+          ["--color-primary-foreground" as string]:
+            "hsl(223.8136 0.0000% 9.0527%)",
           ["--color-muted" as string]: "hsl(223.8136 0.0000% 14.9382%)",
-          ["--color-muted-foreground" as string]: "hsl(223.8136 0.0000% 63.0163%)",
+          ["--color-muted-foreground" as string]:
+            "hsl(223.8136 0.0000% 63.0163%)",
           ["--color-foreground" as string]: "hsl(223.8136 0.0004% 98.0256%)",
           ["--color-card" as string]: "hsl(223.8136 0.0000% 9.0527%)",
           ["--color-border" as string]: "hsl(223.8136 0.0000% 15.5096%)",
@@ -59,9 +58,9 @@ export function VideoWorkspace(_props: VideoWorkspaceProps) {
           ["--color-ring" as string]: "hsl(223.8136 0.0000% 45.1519%)",
         }}
       >
-      <GenerationForm activeTab={activeTab} onTabChange={setActiveTab} />
-      <VideoPreview showGuide={activeTab === "multi-reference"} />
-    </div>
+        <GenerationForm activeTab={activeTab} onTabChange={setActiveTab} />
+        <VideoPreview showGuide={activeTab === "multi-reference"} />
+      </div>
     </>
   );
 }

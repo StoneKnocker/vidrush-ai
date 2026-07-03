@@ -36,11 +36,11 @@ export function UploadArea({
       onKeyDown={onClick ? handleKeyDown : undefined}
       className={cn(
         "flex flex-col items-center justify-center",
-        "w-full h-[184px] py-10 mt-2.5",
-        "rounded-[10px] border-2 border-dashed border-muted-foreground/25",
-        "bg-transparent cursor-pointer",
+        "mt-2.5 h-[184px] w-full py-10",
+        "rounded-[10px] border-2 border-muted-foreground/25 border-dashed",
+        "cursor-pointer bg-transparent",
         "transition-colors duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
-        "hover:bg-muted/50 hover:border-muted-foreground/40",
+        "hover:border-muted-foreground/40 hover:bg-muted/50",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         className,
       )}
@@ -48,15 +48,15 @@ export function UploadArea({
       <div className="mb-3 text-muted-foreground [&_svg]:h-8 [&_svg]:w-8">
         {icon}
       </div>
-      <p className="text-sm font-medium text-foreground">{title}</p>
-      <p className="text-xs text-muted-foreground">{hint}</p>
+      <p className="font-medium text-foreground text-sm">{title}</p>
+      <p className="text-muted-foreground text-xs">{hint}</p>
       {secondaryAction && (
         <button
           type="button"
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "inline-flex items-center gap-1.5 mt-3",
-            "text-xs text-muted-foreground",
+            "mt-3 inline-flex items-center gap-1.5",
+            "text-muted-foreground text-xs",
             "transition-colors duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
             "hover:text-foreground",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",

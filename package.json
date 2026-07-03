@@ -13,6 +13,8 @@
     "check": "biome check .",
     "check:fix": "biome check --fix .",
     "format": "biome format --write .",
+    "format:check": "biome format .",
+    "prepare": "lefthook install",
     "db:drop": "drizzle-kit drop",
     "db:generate": "drizzle-kit generate",
     "db:apply": "CLOUDFLARE_ENV=dev wrangler d1 migrations apply DB --local",

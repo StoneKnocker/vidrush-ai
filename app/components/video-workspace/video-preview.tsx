@@ -1,5 +1,5 @@
-import type * as React from "react";
 import { ExternalLink, FileText, Info } from "lucide-react";
+import type * as React from "react";
 import { cn } from "~/lib/utils";
 
 export interface VideoPreviewProps {
@@ -8,12 +8,7 @@ export interface VideoPreviewProps {
 
 export function VideoPreview({ showGuide = false }: VideoPreviewProps) {
   return (
-    <div
-      className={cn(
-        "flex w-full flex-1 flex-col gap-4",
-        "lg:w-auto",
-      )}
-    >
+    <div className={cn("flex w-full flex-1 flex-col gap-4", "lg:w-auto")}>
       <div
         className={cn(
           "relative w-full overflow-hidden rounded-2xl bg-black",
@@ -26,10 +21,7 @@ export function VideoPreview({ showGuide = false }: VideoPreviewProps) {
           poster="/seedance2-assets/example-poster.webp"
           preload="metadata"
         >
-          <source
-            src="/seedance2-assets/example-video.mp4"
-            type="video/mp4"
-          />
+          <source src="/seedance2-assets/example-video.mp4" type="video/mp4" />
         </video>
       </div>
 
@@ -41,11 +33,11 @@ export function VideoPreview({ showGuide = false }: VideoPreviewProps) {
             "border-[rgba(40,40,40,0.5)]",
           )}
         >
-          <h3 className="text-lg font-semibold text-[rgb(250,250,250)]">
+          <h3 className="font-semibold text-[rgb(250,250,250)] text-lg">
             Multi Reference Guide
           </h3>
 
-          <p className="text-sm leading-6 text-[rgb(161,161,161)]">
+          <p className="text-[rgb(161,161,161)] text-sm leading-6">
             Seedance 2.0 supports text, image, video, and audio as input
             references. Combine multiple types of materials to guide AI video
             generation with greater precision and creative control.
@@ -53,7 +45,7 @@ export function VideoPreview({ showGuide = false }: VideoPreviewProps) {
 
           <a
             href="#"
-            className="inline-flex items-center gap-1 text-sm text-[rgb(250,250,250)] hover:underline"
+            className="inline-flex items-center gap-1 text-[rgb(250,250,250)] text-sm hover:underline"
           >
             For a detailed Seedance 2.0 tutorial, check out our{" "}
             <span className="font-medium">Full Guide</span>
@@ -65,7 +57,7 @@ export function VideoPreview({ showGuide = false }: VideoPreviewProps) {
               icon={<FileText className="h-4 w-4 text-[rgb(250,250,250)]" />}
               title="Prompt Guide"
             >
-              <ul className="list-disc space-y-1 pl-4 text-sm text-[rgb(161,161,161)]">
+              <ul className="list-disc space-y-1 pl-4 text-[rgb(161,161,161)] text-sm">
                 <li>
                   Type @ to quickly insert your uploaded files into the prompt.
                 </li>
@@ -81,7 +73,7 @@ export function VideoPreview({ showGuide = false }: VideoPreviewProps) {
               icon={<FileText className="h-4 w-4 text-[rgb(250,250,250)]" />}
               title="Material Limits"
             >
-              <ul className="list-disc space-y-1 pl-4 text-sm text-[rgb(161,161,161)]">
+              <ul className="list-disc space-y-1 pl-4 text-[rgb(161,161,161)] text-sm">
                 <li>Up to 9 reference images</li>
                 <li>Up to 3 reference videos, total duration ≤ 15 seconds</li>
                 <li>Up to 3 reference audios, total duration ≤ 15 seconds</li>
@@ -93,7 +85,7 @@ export function VideoPreview({ showGuide = false }: VideoPreviewProps) {
               icon={<FileText className="h-4 w-4 text-[rgb(250,250,250)]" />}
               title="Supported Input Combinations"
             >
-              <ul className="list-disc space-y-1 pl-4 text-sm text-[rgb(161,161,161)]">
+              <ul className="list-disc space-y-1 pl-4 text-[rgb(161,161,161)] text-sm">
                 <li>Text + Image</li>
                 <li>Text + Video</li>
                 <li>Text + Image + Video</li>
@@ -105,7 +97,7 @@ export function VideoPreview({ showGuide = false }: VideoPreviewProps) {
 
             <div className="flex items-start gap-2">
               <Info className="mt-0.5 h-4 w-4 shrink-0 text-[rgb(250,250,250)]" />
-              <p className="text-sm text-[rgb(161,161,161)]">
+              <p className="text-[rgb(161,161,161)] text-sm">
                 <span className="font-medium text-[rgb(250,250,250)]">
                   Note:
                 </span>{" "}
@@ -131,7 +123,7 @@ function GuideSection({ icon, title, children }: GuideSectionProps) {
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         {icon}
-        <h4 className="text-sm font-semibold text-[rgb(250,250,250)]">
+        <h4 className="font-semibold text-[rgb(250,250,250)] text-sm">
           {title}
         </h4>
       </div>
