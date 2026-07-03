@@ -9,7 +9,7 @@
     "deploy:version": "react-router build && wrangler versions upload",
     "deploy:promote": "wrangler versions deploy",
     "start": "wrangler dev --test-scheduled",
-    "typegen": "CLOUDFLARE_ENV=prod wrangler types && react-router typegen",
+    "typegen": "wrangler types && react-router typegen",
     "check": "biome check .",
     "check:fix": "biome check --fix .",
     "format": "biome format --write .",
