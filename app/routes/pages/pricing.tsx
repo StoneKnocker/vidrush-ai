@@ -12,11 +12,11 @@ import type { PricingPageContent } from "~/types/pricing";
 import type { Route } from "./+types/pricing";
 
 export const meta: Route.MetaFunction = ({
-  data,
+  loaderData,
 }: {
-  data: Awaited<ReturnType<typeof loader>>;
+  loaderData: Awaited<ReturnType<typeof loader>>;
 }) => {
-  const contentData = data.contentData;
+  const contentData = loaderData.contentData;
   return [
     { title: contentData.meta.title },
     { name: "description", content: contentData.meta.description },

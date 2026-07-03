@@ -20,7 +20,10 @@
     "paths": {
       "~/*": ["./app/*"],
       "@/*": ["./app/*"],
-      "content-collections": ["./.content-collections/generated"]
+      "content-collections": ["./.content-collections/generated"],
+      "react-router/internal": [
+        "./node_modules/react-router/dist/production/lib/types/internal.d.ts"
+      ]
     },
     "rootDirs": [".", "./.react-router/types"],
     "types": [

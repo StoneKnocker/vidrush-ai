@@ -6,11 +6,11 @@ import { getLocale } from "~/middlewares/i18next";
 import type { Route } from "./+types/playground";
 
 export const meta: Route.MetaFunction = ({
-  data,
+  loaderData,
 }: {
-  data: Awaited<ReturnType<typeof loader>>;
+  loaderData: Awaited<ReturnType<typeof loader>>;
 }) => {
-  const content = data.content;
+  const content = loaderData.content;
 
   return [
     { title: content.metaTitle },
@@ -18,9 +18,13 @@ export const meta: Route.MetaFunction = ({
     {
       tagName: "link",
       rel: "canonical",
-      href: getCanonicalUrl(data.locale, "/playground", data.appUrl),
+      href: getCanonicalUrl(
+        loaderData.locale,
+        "/playground",
+        loaderData.appUrl,
+      ),
     },
-    ...getHreflangTags("/playground", data.appUrl),
+    ...getHreflangTags("/playground", loaderData.appUrl),
   ];
 };
 

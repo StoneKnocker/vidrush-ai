@@ -1,6 +1,6 @@
 import { initReactI18next } from "react-i18next";
 import { createCookie } from "react-router";
-import { createI18nextMiddleware } from "remix-i18next/middleware";
+import { createI18nextMiddleware } from "remix-i18next";
 import resources from "~/locales"; // Import your locales
 import "i18next";
 import { i18nConfig } from "~/lib/config";
@@ -18,8 +18,8 @@ export const [i18nextMiddleware, getLocale, getInstance] =
       supportedLanguages: i18nConfig.supportLanguages, // Your supported languages, the fallback should be last
       fallbackLanguage: i18nConfig.defaultLanguage, // Your fallback language
       cookie: localeCookie, // The cookie to store the user preference
-      async findLocale(request: Request): Promise<string> {
-        const url = new URL(request.url);
+      async findLocale(args: { request: Request }): Promise<string> {
+        const url = new URL(args.request.url);
         const locale = url.pathname.split("/").at(1);
 
         // 如果路径中没有语言前缀，或者语言前缀不在支持的语言列表中，则使用英语

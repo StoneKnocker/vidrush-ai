@@ -55,6 +55,7 @@
           "BETTER_AUTH_SECRET",
           "GOOGLE_CLIENT_SECRET",
           "UNOSEND_API_KEY",
+          "RESEND_API_KEY",
           "CREEM_API_KEY",
           "CREEM_WEBHOOK_SECRET"
         ]
@@ -105,6 +106,7 @@
           "BETTER_AUTH_SECRET",
           "GOOGLE_CLIENT_SECRET",
           "UNOSEND_API_KEY",
+          "RESEND_API_KEY",
           "CREEM_API_KEY",
           "CREEM_WEBHOOK_SECRET"
         ]

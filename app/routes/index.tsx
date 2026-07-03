@@ -20,13 +20,13 @@ import type { LandingPageContent } from "~/types/landingpage";
 import type { Route } from "./+types/index";
 
 export const meta: Route.MetaFunction = ({
-  data,
+  loaderData,
 }: {
-  data: Awaited<ReturnType<typeof loader>>;
+  loaderData: Awaited<ReturnType<typeof loader>>;
 }) => {
-  const contentData = data.contentData;
-  const locale = data.locale;
-  const canonicalUrl = getCanonicalUrl(locale, "/", data.appUrl);
+  const contentData = loaderData.contentData;
+  const locale = loaderData.locale;
+  const canonicalUrl = getCanonicalUrl(locale, "/", loaderData.appUrl);
 
   return [
     { title: contentData.meta.title },
@@ -36,7 +36,7 @@ export const meta: Route.MetaFunction = ({
       rel: "canonical",
       href: canonicalUrl,
     },
-    ...getHreflangTags("/", data.appUrl),
+    ...getHreflangTags("/", loaderData.appUrl),
     ...buildSocialMeta({
       title: contentData.meta.title,
       description: contentData.meta.description,

@@ -4,9 +4,9 @@ import { policyLoader } from "~/lib/content/policy.server";
 import { DEFAULT_APP_NAME } from "~/lib/public-env.shared";
 import type { Route } from "./+types/cookie-policy";
 
-export const meta: Route.MetaFunction = ({ data, params }) => {
+export const meta: Route.MetaFunction = ({ loaderData, params }) => {
   return policyMeta({
-    appName: data?.appName || DEFAULT_APP_NAME,
+    appName: loaderData?.appName || DEFAULT_APP_NAME,
     params,
     type: "cookie",
   });

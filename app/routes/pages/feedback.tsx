@@ -26,8 +26,8 @@ const feedbackCategories = ["bug", "idea", "question", "other"] as const;
 
 type FeedbackCategory = (typeof feedbackCategories)[number];
 
-export const meta: Route.MetaFunction = ({ data, params }) => {
-  const locale = data?.locale ?? params.locale ?? "en";
+export const meta: Route.MetaFunction = ({ loaderData, params }) => {
+  const locale = loaderData?.locale ?? params.locale ?? "en";
 
   return [
     { title: "Feedback" },
@@ -38,9 +38,9 @@ export const meta: Route.MetaFunction = ({ data, params }) => {
     {
       tagName: "link",
       rel: "canonical",
-      href: getCanonicalUrl(locale, "/feedback", data?.appUrl),
+      href: getCanonicalUrl(locale, "/feedback", loaderData?.appUrl),
     },
-    ...getHreflangTags("/feedback", data?.appUrl),
+    ...getHreflangTags("/feedback", loaderData?.appUrl),
   ];
 };
 

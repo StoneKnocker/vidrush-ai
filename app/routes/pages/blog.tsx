@@ -6,20 +6,20 @@ import { getLocale } from "~/middlewares/i18next";
 import type { BlogPost } from "~/types/blog";
 import type { Route } from "./+types/blog";
 
-export const meta: Route.MetaFunction = ({ data }) => {
-  if (!data) {
+export const meta: Route.MetaFunction = ({ loaderData }) => {
+  if (!loaderData) {
     return [{ title: "Blog" }];
   }
 
   return [
-    { title: data.copy.title },
-    { name: "description", content: data.copy.description },
+    { title: loaderData.copy.title },
+    { name: "description", content: loaderData.copy.description },
     {
       tagName: "link",
       rel: "canonical",
-      href: getCanonicalUrl(data.locale, "/blog", data.appUrl),
+      href: getCanonicalUrl(loaderData.locale, "/blog", loaderData.appUrl),
     },
-    ...getHreflangTags("/blog", data.appUrl),
+    ...getHreflangTags("/blog", loaderData.appUrl),
   ];
 };
 
