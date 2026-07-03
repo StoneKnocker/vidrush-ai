@@ -1,6 +1,5 @@
 import { createRequestHandler, RouterContextProvider } from "react-router";
 import { getCloudflareContext } from "@/lib/cf.server";
-import { recoverStaleTripoTasks } from "@/lib/service/tripoService";
 
 declare module "react-router" {
   export interface RouterContextProvider {
@@ -34,14 +33,5 @@ export default {
   },
   async scheduled(_controller, env, ctx) {
     getCloudflareContext({ env, ctx });
-    ctx.waitUntil(
-      recoverStaleTripoTasks()
-        .then((result) => {
-          console.info("Recovered stale Tripo tasks:", result);
-        })
-        .catch((error) => {
-          console.error("Failed to recover stale Tripo tasks:", error);
-        }),
-    );
   },
 } satisfies ExportedHandler<Env>;
