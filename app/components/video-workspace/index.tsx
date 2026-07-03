@@ -20,10 +20,6 @@ export function VideoWorkspace(_props: VideoWorkspaceProps) {
         .seedance-workspace [class*="text-muted-foreground"]:hover {
           color: hsl(0 0% 95%) !important;
         }
-        .seedance-workspace [class*="bg-primary"],
-        .seedance-workspace [class*="bg-primary"]::before {
-          background-color: hsl(160 100% 43%) !important;
-        }
         .seedance-workspace [class*="text-primary-foreground"] {
           color: hsl(0 0% 2%) !important;
         }
