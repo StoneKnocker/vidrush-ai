@@ -20,47 +20,18 @@ import type { Route } from "./+types/creations";
 
 const PAGE_SIZE = 12;
 
-type GalleryResultData = TaskResultData & {
-  models?: {
-    kind: "model" | "base_model" | "pbr_model";
-    key: string;
-  }[];
-  tripo?: {
-    previewModelKey?: string;
-    downloadModelKey?: string;
-    renderedImageKey?: string;
-    generatedImageKey?: string;
-  };
-};
+type GalleryResultData = TaskResultData;
 
 type GalleryItem = {
   taskId: string;
   mediaKey: string;
-  mediaType: "image" | "video" | "model";
+  mediaType: "image" | "video";
   template: string;
   createdAt: Date;
-  thumbnailKey?: string | null;
-  downloadKey?: string | null;
 };
-
-function getPreferredModel(
-  resultData: GalleryResultData,
-  preferredKey: string | undefined,
-) {
-  const models = resultData.models ?? [];
-  return (
-    models.find((model) => model.key === preferredKey) ??
-    models.find((model) => model.kind === "pbr_model") ??
-    models.find((model) => model.kind === "model") ??
-    models[0] ??
-    null
-  );
-}
 
 function getMediaTypeLabel(mediaType: GalleryItem["mediaType"]) {
   switch (mediaType) {
-    case "model":
-      return "Model";
     case "video":
       return "Video";
     default:
@@ -80,11 +51,6 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   for (const task of tasks.items) {
     const resultData = task.resultData as GalleryResultData;
     const imageKeys = resultData?.images ?? [];
-    const renderedImageKey =
-      resultData?.tripo?.renderedImageKey || imageKeys[0];
-    const generatedImageKey =
-      resultData?.tripo?.generatedImageKey || imageKeys[1];
-    const thumbnailKey = renderedImageKey || generatedImageKey || null;
 
     if (resultData?.videos) {
       for (const videoKey of resultData.videos) {
@@ -98,34 +64,14 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       }
     }
 
-    const previewModel = getPreferredModel(
-      resultData,
-      resultData?.tripo?.previewModelKey,
-    );
-    if (previewModel) {
-      const downloadModel = getPreferredModel(
-        resultData,
-        resultData?.tripo?.downloadModelKey,
-      );
+    for (const imageKey of imageKeys) {
       mediaItems.push({
         taskId: task.id,
-        mediaKey: previewModel.key,
-        mediaType: "model" as const,
+        mediaKey: imageKey,
+        mediaType: "image" as const,
         template: task.template,
         createdAt: task.createdAt,
-        thumbnailKey,
-        downloadKey: downloadModel?.key ?? previewModel.key,
       });
-    } else {
-      for (const imageKey of imageKeys) {
-        mediaItems.push({
-          taskId: task.id,
-          mediaKey: imageKey,
-          mediaType: "image" as const,
-          template: task.template,
-          createdAt: task.createdAt,
-        });
-      }
     }
   }
 
@@ -225,19 +171,6 @@ export default function CreationsPage({ loaderData }: Route.ComponentProps) {
                           </div>
                         </div>
                       </>
-                    ) : item.mediaType === "model" ? (
-                      item.thumbnailKey ? (
-                        <img
-                          alt="Generated model thumbnail"
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy"
-                          src={buildR2Url(item.thumbnailKey, r2Domain)}
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-slate-900 text-white transition-transform duration-300 group-hover:scale-105">
-                          <ImageIcon className="h-12 w-12" />
-                        </div>
-                      )
                     ) : (
                       <img
                         alt="Generated result"
@@ -264,9 +197,7 @@ export default function CreationsPage({ loaderData }: Route.ComponentProps) {
                         aria-label={
                           item.mediaType === "video"
                             ? t("creations.viewVideo")
-                            : item.mediaType === "model"
-                              ? "View model"
-                              : t("creations.viewFullSize")
+                            : t("creations.viewFullSize")
                         }
                         className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg transition-transform hover:scale-110"
                         onClick={() => setSelectedMedia(item)}
@@ -278,14 +209,10 @@ export default function CreationsPage({ loaderData }: Route.ComponentProps) {
                         aria-label={
                           item.mediaType === "video"
                             ? t("creations.downloadVideo")
-                            : item.mediaType === "model"
-                              ? "Download model"
-                              : t("creations.downloadImage")
+                            : t("creations.downloadImage")
                         }
                         className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg transition-transform hover:scale-110"
-                        onClick={() =>
-                          handleDownload(item.downloadKey ?? item.mediaKey)
-                        }
+                        onClick={() => handleDownload(item.mediaKey)}
                         type="button"
                       >
                         <Download className="h-5 w-5" />
@@ -407,11 +334,7 @@ export default function CreationsPage({ loaderData }: Route.ComponentProps) {
                 <div className="mt-4 flex justify-center">
                   <button
                     className="flex items-center gap-2 rounded-full bg-white px-6 py-3 font-medium text-slate-900 shadow-lg transition-transform hover:scale-105"
-                    onClick={() =>
-                      handleDownload(
-                        selectedMedia.downloadKey ?? selectedMedia.mediaKey,
-                      )
-                    }
+                    onClick={() => handleDownload(selectedMedia.mediaKey)}
                     type="button"
                   >
                     <Download className="h-5 w-5" />

@@ -1,4 +1,4 @@
-import { and, desc, eq, like, lte, notInArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, like, or, sql } from "drizzle-orm";
 import { TASK_STATUS } from "@/lib/consts";
 import { db } from "@/lib/database/db.server";
 import type { InsertUserTask, SelectUserTask } from "@/lib/database/schema";
@@ -151,31 +151,6 @@ export async function hasGuestCreatedTask(
     .limit(1);
 
   return result.length > 0;
-}
-
-export async function getStaleRecoverableTripoTasks({
-  olderThan,
-  limit = 20,
-}: {
-  olderThan: Date;
-  limit?: number;
-}) {
-  return db
-    .select()
-    .from(userTask)
-    .where(
-      and(
-        notInArray(userTask.status, [
-          TASK_STATUS.COMPLETED,
-          TASK_STATUS.FAILED,
-          TASK_STATUS.CANCELED,
-        ]),
-        lte(userTask.createdAt, olderThan),
-        sql`json_extract(${userTask.parameters}, '$.provider') = 'tripo'`,
-      ),
-    )
-    .orderBy(userTask.createdAt)
-    .limit(limit);
 }
 
 export async function getAllUserTasksPaginated(

@@ -29,8 +29,8 @@ app/
   lib/
     auth/           # better-auth config (Google OAuth + email OTP)
     database/       # D1/Drizzle schema + connection
-    service/        # Business logic: tripoService, taskService, creditsService
-    trpc/           # tRPC routers: tripoRouter, paymentRouter, userRouter, ...
+    service/        # Business logic: taskService, creditsService
+    trpc/           # tRPC routers: paymentRouter, userRouter, ...
     payment/        # Creem payment integration
     r2/             # R2 storage client/server
     model/          # Database query modules

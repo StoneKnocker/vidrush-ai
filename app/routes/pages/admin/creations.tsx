@@ -74,13 +74,7 @@ const statusConfig: Record<
 };
 
 const assetTypeLabels: Record<string, string> = {
-  "text-to-avatar": "Text to Avatar",
   "text-to-image": "Text to Image",
-  "image-to-avatar": "Image to Avatar",
-  "multi-image-to-avatar": "Multi-Image to Avatar",
-  "add-texture": "Add Texture",
-  "auto-rigging": "Auto Rigging",
-  "retarget-animation": "Retarget Animation",
 };
 
 function formatDate(date: Date) {
@@ -116,13 +110,9 @@ function extractMediaItems(resultData: unknown): MediaItem[] {
     }
   };
 
-  // Compute a model thumbnail from rendered image or first image
-  const tripo = data.tripo as Record<string, string | undefined> | undefined;
+  // Compute a model thumbnail from first image
   const images = data.images as string[] | undefined;
-  const modelThumbnail =
-    tripo?.renderedImageKey ||
-    tripo?.generatedImageKey ||
-    (Array.isArray(images) ? images[0] : undefined);
+  const modelThumbnail = Array.isArray(images) ? images[0] : undefined;
 
   // Legacy fields
   add(data.modelUrl as string | undefined, "model", modelThumbnail);
@@ -136,20 +126,6 @@ function extractMediaItems(resultData: unknown): MediaItem[] {
   const videos = data.videos as string[] | undefined;
   if (Array.isArray(videos)) {
     for (const key of videos) add(key, "video");
-  }
-
-  // Current PersistedGalleryModel[]: models array
-  const models = data.models as Array<{ key?: string }> | undefined;
-  if (Array.isArray(models)) {
-    for (const model of models) add(model.key, "model", modelThumbnail);
-  }
-
-  // Tripo-specific keys
-  if (tripo) {
-    add(tripo.renderedImageKey, "image");
-    add(tripo.generatedImageKey, "image");
-    add(tripo.previewModelKey, "model", modelThumbnail);
-    add(tripo.downloadModelKey, "model", modelThumbnail);
   }
 
   return items;
