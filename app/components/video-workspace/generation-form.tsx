@@ -192,7 +192,7 @@ export function GenerationForm({
                     <span className="min-w-0 truncate font-semibold text-foreground">
                       Seedance 2.0
                     </span>
-                    <span className="inline-flex shrink-0 items-center rounded-full bg-primary/20 px-1.5 py-0.5 font-medium text-[10px] text-white">
+                    <span className="inline-flex shrink-0 items-center rounded-full bg-primary/20 px-1.5 py-0.5 font-medium text-[10px] text-primary-foreground">
                       With Audio
                     </span>
                   </div>
@@ -436,7 +436,7 @@ export function GenerationForm({
           <textarea
             className={cn(
               "flex h-full min-h-[150px] w-full resize-none rounded-xl border p-4",
-              "/50 bg-background/50 shadow-sm backdrop-blur-sm",
+              "border-border/50 bg-background/50 shadow-sm backdrop-blur-sm",
               "text-base text-foreground md:text-sm",
               "placeholder:text-muted-foreground",
               "transition-all",

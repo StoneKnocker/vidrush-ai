@@ -13,17 +13,6 @@ export function VideoWorkspace(_props: VideoWorkspaceProps) {
 
   return (
     <>
-      <style>{`
-        .seedance-workspace [class*="text-muted-foreground"] {
-          color: hsl(212 9% 58%) !important;
-        }
-        .seedance-workspace [class*="text-muted-foreground"]:hover {
-          color: hsl(0 0% 95%) !important;
-        }
-        .seedance-workspace [class*="text-primary-foreground"] {
-          color: hsl(0 0% 2%) !important;
-        }
-      `}</style>
       <div
         className={cn(
           "seedance-workspace mx-auto my-4 flex h-full w-full max-w-[90rem] flex-col items-start gap-8 p-6 lg:flex-row",
@@ -41,15 +30,6 @@ export function VideoWorkspace(_props: VideoWorkspaceProps) {
           ["--border" as string]: "15 3% 23%",
           ["--input" as string]: "15 3% 28%",
           ["--ring" as string]: "160 100% 43%",
-          ["--color-primary" as string]: "hsl(160 100% 43%)",
-          ["--color-primary-foreground" as string]: "hsl(0 0% 2%)",
-          ["--color-muted" as string]: "hsl(0 0% 12%)",
-          ["--color-muted-foreground" as string]: "hsl(212 9% 58%)",
-          ["--color-foreground" as string]: "hsl(0 0% 95%)",
-          ["--color-card" as string]: "hsl(0 0% 6%)",
-          ["--color-border" as string]: "hsl(15 3% 23%)",
-          ["--color-input" as string]: "hsl(15 3% 28%)",
-          ["--color-ring" as string]: "hsl(160 100% 43%)",
         }}
       >
         <GenerationForm activeTab={activeTab} onTabChange={setActiveTab} />

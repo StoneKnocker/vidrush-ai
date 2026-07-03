@@ -139,7 +139,7 @@ export function PortraitLibrary({
               <Select value={gender} onValueChange={setGender}>
                 <SelectTrigger
                   id="portrait-gender"
-                  className="flex h-8 w-[120px] items-center justify-between whitespace-nowrap gap-1 rounded-md border-input bg-transparent px-3 py-2 text-xs shadow-sm ring-offset-background [&>span]:line-clamp-1"
+                  className="flex h-8 w-[120px] items-center justify-between whitespace-nowrap gap-1 rounded-md border-input bg-background px-3 py-2 text-xs shadow-sm ring-offset-background [&>span]:line-clamp-1"
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -187,7 +187,7 @@ export function PortraitLibrary({
               <Select value={age} onValueChange={setAge}>
                 <SelectTrigger
                   id="portrait-age"
-                  className="flex h-8 w-[120px] items-center justify-between whitespace-nowrap gap-1 rounded-md border-input bg-transparent px-3 py-2 text-xs shadow-sm ring-offset-background [&>span]:line-clamp-1"
+                  className="flex h-8 w-[120px] items-center justify-between whitespace-nowrap gap-1 rounded-md border-input bg-background px-3 py-2 text-xs shadow-sm ring-offset-background [&>span]:line-clamp-1"
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -257,7 +257,7 @@ export function PortraitLibrary({
                       >
                         <div
                           className={cn(
-                            "flex h-8 w-8 items-center justify-center rounded-full bg-primary/80 text-white transition-opacity",
+                            "flex h-8 w-8 items-center justify-center rounded-full bg-primary/80 text-primary-foreground transition-opacity",
                             selected
                               ? "opacity-100"
                               : "opacity-0 group-hover:opacity-100",

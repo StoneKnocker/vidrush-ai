@@ -72,8 +72,8 @@ export function VideoPreview({ showGuide = false }: VideoPreviewProps) {
 
         <div className="mt-4 flex justify-center gap-2">
           <span className="h-2 w-6 rounded-full bg-primary transition-all duration-200" />
-          <span className="h-2 w-2 rounded-full bg-secondary transition-all duration-200 hover:bg-muted-foreground/60" />
-          <span className="h-2 w-2 rounded-full bg-secondary transition-all duration-200 hover:bg-muted-foreground/60" />
+          <span className="h-2 w-2 rounded-full bg-muted-foreground/30 transition-all duration-200 hover:bg-muted-foreground/60" />
+          <span className="h-2 w-2 rounded-full bg-muted-foreground/30 transition-all duration-200 hover:bg-muted-foreground/60" />
         </div>
       </div>
 
