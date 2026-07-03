@@ -4,12 +4,9 @@
   "scripts": {
     "build": "content-collections build && CLOUDFLARE_ENV=prod react-router build",
     "dev": "CLOUDFLARE_ENV=dev react-router dev",
-    "preview": "pnpm run build && vite preview",
     "deploy": "pnpm run build && wrangler deploy --env prod",
-    "deploy:version": "react-router build && wrangler versions upload",
-    "deploy:promote": "wrangler versions deploy",
-    "start": "wrangler dev --test-scheduled",
     "typegen": "wrangler types && react-router typegen",
+    "typecheck": "tsc --noEmit",
     "check": "biome check .",
     "check:fix": "biome check --fix .",
     "format": "biome format --write .",
