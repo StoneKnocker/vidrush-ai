@@ -31,7 +31,7 @@ export const emailOTPConfig = emailOTP({
 
     try {
       await resendClient.emails.send({
-        from: resendFromEmail,
+        from: resendFromEmail!,
         to: email,
         subject,
         html: `

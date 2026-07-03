@@ -28,10 +28,10 @@ export const loader = async ({ context }: Route.LoaderArgs) => {
   const locale = getLocale(context);
   const publicEnv = getPublicEnv();
   const translation = resources[locale]?.translation as
-    | Record<string, unknown>
+    | Record<string, Record<string, unknown>>
     | undefined;
   const playground = (translation?.playground ??
-    resources.en?.translation?.playground ??
+    (resources.en?.translation as Record<string, unknown>)?.playground ??
     {}) as {
     metaTitle: string;
     metaDescription: string;

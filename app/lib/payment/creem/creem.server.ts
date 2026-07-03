@@ -6,7 +6,7 @@ import { isDevelopment } from "~/lib/env.server";
 import { getProduct } from "~/lib/payment/product";
 
 export const creem = createCreem({
-  apiKey: env.CREEM_API_KEY,
+  apiKey: env.CREEM_API_KEY!,
   webhookSecret: env.CREEM_WEBHOOK_SECRET,
   testMode: isDevelopment,
 });

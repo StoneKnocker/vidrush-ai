@@ -15,8 +15,8 @@ type BetterAuthNewUser = {
 };
 
 export const serverAuth = betterAuth({
-  baseURL: env.APP_URL,
-  trustedOrigins: [env.APP_URL],
+  baseURL: env.APP_URL!,
+  trustedOrigins: [env.APP_URL!],
   database: drizzleAdapter(db, {
     provider: "sqlite",
   }),
@@ -49,10 +49,10 @@ export const serverAuth = betterAuth({
     }),
   },
   secondaryStorage: {
-    get: async (key) => await env.APP_KV.get(`_auth:${key}`, "json"),
+    get: async (key) => await env.APP_KV!.get(`_auth:${key}`, "json"),
     set: async (key, value) =>
-      await env.APP_KV.put(`_auth:${key}`, JSON.stringify(value)),
-    delete: async (key) => await env.APP_KV.delete(`_auth:${key}`),
+      await env.APP_KV!.put(`_auth:${key}`, JSON.stringify(value)),
+    delete: async (key) => await env.APP_KV!.delete(`_auth:${key}`),
   },
   socialProviders: {
     google: {
@@ -113,7 +113,7 @@ function getR2ObjectKeyFromImage(imageUrl: string): string | null {
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
     try {
       const parsedImageUrl = new URL(imageUrl);
-      const parsedR2Domain = new URL(env.R2_DOMAIN);
+      const parsedR2Domain = new URL(env.R2_DOMAIN!);
 
       if (parsedImageUrl.host !== parsedR2Domain.host) {
         return null;

@@ -31,7 +31,7 @@ export const emailOTPConfig = emailOTP({
 
     try {
       const { data, error } = await unosend.emails.send({
-        from: unosendFromEmail,
+        from: unosendFromEmail!,
         to: [email],
         subject,
         html: `

@@ -30,7 +30,7 @@ export function requireUser() {
 
 export function requireAdmin() {
   const session = requireUser();
-  if (session.user.role !== "admin") {
+  if ((session.user as { role: string }).role !== "admin") {
     throw new Response("Forbidden", { status: 403 });
   }
   return session;

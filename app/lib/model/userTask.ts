@@ -249,7 +249,7 @@ export async function getUsersWithTasks() {
     .innerJoin(user, eq(userTask.userId, user.id))
     .where(sql`${userTask.userId} IS NOT NULL`);
 
-  return result.filter((r) => r.userId !== null);
+  return result.filter((r): r is { userId: string; name: string; email: string } => r.userId !== null);
 }
 
 export async function getUserCompletedTasksPaginated(
