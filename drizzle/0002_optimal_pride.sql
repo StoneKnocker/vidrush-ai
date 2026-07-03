@@ -1,0 +1,1 @@
+CREATE INDEX `payment_providerSessionId_idx` ON `payment` (`providerSessionId`);

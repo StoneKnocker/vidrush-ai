@@ -1,0 +1,194 @@
+{
+  "terms": "Terms of Service",
+  "privacyLabel": "Privacy Policy",
+  "cookieLabel": "Cookie Policy",
+  "navigation": {
+    "home": "Home"
+  },
+  "privacy": {
+    "contentNotFound": "Content Not Found",
+    "contentUnavailable": "Privacy policy content is unavailable",
+    "lastModified": "Last modified: "
+  },
+  "termsPage": {
+    "contentNotFound": "Content Not Found",
+    "contentUnavailable": "Terms and conditions content is unavailable",
+    "lastModified": "Last modified: "
+  },
+  "cookiePage": {
+    "contentNotFound": "Content Not Found",
+    "contentUnavailable": "Cookie policy content is unavailable",
+    "lastModified": "Last modified: "
+  },
+  "cookieBanner": {
+    "message": "We use cookies to improve your experience. By continuing to use this site, you consent to our use of cookies. Read our",
+    "accept": "I agree"
+  },
+  "affiliateBanner": {
+    "title": "Pollo AI",
+    "description": "Free All-in-One AI Image and Video Generator",
+    "buttonText": "Try for Free"
+  },
+  "header": {
+    "workspace": "Playground",
+    "playground": "Playground",
+    "startGenerating": "Start For Free",
+    "closeMobileMenu": "Close navigation menu",
+    "openMobileMenu": "Open navigation menu"
+  },
+  "footer": {
+    "brandDescription": "CyberRealistic delivers high-fidelity photorealistic AI image generation powered by Cyberdelia's meticulously crafted SDXL-based models, offering natural skin textures, cinematic lighting, and professional-quality results from simple natural language prompts.",
+    "service": "Service",
+    "resources": "Resources",
+    "contact": "Contact",
+    "community": "Community",
+    "legal": "Legal",
+    "allRightsReserved": "All rights reserved.",
+    "language": "Language"
+  },
+  "feedback": {
+    "eyebrow": "Feedback",
+    "title": "Tell us what would make this better",
+    "description": "Share bugs, questions, ideas, or anything that got in your way while using the product.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "categoryLabel": "Feedback type",
+    "messageLabel": "Your feedback",
+    "messagePlaceholder": "Tell us what happened, what you expected, or what you would like to see next.",
+    "messageHint": "Please include enough detail for us to understand the request.",
+    "submit": "Submit feedback",
+    "submitting": "Submitting...",
+    "success": "Thanks for the feedback. We received your message.",
+    "error": "Feedback could not be submitted. Please try again.",
+    "categories": {
+      "bug": "Bug report",
+      "idea": "Feature idea",
+      "question": "Question",
+      "other": "Other"
+    }
+  },
+  "blog": {
+    "title": "The {{appName}} Blog",
+    "description": "The {{appName}} Blog",
+    "articleEyebrow": "Article",
+    "backToList": "Back to blog",
+    "readMore": "Read article",
+    "emptyTitle": "No articles yet",
+    "emptyDescription": "Check back soon for tips on AI image generation, prompt engineering, and workflow guides."
+  },
+  "auth": {
+    "email": "Email",
+    "verifyYourEmail": "Verify your email",
+    "createAnAccount": "Create an account",
+    "signInToYourAccount": "Sign in to your account",
+    "enterEmailBelow": "Enter your email below to create your account",
+    "enterEmailToSignIn": "Enter your email to sign in or create an account",
+    "verificationCodeSentTo": "We've sent a verification code to",
+    "sendVerificationCode": "Send Verification Code",
+    "sendingCode": "Sending Code...",
+    "orContinueWith": "Or continue with",
+    "verificationCode": "Verification Code",
+    "enterSixDigitCode": "Enter 6-digit code",
+    "verifying": "Verifying...",
+    "verifyAndSignIn": "Verify & Sign In",
+    "backToEmail": "Back to Email",
+    "byContinuing": "By clicking continue, you agree to our",
+    "and": "and",
+    "toast": {
+      "signedIn": "Successfully signed in!",
+      "loggedIn": "Logged in successfully"
+    },
+    "errors": {
+      "sendOtpFailed": "Failed to send OTP. Please try again.",
+      "invalidOtp": "Invalid OTP. Please try again.",
+      "googleLoginFailed": "Google login failed. Please try again."
+    },
+    "testimonial": {
+      "quote": "For pre-production, this is closer to what I need: a fast way to turn a character direction into a 3D draft I can keep refining.",
+      "author": "Sofia Davis"
+    }
+  },
+  "errorBoundary": {
+    "backToHome": "Back to home",
+    "applicationErrorTitle": "Oops! Application Error.",
+    "unexpectedError": "An unexpected error occurred.",
+    "notFoundTitle": "404 Not Found",
+    "genericTitle": "Error",
+    "notFoundDetail": "The requested page could not be found."
+  },
+  "authError": {
+    "title": "{{appName}} Authentication Error",
+    "defaultDescription": "We couldn't sign you in. Please try again or contact support if the problem persists.",
+    "goToSignIn": "Go to sign in",
+    "takeMeHome": "Take me home",
+    "errorCode": "Error code:"
+  },
+  "notFoundPage": {
+    "metaTitle": "Not Found",
+    "title": "{{appName}} Page Not Found",
+    "description": "The page you requested doesn't exist or has been moved. Try going back to the homepage or check the URL."
+  },
+  "workspace": {
+    "chooseStyle": "Choose Style"
+  },
+  "playground": {
+    "metaTitle": "CyberRealistic XL & CyberRealistic Pony Playground",
+    "metaDescription": "Experience CyberRealistic's photorealistic AI model directly in your browser. Try lifelike skin textures and cinematic lighting with simple natural language prompts — completely free.",
+    "title": "CyberRealistic Playground",
+    "description": "Try CyberRealistic directly in your browser. Generate high-fidelity photorealistic images with simple natural language prompts — fast, responsive, and free to explore.",
+    "tabXL": "CyberRealistic XL Playground",
+    "tabPony": "CyberRealistic Pony Playground"
+  },
+  "pricing": {
+    "processing": "Processing...",
+    "genericError": "An error occurred. Please try again."
+  },
+  "userNav": {
+    "myCreations": "My Creations",
+    "myCredits": "My Credits",
+    "adminPanel": "Admin Panel",
+    "signingOut": "Signing out...",
+    "logOut": "Log out",
+    "accountMenu": "Open account menu"
+  },
+  "creations": {
+    "title": "Your {{appName}} Creations",
+    "description": "Browse and manage your generated images and artwork.",
+    "emptyTitle": "No creations yet",
+    "emptyDescription": "Your generated images will appear here. Start by creating your first image from the playground.",
+    "viewVideo": "View video",
+    "viewFullSize": "View full size",
+    "downloadVideo": "Download video",
+    "downloadImage": "Download image"
+  },
+  "credits": {
+    "title": "Your {{appName}} Credits",
+    "description": "View your credit balance, subscription credits, and generation usage history.",
+    "subscriptionCredits": "Subscription Credits",
+    "subscriptionCreditsHint": "Renews with your subscription cycle",
+    "permanentCredits": "Permanent Credits",
+    "neverExpires": "Never expires",
+    "totalAvailable": "Total Available:",
+    "transactionHistory": "Transaction History",
+    "noTransactionsYet": "No transactions yet",
+    "date": "Date",
+    "amount": "Amount",
+    "type": "Type",
+    "event": "Event",
+    "tableDescription": "Description",
+    "events": {
+      "welcomeBonus": "Welcome Bonus",
+      "usage": "Usage",
+      "refund": "Refund",
+      "purchase": "Purchase",
+      "subscription": "Subscription",
+      "reset": "Reset",
+      "checkIn": "Check-in",
+      "adjustment": "Adjustment"
+    },
+    "types": {
+      "permanent": "Permanent",
+      "subscription": "Subscription"
+    }
+  }
+}
