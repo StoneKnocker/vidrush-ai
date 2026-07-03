@@ -158,7 +158,7 @@ export function GenerationForm({
                     <span
                       className={cn(
                         "inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 font-medium text-[10px]",
-                        "bg-primary/20 text-primary-foreground",
+                        "bg-primary/60 text-foreground",
                       )}
                     >
                       With Audio
@@ -175,8 +175,7 @@ export function GenerationForm({
             position="popper"
             className={cn(
               "w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]",
-              "bg-card ",
-              "[&_[data-slot=select-item]]:focus:bg-primary/15",
+              "[&_[data-slot=select-item]]:focus:bg-primary/10",
               "[&_svg]:text-primary",
             )}
           >
@@ -192,7 +191,7 @@ export function GenerationForm({
                     <span className="min-w-0 truncate font-semibold text-foreground">
                       Seedance 2.0
                     </span>
-                    <span className="inline-flex shrink-0 items-center rounded-full bg-primary/20 px-1.5 py-0.5 font-medium text-[10px] text-primary-foreground">
+                    <span className="inline-flex shrink-0 items-center rounded-full bg-primary/20 px-1.5 py-0.5 font-medium text-[10px] text-foreground">
                       With Audio
                     </span>
                   </div>

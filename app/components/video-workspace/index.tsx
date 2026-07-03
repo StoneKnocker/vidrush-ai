@@ -30,6 +30,10 @@ export function VideoWorkspace(_props: VideoWorkspaceProps) {
           ["--border" as string]: "15 3% 23%",
           ["--input" as string]: "15 3% 28%",
           ["--ring" as string]: "160 100% 43%",
+          ["--popover" as string]: "0 0% 10%",
+          ["--popover-foreground" as string]: "0 0% 95%",
+          ["--accent" as string]: "0 0% 15%",
+          ["--accent-foreground" as string]: "0 0% 95%",
         }}
       >
         <GenerationForm activeTab={activeTab} onTabChange={setActiveTab} />
