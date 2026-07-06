@@ -9,6 +9,7 @@
 ```bash
 pnpm dev                  # Dev server (port 3000)
 pnpm build                # Production build (content-collections + react-router)
+pnpm typecheck            # TypeScript type check
 pnpm check:fix            # Biome auto format
 pnpm deploy               # deploy to Cloudflare Workers (uses wrangler)
 ```

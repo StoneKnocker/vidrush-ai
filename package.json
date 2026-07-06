@@ -6,6 +6,7 @@
     "dev": "CLOUDFLARE_ENV=dev react-router dev",
     "deploy": "pnpm run build && wrangler deploy --env prod",
     "typegen": "wrangler types && react-router typegen",
+    "typecheck": "tsc --noEmit",
     "check:fix": "biome format --write .",
     "prepare": "lefthook install",
     "db:drop": "drizzle-kit drop",
