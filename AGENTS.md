@@ -9,6 +9,7 @@
 ```bash
 pnpm dev                  # Dev server (port 3000)
 pnpm build                # Production build (content-collections + react-router)
+pnpm test                 # Vitest test suite
 pnpm typecheck            # TypeScript type check
 pnpm check:fix            # Biome auto format
 pnpm deploy               # deploy to Cloudflare Workers (uses wrangler)
@@ -18,16 +19,17 @@ pnpm deploy               # deploy to Cloudflare Workers (uses wrangler)
 
 ```
 app/
-  routes/           # React Router file-based routes (map in routes.ts)
+  routes/           # React Router routes (map in routes.ts)
     pages/          # Public pages (blog, pricing, playground, signin, etc.)
     pages/user/     # Authenticated user pages (creations, credits)
     pages/admin/    # Admin pages
     api/            # API routes (tRPC, auth, payment webhooks, locales)
   components/
-    avatar-workspace/  # Core product: generation modes, hooks, shared UI
+    video-workspace/   # Core product: video generation UI
     landing/           # Landing page sections
     ui/                # shadcn/ui components
   lib/
+    ai/             # AI provider clients and shared provider helpers (KIE)
     auth/           # better-auth config (Google OAuth + email OTP)
     database/       # D1/Drizzle schema + connection
     service/        # Business logic: taskService, creditsService
@@ -48,6 +50,8 @@ content/            # Content collections (markdown)
 **Storage:** D1 (SQLite via Drizzle) for relational data, R2 for generated assets, KV for ephemeral key-value.
 
 **i18n:** i18next with locale prefix routing (`/:locale?`). Locale resources served via `api/locales/:lng/:ns`.
+
+**Routing:** Routes are declared manually in `app/routes.ts`. When adding a new file under `app/routes/api/**`, also register it under the `api` prefix in `app/routes.ts`; file creation alone is not enough.
 
 **Styling:** Tailwind CSS v4 + shadcn/ui. Full design system spec in `DESIGN.md`.
 
