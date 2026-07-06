@@ -1,11 +1,11 @@
 {
   "meta": {
     "title": "{{appName}} 料金",
-    "description": "VRChatアバターワークフローに合った{{appName}}プランをお選びください。無料で始め、月額サブスクリプションで継続、さらに生成が必要なときに追加クレジットパックを購入できます。"
+    "description": "VRChatアバターワークフローに合った{{appName}}プランをお選びください。月額サブスクリプションで継続、さらに生成が必要なときに追加クレジットパックを購入できます。"
   },
   "page": {
     "title": "アバター作成の全段階に対応する{{appName}}料金",
-    "description": "無料クレジットで始め、継続的なアバター作業のためにアップグレードし、さらに生成、テクスチャ、リギングジョブが必要なときはいつでも追加クレジットパックを購入できます。",
+    "description": "継続的なアバター作業のためのサブスクリプションを選び、さらに生成、テクスチャ、リギングジョブが必要なときはいつでも追加クレジットパックを購入できます。",
     "modeToggle": {
       "subscriptions": "サブスクリプション",
       "payAsYouGo": "クレジットパック"
@@ -13,12 +13,12 @@
     "billingToggle": {
       "monthly": "月額",
       "yearly": "年額",
-      "saveText": "34%お得"
+      "saveText": "50%お得"
     },
     "trustText": "{{appName}}でのVRChatアバター作成、テクスチャリング、リギングのためのシンプルな料金体系",
     "unsureSection": {
       "title": "どの{{appName}}プランが適しているか分かりませんか？",
-      "description": "ワークフローを試したいならFree、定期的にアバターを作成するならCreator、毎月多くのバリエーションを生成したり複数のアセットに取り組むならProをお選びください。",
+      "description": "アバター作成を始めたばかりならBasic、定期的にアバターを作成するならStandard、大量制作ならPro、スタジオレベルの制作ならMaxをお選びください。",
       "linkText": "適切なプランについてご相談ください"
     }
   },
@@ -36,11 +36,11 @@
       },
       {
         "question": "プランでどれだけ作成できますか？",
-        "answer": "ワークフローによって異なります。例えば、120クレジットあれば約24回のテキストから画像生成、6回のテクスチャ付きテキストから3D生成、またはコンセプト、モデル、テクスチャ、リギングにわたる混合ワークフローをカバーできます。複数のバリエーションを作成したり、アセットを頻繁に調整する場合は、より上位のプランが適しています。"
+        "answer": "ワークフローによって異なります。例えば、800クレジットあれば約160回のテキストから画像生成、40回のテクスチャ付きテキストから3D生成、またはコンセプト、モデル、テクスチャ、リギングにわたる混合ワークフローをカバーできます。複数のバリエーションを作成したり、アセットを頻繁に調整する場合は、より上位のプランが適しています。"
       },
       {
         "question": "プラン間の違いは何ですか？",
-        "answer": "主な違いは毎月取得できるクレジット数です。<strong class=\"font-semibold text-slate-900\">Freeはワークフローを試すためのもの</strong>、Creatorは定期的なアバター作成用、Proは大量使用、より多くの反復、大規模な月次出力用です。"
+        "answer": "主な違いは毎月取得できるクレジット数と生成速度です。<strong class=\"font-semibold text-slate-900\">Basicは始めたばかりの方</strong>、Standardは定期的なアバター作成、Proはパワーユーザー、Maxはスタジオレベルの制作に適しています。"
       },
       {
         "question": "プランをアップグレードせずに追加クレジットを購入できますか？",
@@ -48,7 +48,7 @@
       },
       {
         "question": "支払う前に{{appName}}を試す方法はありますか？",
-        "answer": "はい。Freeプランには1回限りのスタータークレジットが含まれており、サブスクリプションを契約する前にコアアバターワークフローをテストできます。"
+        "answer": "はい。新規ユーザーはサインアップ時にスタータークレジットを受け取り、サブスクリプションを契約する前にコアアバターワークフローをテストできます。"
       },
       {
         "question": "未使用のサブスクリプションクレジットはどうなりますか？",
@@ -66,109 +66,185 @@
   },
   "subscriptionPlans": [
     {
-      "id": "free",
-      "name": "Free",
-      "description": "アバターワークフローを試して最初の結果を生成するために。",
+      "id": "basic",
+      "name": "Basic",
+      "description": "VRChatアバター作成を始める方に最適です。",
       "cycles": {
-        "monthly": { "id": "free-monthly", "price": 0 },
-        "yearly": { "id": "free-yearly", "price": 0 }
+        "monthly": { "id": "basic-monthly", "price": 29.9 },
+        "yearly": { "id": "basic-yearly", "price": 14.9 }
       },
       "features": [
-        "20クレジット（1回限り）",
-        "基本モデル処理",
-        "基本カスタマイズオプション",
-        "パブリックアセットアクセス"
+        "800クレジット/月",
+        "標準生成速度",
+        "AI 3Dモデル生成",
+        "AIテクスチャ＆画像生成",
+        "自動リギング",
+        "透かしなし",
+        "プライベート生成",
+        "カスタマーサポート",
+        "商用利用ライセンス"
       ],
-      "cta": "無料で始める",
+      "cta": "Basicを選択",
       "popular": false,
       "enterprise": false
     },
     {
-      "id": "creator",
-      "name": "Creator",
-      "description": "定期的なVRChatアバター作成と反復のために。",
+      "id": "standard",
+      "name": "Standard",
+      "description": "より高速な生成を求める定期的なVRChatアバタークリエイター向け。",
       "cycles": {
-        "monthly": { "id": "creator-monthly", "price": 29 },
-        "yearly": { "id": "creator-yearly", "price": 19 }
+        "monthly": { "id": "standard-monthly", "price": 49.9 },
+        "yearly": { "id": "standard-yearly", "price": 24.9 }
       },
       "features": [
-        "350クレジット/月",
-        "優先モデル処理",
-        "高度なカスタマイズオプション",
-        "プライベートアセットアクセス",
-        "いつでも追加クレジット購入可能"
+        "1600クレジット/月",
+        "優先生成速度",
+        "AI 3Dモデル生成",
+        "AIテクスチャ＆画像生成",
+        "自動リギング",
+        "透かしなし",
+        "プライベート生成",
+        "優先カスタマーサポート",
+        "商用利用ライセンス"
       ],
-      "cta": "Creatorを選択",
-      "popular": false,
+      "cta": "Standardを選択",
+      "popular": true,
       "enterprise": false
     },
     {
       "id": "pro",
       "name": "Pro",
-      "description": "大量制作クリエイター、パワーユーザー、小規模チーム向け。",
+      "description": "大量制作クリエイターやパワーユーザー向け。",
       "cycles": {
-        "monthly": { "id": "pro-monthly", "price": 59 },
-        "yearly": { "id": "pro-yearly", "price": 39 }
+        "monthly": { "id": "pro-monthly", "price": 99.9 },
+        "yearly": { "id": "pro-yearly", "price": 49.9 }
       },
       "features": [
-        "900クレジット/月",
-        "優先モデル処理",
-        "高度なカスタマイズオプション",
-        "プライベートアセットアクセス",
-        "いつでも追加クレジット購入可能"
+        "4000クレジット/月",
+        "最速生成速度",
+        "AI 3Dモデル生成",
+        "AIテクスチャ＆画像生成",
+        "自動リギング",
+        "透かしなし",
+        "プライベート生成",
+        "エキスパートチームサポート",
+        "商用利用ライセンス"
       ],
       "cta": "Proを選択",
-      "popular": true,
+      "popular": false,
       "enterprise": false
     },
     {
-      "id": "enterprise",
-      "name": "Custom",
-      "description": "より大きなボリューム、カスタムワークフローニーズ、特別な請求要件を持つチーム向け。",
+      "id": "max",
+      "name": "Max",
+      "description": "最大限の処理能力を必要とするスタジオやチーム向け。",
       "cycles": {
-        "monthly": { "id": "enterprise-monthly", "price": "Custom" },
-        "yearly": { "id": "enterprise-yearly", "price": "Custom" }
+        "monthly": { "id": "max-monthly", "price": 199.9 },
+        "yearly": { "id": "max-yearly", "price": 99.9 }
       },
       "features": [
-        "カスタム月間クレジット量",
-        "優先モデル処理",
-        "高度なカスタマイズオプション",
-        "プライベートアセットアクセス",
-        "柔軟な請求オプション",
-        "チーム向け利用計画",
-        "大規模ワークフロー向け優先サポート",
-        "カスタムオンボーディング利用可能"
+        "10000クレジット/月",
+        "最速生成速度",
+        "AI 3Dモデル生成",
+        "AIテクスチャ＆画像生成",
+        "自動リギング",
+        "透かしなし",
+        "プライベート生成",
+        "エキスパートチームサポート",
+        "商用利用ライセンス"
       ],
-      "cta": "営業に問い合わせる",
+      "cta": "Maxを選択",
       "popular": false,
-      "enterprise": true
+      "enterprise": false
     }
   ],
   "creditPacks": [
     {
-      "id": "pack-700",
-      "name": "700クレジットパック",
-      "credits": 700,
-      "price": 49,
-      "perCredit": "1クレジットあたり$0.07",
+      "id": "pack-starter",
+      "name": "スターターパック",
+      "credits": 1000,
+      "price": 39.9,
+      "perCredit": "$0.040/クレジット",
+      "description": "たまに追加生成が必要な場合のクイックトップアップ。",
       "features": [
-        "多めの追加利用に最適",
-        "複数のテクスチャ付き3D生成に適しています",
-        "CreatorまたはProプランと相性良好"
+        "1000ボーナスクレジット",
+        "全機能を含む",
+        "クレジットに有効期限なし"
       ],
       "cta": "パックを購入",
       "popular": false
     },
     {
-      "id": "pack-1500",
-      "name": "1500クレジットパック",
-      "credits": 1500,
-      "price": 99,
-      "perCredit": "1クレジットあたり$0.066",
+      "id": "pack-creator",
+      "name": "クリエイターパック",
+      "credits": 3000,
+      "price": 89.9,
+      "perCredit": "$0.030/クレジット",
+      "description": "定期的なクリエイターに最も人気のパック。",
       "features": [
-        "ベストバリューパック",
-        "大規模バッチと繰り返しの反復向け",
-        "パワーユーザーとチームに最適"
+        "3000ボーナスクレジット",
+        "全機能を含む",
+        "クレジットに有効期限なし"
+      ],
+      "cta": "パックを購入",
+      "popular": true
+    },
+    {
+      "id": "pack-professional",
+      "name": "プロフェッショナルパック",
+      "credits": 8000,
+      "price": 199.9,
+      "perCredit": "$0.025/クレジット",
+      "description": "大量のクレジットを必要とする本格的なクリエイター向け。",
+      "features": [
+        "8000ボーナスクレジット",
+        "全機能を含む",
+        "クレジットに有効期限なし"
+      ],
+      "cta": "パックを購入",
+      "popular": false
+    },
+    {
+      "id": "pack-advanced",
+      "name": "アドバンスドパック",
+      "credits": 30000,
+      "price": 599.9,
+      "perCredit": "$0.020/クレジット",
+      "description": "パワーユーザー向け大容量クレジットパック。",
+      "features": [
+        "30000ボーナスクレジット",
+        "全機能を含む",
+        "クレジットに有効期限なし"
+      ],
+      "cta": "パックを購入",
+      "popular": false
+    },
+    {
+      "id": "pack-ultra",
+      "name": "ウルトラパック",
+      "credits": 100000,
+      "price": 1899.9,
+      "perCredit": "$0.019/クレジット",
+      "description": "最大限のスループットのための大容量クレジット。",
+      "features": [
+        "100000ボーナスクレジット",
+        "全機能を含む",
+        "クレジットに有効期限なし"
+      ],
+      "cta": "パックを購入",
+      "popular": false
+    },
+    {
+      "id": "pack-max",
+      "name": "マックスパック",
+      "credits": 200000,
+      "price": 3599.9,
+      "perCredit": "$0.018/クレジット",
+      "description": "エンタープライズチーム向けの究極のクレジットパック。",
+      "features": [
+        "200000ボーナスクレジット",
+        "全機能を含む",
+        "クレジットに有効期限なし"
       ],
       "cta": "パックを購入",
       "popular": false

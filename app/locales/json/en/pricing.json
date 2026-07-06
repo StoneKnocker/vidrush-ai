@@ -1,11 +1,11 @@
 {
   "meta": {
     "title": "{{appName}} Pricing",
-    "description": "Choose the {{appName}} plan that fits your VRChat avatar workflow. Start free, subscribe for monthly credits, or buy extra credit packs when you need more generations."
+    "description": "Choose the {{appName}} plan that fits your VRChat avatar workflow. Subscribe for monthly credits or buy credit packs when you need more generations."
   },
   "page": {
     "title": "{{appName}} pricing for every stage of avatar creation",
-    "description": "Start with free credits, upgrade for ongoing avatar work, and add extra credit packs whenever you need more generations, textures, or rigging jobs.",
+    "description": "Choose a subscription for ongoing avatar work and add extra credit packs whenever you need more generations, textures, or rigging jobs.",
     "modeToggle": {
       "subscriptions": "Subscriptions",
       "payAsYouGo": "Credit Packs"
@@ -13,12 +13,12 @@
     "billingToggle": {
       "monthly": "Monthly",
       "yearly": "Yearly",
-      "saveText": "Save 34%"
+      "saveText": "Save 50%"
     },
     "trustText": "Simple pricing for creating, texturing, and rigging VRChat avatars with {{appName}}",
     "unsureSection": {
       "title": "Not sure which {{appName}} plan fits you?",
-      "description": "Choose Free if you want to test the workflow, Creator if you build avatars regularly, and Pro if you generate lots of variants or work on multiple assets every month.",
+      "description": "Choose Basic if you are starting out with avatar creation, Standard if you build avatars regularly, Pro for high-volume creation, and Max for studio-level production needs.",
       "linkText": "Talk to us about the right plan"
     }
   },
@@ -36,11 +36,11 @@
       },
       {
         "question": "How much can I create with a plan?",
-        "answer": "It depends on your workflow. For example, 120 credits can cover around 24 Text to Image generations, 6 Text to 3D jobs with texture, or a mixed workflow across concept, model, texture, and rigging. Higher plans are better if you create multiple variants or refine assets often."
+        "answer": "It depends on your workflow. For example, 800 credits can cover around 160 Text to Image generations, 40 Text to 3D jobs with texture, or a mixed workflow across concept, model, texture, and rigging. Higher plans are better if you create multiple variants or refine assets often."
       },
       {
         "question": "What changes between the plans?",
-        "answer": "The main difference is how many credits you get each month. <strong class=\"font-semibold text-slate-900\">Free is for trying the workflow</strong>, Creator is for regular avatar creation, and Pro is for heavy usage, more iteration, and larger monthly output."
+        "answer": "The main difference is how many credits you get each month and the generation speed. <strong class=\"font-semibold text-slate-900\">Basic is for getting started</strong>, Standard is for regular avatar creation, Pro is for power users, and Max is for studio-level production."
       },
       {
         "question": "Can I buy extra credits without upgrading my plan?",
@@ -48,7 +48,7 @@
       },
       {
         "question": "Is there a way to try {{appName}} before paying?",
-        "answer": "Yes. The Free plan includes one-time starter credits so you can test the core avatar workflow before committing to a subscription."
+        "answer": "Yes. New users receive starter credits upon signup so you can test the core avatar workflow before committing to a subscription."
       },
       {
         "question": "What happens to unused subscription credits?",
@@ -66,133 +66,209 @@
   },
   "subscriptionPlans": [
     {
-      "id": "free",
-      "name": "Free",
-      "description": "For trying the avatar workflow and generating your first results.",
+      "id": "basic",
+      "name": "Basic",
+      "description": "For getting started with VRChat avatar creation.",
       "cycles": {
         "monthly": {
-          "id": "free-monthly",
-          "price": 0
+          "id": "basic-monthly",
+          "price": 29.9
         },
         "yearly": {
-          "id": "free-yearly",
-          "price": 0
+          "id": "basic-yearly",
+          "price": 14.9
         }
       },
       "features": [
-        "20 one-time credits",
-        "Basic model processing",
-        "Basic customization options",
-        "Public asset access"
+        "800 credits / month",
+        "Standard generation speed",
+        "AI 3D Model Generation",
+        "AI Texturing & Image Generation",
+        "Auto Rigging",
+        "No watermark",
+        "Private generation",
+        "Customer support",
+        "Commercial Use License"
       ],
-      "cta": "Start for Free",
+      "cta": "Choose Basic",
       "popular": false,
       "enterprise": false
     },
     {
-      "id": "creator",
-      "name": "Creator",
-      "description": "For regular VRChat avatar creation and iteration.",
+      "id": "standard",
+      "name": "Standard",
+      "description": "For regular VRChat avatar creators who want faster generation.",
       "cycles": {
         "monthly": {
-          "id": "creator-monthly",
-          "price": 29
+          "id": "standard-monthly",
+          "price": 49.9
         },
         "yearly": {
-          "id": "creator-yearly",
-          "price": 19
+          "id": "standard-yearly",
+          "price": 24.9
         }
       },
       "features": [
-        "350 credits / month",
-        "Priority model processing",
-        "Advanced customization options",
-        "Private asset access",
-        "Buy extra credits anytime"
+        "1600 credits / month",
+        "Priority generation speed",
+        "AI 3D Model Generation",
+        "AI Texturing & Image Generation",
+        "Auto Rigging",
+        "No watermark",
+        "Private generation",
+        "Priority customer support",
+        "Commercial Use License"
       ],
-      "cta": "Choose Creator",
-      "popular": false,
+      "cta": "Choose Standard",
+      "popular": true,
       "enterprise": false
     },
     {
       "id": "pro",
       "name": "Pro",
-      "description": "For high-volume creators, power users, and small teams.",
+      "description": "For power users and high-volume VRChat avatar production.",
       "cycles": {
         "monthly": {
           "id": "pro-monthly",
-          "price": 59
+          "price": 99.9
         },
         "yearly": {
           "id": "pro-yearly",
-          "price": 39
+          "price": 49.9
         }
       },
       "features": [
-        "900 credits / month",
-        "Priority model processing",
-        "Advanced customization options",
-        "Private asset access",
-        "Buy extra credits anytime"
+        "4000 credits / month",
+        "Fastest generation speed",
+        "AI 3D Model Generation",
+        "AI Texturing & Image Generation",
+        "Auto Rigging",
+        "No watermark",
+        "Private generation",
+        "Expert team support",
+        "Commercial Use License"
       ],
       "cta": "Choose Pro",
-      "popular": true,
+      "popular": false,
       "enterprise": false
     },
     {
-      "id": "enterprise",
-      "name": "Custom",
-      "description": "For teams with larger volume, custom workflow needs, or special billing requirements.",
+      "id": "max",
+      "name": "Max",
+      "description": "For studios and teams requiring maximum throughput.",
       "cycles": {
         "monthly": {
-          "id": "enterprise-monthly",
-          "price": "Custom"
+          "id": "max-monthly",
+          "price": 199.9
         },
         "yearly": {
-          "id": "enterprise-yearly",
-          "price": "Custom"
+          "id": "max-yearly",
+          "price": 99.9
         }
       },
       "features": [
-        "Custom monthly credit volume",
-        "Priority model processing",
-        "Advanced customization options",
-        "Private asset access",
-        "Flexible billing options",
-        "Team-oriented usage planning",
-        "Priority support for larger workflows",
-        "Custom onboarding available"
+        "10000 credits / month",
+        "Fastest generation speed",
+        "AI 3D Model Generation",
+        "AI Texturing & Image Generation",
+        "Auto Rigging",
+        "No watermark",
+        "Private generation",
+        "Expert team support",
+        "Commercial Use License"
       ],
-      "cta": "Contact Sales",
+      "cta": "Choose Max",
       "popular": false,
-      "enterprise": true
+      "enterprise": false
     }
   ],
   "creditPacks": [
     {
-      "id": "pack-700",
-      "name": "700 Credit Pack",
-      "credits": 700,
-      "price": 49,
-      "perCredit": "$0.07 per credit",
+      "id": "pack-starter",
+      "name": "Starter Pack",
+      "credits": 1000,
+      "price": 39.9,
+      "perCredit": "$0.040 / credit",
+      "description": "A quick top-up for occasional extra generations.",
       "features": [
-        "Best for heavier extra usage",
-        "Good for multiple textured 3D generations",
-        "Works well with Creator or Pro plans"
+        "1000 bonus credits",
+        "Includes all features",
+        "Credits never expire"
       ],
       "cta": "Buy Pack",
       "popular": false
     },
     {
-      "id": "pack-1500",
-      "name": "1500 Credit Pack",
-      "credits": 1500,
-      "price": 99,
-      "perCredit": "$0.066 per credit",
+      "id": "pack-creator",
+      "name": "Creator Pack",
+      "credits": 3000,
+      "price": 89.9,
+      "perCredit": "$0.030 / credit",
+      "description": "The most popular pack for regular creators.",
       "features": [
-        "Best value pack",
-        "Built for large batches and repeated iteration",
-        "Ideal for power users and teams"
+        "3000 bonus credits",
+        "Includes all features",
+        "Credits never expire"
+      ],
+      "cta": "Buy Pack",
+      "popular": true
+    },
+    {
+      "id": "pack-professional",
+      "name": "Professional Pack",
+      "credits": 8000,
+      "price": 199.9,
+      "perCredit": "$0.025 / credit",
+      "description": "For serious creators who need bulk credits.",
+      "features": [
+        "8000 bonus credits",
+        "Includes all features",
+        "Credits never expire"
+      ],
+      "cta": "Buy Pack",
+      "popular": false
+    },
+    {
+      "id": "pack-advanced",
+      "name": "Advanced Pack",
+      "credits": 30000,
+      "price": 599.9,
+      "perCredit": "$0.020 / credit",
+      "description": "High-volume credit pack for power users.",
+      "features": [
+        "30000 bonus credits",
+        "Includes all features",
+        "Credits never expire"
+      ],
+      "cta": "Buy Pack",
+      "popular": false
+    },
+    {
+      "id": "pack-ultra",
+      "name": "Ultra Pack",
+      "credits": 100000,
+      "price": 1899.9,
+      "perCredit": "$0.019 / credit",
+      "description": "Massive credit volume for maximum throughput.",
+      "features": [
+        "100000 bonus credits",
+        "Includes all features",
+        "Credits never expire"
+      ],
+      "cta": "Buy Pack",
+      "popular": false
+    },
+    {
+      "id": "pack-max",
+      "name": "Max Pack",
+      "credits": 200000,
+      "price": 3599.9,
+      "perCredit": "$0.018 / credit",
+      "description": "The ultimate credit pack for enterprise teams.",
+      "features": [
+        "200000 bonus credits",
+        "Includes all features",
+        "Credits never expire"
       ],
       "cta": "Buy Pack",
       "popular": false
