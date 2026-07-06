@@ -24,6 +24,8 @@ const serverEnvSchema = z.object({
   RESEND_API_KEY: z.string().optional(),
   CREEM_API_KEY: z.string().min(1),
   CREEM_WEBHOOK_SECRET: z.string().optional(),
+  KIE_API_KEY: z.string().optional(),
+  KIE_WEBHOOK_HMAC_KEY: z.string().optional(),
 });
 
 type RequiredBindingName = "APP_KV" | "DB" | "R2";

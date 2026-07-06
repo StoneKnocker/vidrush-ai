@@ -51,6 +51,7 @@ export default [
     route("locales/:lng/:ns", "routes/api/locales.ts"),
     route("trpc/*", "routes/api/trpc.ts"),
     route("payment/webhook/creem", "routes/api/payment/webhook/creem.ts"),
+    route("ai/kie/callback", "routes/api/ai/kie/callback.ts"),
   ]),
 
   // Not found
