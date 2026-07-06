@@ -3,7 +3,6 @@ import contentCollections from "@content-collections/remix-vite";
 import { reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [
@@ -12,9 +11,11 @@ export default defineConfig({
     }),
     tailwindcss(),
     reactRouter(),
-    tsconfigPaths(),
     contentCollections(),
   ],
+  resolve: {
+    tsconfigPaths: true,
+  },
   server: {
     open: false,
     port: 3000,
