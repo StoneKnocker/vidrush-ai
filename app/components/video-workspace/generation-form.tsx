@@ -78,7 +78,6 @@ export function GenerationForm({
     React.useState<GenerationFormState["resolution"]>("1080p");
   const [duration, setDuration] = React.useState(5);
   const [aspectRatio, setAspectRatio] = React.useState("Auto");
-  const [advancedOpen, setAdvancedOpen] = React.useState(false);
   const [returnLastFrame, setReturnLastFrame] = React.useState(false);
   const [addEndFrame, setAddEndFrame] = React.useState(false);
   const [portraitLibraryOpen, setPortraitLibraryOpen] = React.useState(false);
@@ -463,8 +462,6 @@ export function GenerationForm({
         onDurationChange={setDuration}
         aspectRatio={aspectRatio}
         onAspectRatioChange={setAspectRatio}
-        advancedOpen={advancedOpen}
-        onAdvancedToggle={() => setAdvancedOpen((prev) => !prev)}
       />
 
       {/* Generate Button */}

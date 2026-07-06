@@ -1,11 +1,4 @@
-import {
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Monitor,
-  Video,
-  WandSparkles,
-} from "lucide-react";
+import { Clock, Monitor, Video, WandSparkles } from "lucide-react";
 import type * as React from "react";
 import { Slider } from "~/components/ui/slider";
 import { cn } from "~/lib/utils";
@@ -17,8 +10,6 @@ interface SettingsPanelProps {
   onDurationChange: (val: number) => void;
   aspectRatio: string;
   onAspectRatioChange: (val: string) => void;
-  advancedOpen: boolean;
-  onAdvancedToggle: () => void;
 }
 
 const RESOLUTIONS = ["480p", "720p", "1080p", "4K"] as const;
@@ -76,8 +67,6 @@ export function SettingsPanel({
   onDurationChange,
   aspectRatio,
   onAspectRatioChange,
-  advancedOpen,
-  onAdvancedToggle,
 }: SettingsPanelProps) {
   return (
     <div className="flex flex-col gap-5">
@@ -175,52 +164,6 @@ export function SettingsPanel({
             );
           })}
         </div>
-      </div>
-
-      {/* Advanced */}
-      <div className="space-y-2 border-border/40 border-t pt-2">
-        <button
-          type="button"
-          onClick={onAdvancedToggle}
-          className="flex items-center gap-2 font-medium text-muted-foreground text-xs transition-colors hover:text-foreground"
-        >
-          Advanced
-          {advancedOpen ? (
-            <ChevronUp className="h-3 w-3" />
-          ) : (
-            <ChevronDown className="h-3 w-3" />
-          )}
-        </button>
-
-        {advancedOpen && (
-          <div className="mt-4 flex flex-col gap-4 rounded-lg border border-border bg-card p-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between font-medium text-muted-foreground text-xs">
-                <span>Quality</span>
-                <span>High</span>
-              </div>
-              <Slider defaultValue={[75]} max={100} step={1} />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between font-medium text-muted-foreground text-xs">
-                <span>Motion</span>
-                <span>Medium</span>
-              </div>
-              <Slider defaultValue={[50]} max={100} step={1} />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-muted-foreground text-xs">
-                Enhance
-              </span>
-              <button
-                type="button"
-                className="relative inline-flex h-5 w-9 cursor-pointer items-center rounded-full bg-primary transition-colors"
-              >
-                <span className="inline-block h-3.5 w-3.5 translate-x-5 rounded-full bg-primary-foreground transition-transform" />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
