@@ -97,7 +97,7 @@ export function GenerationForm({
       {/* Tab Bar */}
       <div
         className={cn(
-          "flex w-full rounded-lg border-border/50 bg-muted/30 p-1",
+          "flex w-full rounded-lg border border-border/50 bg-secondary/70 p-1",
         )}
       >
         {TABS.map((tab) => {
@@ -471,21 +471,21 @@ export function GenerationForm({
         className={cn(
           "group relative inline-flex h-14 w-full items-center justify-center gap-2",
           "overflow-hidden rounded-xl px-4",
-          "bg-card",
-          "font-semibold text-primary text-base leading-6",
+          "bg-primary text-primary-foreground",
+          "font-semibold text-base leading-6",
           "transition-all duration-300",
-          "disabled:pointer-events-none disabled:opacity-50",
+          "disabled:pointer-events-none disabled:opacity-40",
           "hover:enabled:brightness-110",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
         )}
         style={{
           boxShadow:
-            "0 0 15px rgba(0, 217, 146, 0.15), 0 4px 6px -4px rgba(0, 217, 146, 0.1)",
+            "0 0 20px rgba(0, 217, 146, 0.25), 0 4px 6px -4px rgba(0, 217, 146, 0.15)",
         }}
       >
         <span className="absolute inset-0 translate-y-full bg-white/20 transition-transform duration-300 ease-in-out group-hover:translate-y-0" />
         <span className="relative flex items-center justify-center gap-2">
-          <Sparkles className="h-5 w-5 fill-primary/20" />
+          <Sparkles className="h-5 w-5 fill-primary-foreground/30" />
           Generate
         </span>
       </button>
