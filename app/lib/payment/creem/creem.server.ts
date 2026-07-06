@@ -1,13 +1,12 @@
-import { env } from "cloudflare:workers";
 import { createCreem } from "creem_io";
 import { PAYMENT_STATUS } from "@/lib/consts";
 import { createPayment, updatePaymentSessionId } from "@/lib/model/payment";
-import { isDevelopment } from "~/lib/env.server";
+import { isDevelopment, serverEnv } from "~/lib/env.server";
 import { getProduct } from "~/lib/payment/product";
 
 export const creem = createCreem({
-  apiKey: env.CREEM_API_KEY!,
-  webhookSecret: env.CREEM_WEBHOOK_SECRET,
+  apiKey: serverEnv.CREEM_API_KEY,
+  webhookSecret: serverEnv.CREEM_WEBHOOK_SECRET,
   testMode: isDevelopment,
 });
 
@@ -34,7 +33,7 @@ export async function createCheckout(planId: string, userId: string) {
       status: PAYMENT_STATUS.PENDING,
     });
 
-    const successUrl = new URL("/payment/success", env.APP_URL);
+    const successUrl = new URL("/payment/success", serverEnv.APP_URL);
     successUrl.searchParams.set("public_id", payment.publicId);
 
     // Create a checkout session

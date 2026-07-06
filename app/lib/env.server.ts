@@ -8,9 +8,9 @@ import { z } from "zod";
 const serverEnvSchema = z.object({
   ENVIRONMENT: z.enum(["development", "production"]).default("development"),
   NEED_MOCK: z.string().optional().default("0"),
-  APP_NAME: z.string().min(1).optional(),
-  APP_URL: z.string().min(1).optional(),
-  R2_DOMAIN: z.string().min(1).optional(),
+  APP_NAME: z.string().min(1),
+  APP_URL: z.string().min(1),
+  R2_DOMAIN: z.string().min(1),
 
   R2_BUCKET_NAME: z.string().min(1),
   R2_ACCOUNT_ID: z.string().min(1),
@@ -18,13 +18,32 @@ const serverEnvSchema = z.object({
   R2_SECRET_ACCESS_KEY: z.string().min(1),
   SEND_FROM_EMAIL: z.string().min(1),
 
-  // Add other server-only variables here...
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  UNOSEND_API_KEY: z.string().optional(),
+  RESEND_API_KEY: z.string().optional(),
+  CREEM_API_KEY: z.string().min(1),
+  CREEM_WEBHOOK_SECRET: z.string().optional(),
 });
+
+type RequiredBindingName = "APP_KV" | "DB" | "R2";
+
+function requireBinding<Name extends RequiredBindingName>(
+  name: Name,
+): NonNullable<Cloudflare.Env[Name]> {
+  const binding = cloudflareEnv[name];
+
+  if (!binding) {
+    throw new Error(`Missing Cloudflare binding: ${name}`);
+  }
+
+  return binding;
+}
 
 /**
  * Validated server environment variables
  */
-const checkedEnv = (() => {
+export const serverEnv = (() => {
   const parsed = serverEnvSchema.safeParse(cloudflareEnv);
 
   if (parsed.success === false) {
@@ -35,19 +54,23 @@ const checkedEnv = (() => {
     throw new Error("Invalid environment variables");
   }
 
-  const validatedData = parsed.data;
-  Object.freeze(validatedData); // Ensure immutability
+  const checkedEnv = Object.freeze({
+    ...parsed.data,
+    APP_KV: requireBinding("APP_KV"),
+    DB: requireBinding("DB"),
+    R2: requireBinding("R2"),
+  });
 
   // Only log in development for better production security
-  if (validatedData.ENVIRONMENT === "development") {
-    console.log(`✅ Environment: ${validatedData.ENVIRONMENT}`);
+  if (checkedEnv.ENVIRONMENT === "development") {
+    console.log(`✅ Environment: ${checkedEnv.ENVIRONMENT}`);
   }
 
-  return validatedData;
+  return checkedEnv;
 })();
 
 // Environment convenience exports
-export const isDevelopment = checkedEnv.ENVIRONMENT === "development";
+export const isDevelopment = serverEnv.ENVIRONMENT === "development";
 
 /**
  * Returns a subset of environment variables that are safe to expose to the client.
@@ -56,9 +79,9 @@ export const isDevelopment = checkedEnv.ENVIRONMENT === "development";
  */
 export function getPublicEnv() {
   return {
-    SEND_FROM_EMAIL: checkedEnv.SEND_FROM_EMAIL,
-    APP_NAME: checkedEnv.APP_NAME,
-    APP_URL: checkedEnv.APP_URL,
-    R2_DOMAIN: checkedEnv.R2_DOMAIN,
+    SEND_FROM_EMAIL: serverEnv.SEND_FROM_EMAIL,
+    APP_NAME: serverEnv.APP_NAME,
+    APP_URL: serverEnv.APP_URL,
+    R2_DOMAIN: serverEnv.R2_DOMAIN,
   };
 }

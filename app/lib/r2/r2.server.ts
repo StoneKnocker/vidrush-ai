@@ -1,15 +1,15 @@
-import { env } from "cloudflare:workers";
 import { AwsClient } from "aws4fetch";
 import { getMimeType } from "@/lib/mime";
+import { serverEnv } from "~/lib/env.server";
 import { buildR2Url } from "./r2.shared";
 
-const R2_BUCKET_NAME = env.R2_BUCKET_NAME;
-const R2_ACCOUNT_ID = env.R2_ACCOUNT_ID;
+const R2_BUCKET_NAME = serverEnv.R2_BUCKET_NAME;
+const R2_ACCOUNT_ID = serverEnv.R2_ACCOUNT_ID;
 
 let r2Client: AwsClient | null = null;
 
 function requireEnv(name: "R2_ACCESS_KEY_ID" | "R2_SECRET_ACCESS_KEY") {
-  const value = env[name];
+  const value = serverEnv[name];
 
   if (!value) {
     throw new Error(`${name} is required for R2 client initialization.`);
@@ -32,7 +32,7 @@ function getR2ObjectEndpoint(filePath: string): string {
 }
 
 export function getServerR2Url(pathOrUrl: string): string {
-  return buildR2Url(pathOrUrl, env.R2_DOMAIN);
+  return buildR2Url(pathOrUrl, serverEnv.R2_DOMAIN);
 }
 
 /**

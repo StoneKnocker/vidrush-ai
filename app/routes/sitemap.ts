@@ -1,8 +1,8 @@
-import { env } from "cloudflare:workers";
+import { serverEnv } from "~/lib/env.server";
 import { buildSitemapXml, getSitemapEntries } from "~/lib/sitemap";
 
 export async function loader() {
-  const entries = await getSitemapEntries(env.APP_URL!);
+  const entries = await getSitemapEntries(serverEnv.APP_URL);
   const xml = buildSitemapXml(entries);
 
   return new Response(xml, {

@@ -1,10 +1,10 @@
-import { env } from "cloudflare:workers";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
 import { lastLoginMethod } from "better-auth/plugins";
 import { cache } from "react";
 import { db } from "~/lib/database/db.server";
+import { serverEnv } from "~/lib/env.server";
 import { deleteFromR2 } from "~/lib/r2/r2.server";
 import { rewardNewUserCredits } from "~/lib/service/userService";
 import { createUserSourceForNewUser } from "~/lib/service/userSourceService";
@@ -15,8 +15,8 @@ type BetterAuthNewUser = {
 };
 
 export const serverAuth = betterAuth({
-  baseURL: env.APP_URL!,
-  trustedOrigins: [env.APP_URL!],
+  baseURL: serverEnv.APP_URL,
+  trustedOrigins: [serverEnv.APP_URL],
   database: drizzleAdapter(db, {
     provider: "sqlite",
   }),
@@ -49,15 +49,15 @@ export const serverAuth = betterAuth({
     }),
   },
   secondaryStorage: {
-    get: async (key) => await env.APP_KV!.get(`_auth:${key}`, "json"),
+    get: async (key) => await serverEnv.APP_KV.get(`_auth:${key}`, "json"),
     set: async (key, value) =>
-      await env.APP_KV!.put(`_auth:${key}`, JSON.stringify(value)),
-    delete: async (key) => await env.APP_KV!.delete(`_auth:${key}`),
+      await serverEnv.APP_KV.put(`_auth:${key}`, JSON.stringify(value)),
+    delete: async (key) => await serverEnv.APP_KV.delete(`_auth:${key}`),
   },
   socialProviders: {
     google: {
-      clientId: env.GOOGLE_CLIENT_ID || "",
-      clientSecret: env.GOOGLE_CLIENT_SECRET || "",
+      clientId: serverEnv.GOOGLE_CLIENT_ID || "",
+      clientSecret: serverEnv.GOOGLE_CLIENT_SECRET || "",
     },
   },
   account: {
@@ -113,7 +113,7 @@ function getR2ObjectKeyFromImage(imageUrl: string): string | null {
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
     try {
       const parsedImageUrl = new URL(imageUrl);
-      const parsedR2Domain = new URL(env.R2_DOMAIN!);
+      const parsedR2Domain = new URL(serverEnv.R2_DOMAIN);
 
       if (parsedImageUrl.host !== parsedR2Domain.host) {
         return null;

@@ -1,8 +1,8 @@
-import { env } from "cloudflare:workers";
 import { emailOTP } from "better-auth/plugins";
+import { serverEnv } from "~/lib/env.server";
 
-const resendApiKey = env.RESEND_API_KEY;
-const resendFromEmail = env.SEND_FROM_EMAIL;
+const resendApiKey = serverEnv.RESEND_API_KEY;
+const resendFromEmail = serverEnv.SEND_FROM_EMAIL;
 
 export const emailOTPConfig = emailOTP({
   sendVerificationOTP: async ({
@@ -21,7 +21,7 @@ export const emailOTPConfig = emailOTP({
 
     const subject =
       type === "sign-in"
-        ? `Sign-In ${env.APP_NAME}`
+        ? `Sign-In ${serverEnv.APP_NAME}`
         : type === "email-verification"
           ? "Verify Your Email"
           : "Your OTP Code";
@@ -31,12 +31,12 @@ export const emailOTPConfig = emailOTP({
 
     try {
       await resendClient.emails.send({
-        from: resendFromEmail!,
+        from: resendFromEmail,
         to: email,
         subject,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #1a1a1a; font-size: 24px; font-weight: 600; margin-bottom: 16px;">${env.APP_NAME} One-Time Password</h2>
+            <h2 style="color: #1a1a1a; font-size: 24px; font-weight: 600; margin-bottom: 16px;">${serverEnv.APP_NAME} One-Time Password</h2>
             <p style="color: #4a4a4a; font-size: 16px; line-height: 1.5; margin-bottom: 24px;">
               ${
                 type === "sign-in"

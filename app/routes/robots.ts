@@ -1,8 +1,8 @@
 /// <reference path="../../worker-configuration.d.ts" />
-import { env } from "cloudflare:workers";
+import { serverEnv } from "~/lib/env.server";
 
 export async function loader() {
-  const appUrl = env.APP_URL ?? "http://localhost:3000";
+  const appUrl = serverEnv.APP_URL;
   const body = [
     "User-Agent: *",
     "Allow: /",
