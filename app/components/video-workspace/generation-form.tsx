@@ -744,36 +744,6 @@ function UploadSlot({
         </button>
       )}
 
-      <label
-        htmlFor={inputId}
-        className={cn(
-          "relative mt-2.5 flex h-[150px] w-full cursor-pointer flex-col items-center justify-center rounded-xl",
-          "border-2 border-muted-foreground/25 border-dashed bg-transparent py-8",
-          "transition-colors hover:border-muted-foreground/40 hover:bg-muted/50",
-          disabled && "pointer-events-none opacity-60",
-        )}
-      >
-        <input
-          id={inputId}
-          className="sr-only"
-          type="file"
-          accept={limit.accept}
-          multiple
-          disabled={disabled}
-          onChange={(event) => {
-            onFilesSelected(event.target.files, kind);
-            event.currentTarget.value = "";
-          }}
-        />
-        <div className="mb-3 rounded-full bg-primary/20 p-3 text-primary">
-          {icon}
-        </div>
-        <p className="mb-1 font-medium text-foreground text-sm">
-          Click to upload {kind}s
-        </p>
-        <p className="text-muted-foreground text-xs">{limitText}</p>
-      </label>
-
       {assets.length > 0 && (
         <div className="mt-2 grid grid-cols-2 gap-2">
           {assets.map((asset) => (
@@ -822,6 +792,36 @@ function UploadSlot({
           ))}
         </div>
       )}
+
+      <label
+        htmlFor={inputId}
+        className={cn(
+          "relative mt-2.5 flex h-[150px] w-full cursor-pointer flex-col items-center justify-center rounded-xl",
+          "border-2 border-muted-foreground/25 border-dashed bg-transparent py-8",
+          "transition-colors hover:border-muted-foreground/40 hover:bg-muted/50",
+          disabled && "pointer-events-none opacity-60",
+        )}
+      >
+        <input
+          id={inputId}
+          className="sr-only"
+          type="file"
+          accept={limit.accept}
+          multiple
+          disabled={disabled}
+          onChange={(event) => {
+            onFilesSelected(event.target.files, kind);
+            event.currentTarget.value = "";
+          }}
+        />
+        <div className="mb-3 rounded-full bg-primary/20 p-3 text-primary">
+          {icon}
+        </div>
+        <p className="mb-1 font-medium text-foreground text-sm">
+          Click to upload {kind}s
+        </p>
+        <p className="text-muted-foreground text-xs">{limitText}</p>
+      </label>
     </div>
   );
 }
