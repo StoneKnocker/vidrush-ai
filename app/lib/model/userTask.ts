@@ -14,6 +14,14 @@ export async function getTaskById(id: string) {
   return result[0] || null;
 }
 
+export async function getTaskByIdForUser(id: string, userId: string) {
+  const result = await db
+    .select()
+    .from(userTask)
+    .where(and(eq(userTask.id, id), eq(userTask.userId, userId)));
+  return result[0] || null;
+}
+
 export async function completeTask(
   id: string,
   resultData: SelectUserTask["resultData"],

@@ -1,5 +1,10 @@
 import { serverEnv } from "~/lib/env.server";
 import { mapKieJobState } from "./kie.shared";
+import {
+  buildSeedanceInput,
+  SEEDANCE_MODEL,
+  type SeedanceCreateTaskInput,
+} from "./seedance.shared";
 
 const KIE_BASE_URL = "https://api.kie.ai/api/v1";
 
@@ -136,6 +141,20 @@ export async function createKieImageTask({
     model,
     callBackUrl: callbackUrl,
     input,
+  });
+}
+
+export async function createKieSeedanceTask({
+  callbackUrl,
+  input,
+}: {
+  callbackUrl: string;
+  input: SeedanceCreateTaskInput;
+}): Promise<KieTaskResult> {
+  return requestKieTask({
+    model: SEEDANCE_MODEL,
+    callBackUrl: callbackUrl,
+    input: buildSeedanceInput(input),
   });
 }
 

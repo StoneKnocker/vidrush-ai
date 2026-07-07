@@ -1,8 +1,8 @@
 import {
   FileText,
   Image,
-  Info,
   Layers,
+  Loader2,
   Music,
   Sparkles,
   Type,
@@ -10,28 +10,49 @@ import {
   UserRound,
   Video,
   WandSparkles,
+  X,
 } from "lucide-react";
 import * as React from "react";
-import { Checkbox } from "~/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
+import { useAuth } from "~/hooks/use-auth";
+import { useLoginModal } from "~/hooks/use-login-modal";
+import { usePricingModal } from "~/hooks/use-pricing-modal";
+import { getTrpcErrorMessage } from "~/lib/trpc/error";
+import { trpc } from "~/lib/trpc/trpc-provider";
+import { generateUploadFilePath, uploadToR2 } from "~/lib/r2/r2.client";
 import { cn } from "~/lib/utils";
 import type { PortraitItem } from "./portrait-library";
 import { PortraitLibrary } from "./portrait-library";
 import { SettingsPanel } from "./settings-panel";
-import { UploadArea } from "./upload-area";
+import type { GenerationTab, WorkspaceTaskState } from "./workspace-types";
 
-type GenerationTab = "multi-reference" | "image-to-video" | "text-to-video";
+type Resolution = "480p" | "720p" | "1080p" | "4K";
+type ApiResolution = "480p" | "720p" | "1080p" | "4k";
+type ApiAspectRatio =
+  | "adaptive"
+  | "16:9"
+  | "9:16"
+  | "4:3"
+  | "3:4"
+  | "21:9"
+  | "1:1";
+type MediaKind = "image" | "video" | "audio";
+
+interface UploadedAsset {
+  id: string;
+  name: string;
+  url: string;
+  kind: MediaKind;
+  progress: number;
+  status: "uploading" | "success" | "error";
+  previewUrl?: string;
+  error?: string;
+}
 
 interface GenerationFormProps {
   activeTab?: GenerationTab;
   onTabChange?: (tab: GenerationTab) => void;
+  onTaskStateChange?: (state: WorkspaceTaskState) => void;
 }
 
 const TABS: { id: GenerationTab; label: string; icon: React.ReactNode }[] = [
@@ -53,39 +74,351 @@ const TABS: { id: GenerationTab; label: string; icon: React.ReactNode }[] = [
 ];
 
 const PROMPT_PLACEHOLDERS: Record<GenerationTab, string> = {
-  "multi-reference":
-    "Type @ to reference uploaded materials, e.g. @Image1 as first frame...",
+  "multi-reference": "Describe how the references should move together...",
   "image-to-video": "Describe how you want your image to animate...",
-  "text-to-video": "Prompt",
+  "text-to-video": "Describe the video you want to generate...",
 };
+
+const ASSET_LIMITS = {
+  image: { maxFiles: 9, maxSize: 30 * 1024 * 1024, accept: "image/*" },
+  video: { maxFiles: 3, maxSize: 50 * 1024 * 1024, accept: "video/*" },
+  audio: { maxFiles: 3, maxSize: 15 * 1024 * 1024, accept: "audio/*" },
+} as const;
+
+function toApiResolution(resolution: Resolution): ApiResolution {
+  return resolution === "4K" ? "4k" : resolution;
+}
+
+function toApiAspectRatio(aspectRatio: string): ApiAspectRatio {
+  if (aspectRatio === "Auto") return "adaptive";
+  return aspectRatio as ApiAspectRatio;
+}
+
+function getSuccessfulUrls(assets: UploadedAsset[], kind: MediaKind) {
+  return assets
+    .filter((asset) => asset.kind === kind && asset.status === "success")
+    .map((asset) => asset.url);
+}
+
+function getResultUrls(resultData: unknown) {
+  if (!resultData || typeof resultData !== "object") {
+    return { videos: [], images: [] };
+  }
+
+  const data = resultData as { videos?: unknown; images?: unknown };
+  return {
+    videos: Array.isArray(data.videos)
+      ? data.videos.filter((url): url is string => typeof url === "string")
+      : [],
+    images: Array.isArray(data.images)
+      ? data.images.filter((url): url is string => typeof url === "string")
+      : [],
+  };
+}
 
 export function GenerationForm({
   activeTab: controlledActiveTab,
   onTabChange,
+  onTaskStateChange,
 }: GenerationFormProps) {
   const [internalTab, setInternalTab] =
     React.useState<GenerationTab>("multi-reference");
   const activeTab = controlledActiveTab ?? internalTab;
+  const { user, isAuthenticated } = useAuth();
+  const { openLoginModal } = useLoginModal();
+  const { openPricingModal } = usePricingModal();
+  const utils = trpc.useUtils();
+
+  const [prompt, setPrompt] = React.useState("");
+  const [resolution, setResolution] = React.useState<Resolution>("1080p");
+  const [duration, setDuration] = React.useState(5);
+  const [aspectRatio, setAspectRatio] = React.useState("Auto");
+  const [generateAudio, setGenerateAudio] = React.useState(true);
+  const [addEndFrame, setAddEndFrame] = React.useState(false);
+  const [assets, setAssets] = React.useState<UploadedAsset[]>([]);
+  const [formError, setFormError] = React.useState("");
+  const [currentTaskId, setCurrentTaskId] = React.useState<string | null>(null);
+  const [portraitLibraryOpen, setPortraitLibraryOpen] = React.useState(false);
+  const [selectedPortrait, setSelectedPortrait] =
+    React.useState<PortraitItem | null>(null);
+
+  const getPresignedUrlMutation = trpc.r2.getPresignedUrl.useMutation();
+  const creditsQuery = trpc.user.getCredits.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const createTaskMutation = trpc.video.createSeedanceTask.useMutation();
+  const taskStatusQuery = trpc.video.getTaskStatus.useQuery(
+    { taskId: currentTaskId ?? "" },
+    {
+      enabled: Boolean(currentTaskId),
+      refetchInterval: (query) => {
+        const status = query.state.data?.status;
+        return status === "completed" || status === "failed" ? false : 5000;
+      },
+    },
+  );
+
+  const creditCostQuery = trpc.video.getCreditsForSettings.useQuery(
+    {
+      resolution: toApiResolution(resolution),
+      generateAudio,
+    },
+    { enabled: isAuthenticated },
+  );
+
+  React.useEffect(() => {
+    const data = taskStatusQuery.data;
+    if (!data) return;
+
+    const urls = getResultUrls(data.resultData);
+    onTaskStateChange?.({
+      taskId: data.taskId,
+      status:
+        data.status === "completed"
+          ? "completed"
+          : data.status === "failed"
+            ? "failed"
+            : data.status === "pending"
+              ? "pending"
+              : "processing",
+      videoUrls: urls.videos,
+      imageUrls: urls.images,
+      errorMessage: data.errorMessage,
+    });
+
+    if (data.status === "completed" || data.status === "failed") {
+      utils.user.getCredits.invalidate();
+    }
+  }, [taskStatusQuery.data, onTaskStateChange, utils.user.getCredits]);
 
   const handleTabChange = (tab: GenerationTab) => {
+    setFormError("");
     if (controlledActiveTab === undefined) {
       setInternalTab(tab);
     }
     onTabChange?.(tab);
   };
 
-  const [resolution, setResolution] =
-    React.useState<GenerationFormState["resolution"]>("1080p");
-  const [duration, setDuration] = React.useState(5);
-  const [aspectRatio, setAspectRatio] = React.useState("Auto");
-  const [returnLastFrame, setReturnLastFrame] = React.useState(false);
-  const [addEndFrame, setAddEndFrame] = React.useState(false);
-  const [portraitLibraryOpen, setPortraitLibraryOpen] = React.useState(false);
-  const [selectedPortrait, setSelectedPortrait] =
-    React.useState<PortraitItem | null>(null);
+  const removeAsset = (id: string) => {
+    setAssets((current) => {
+      const asset = current.find((item) => item.id === id);
+      if (asset?.previewUrl) URL.revokeObjectURL(asset.previewUrl);
+      return current.filter((item) => item.id !== id);
+    });
+  };
 
-  const showVirtualPortrait =
-    activeTab === "multi-reference" || activeTab === "image-to-video";
+  const uploadFiles = async (files: FileList | null, kind: MediaKind) => {
+    if (!files || files.length === 0) return;
+    if (!isAuthenticated || !user?.id) {
+      setFormError("Sign in and click Generate to upload references.");
+      return;
+    }
+
+    const limit = ASSET_LIMITS[kind];
+    const existingCount = assets.filter((asset) => asset.kind === kind).length;
+    const selectedFiles = Array.from(files).slice(
+      0,
+      Math.max(0, limit.maxFiles - existingCount),
+    );
+
+    if (selectedFiles.length !== files.length) {
+      setFormError(`You can upload up to ${limit.maxFiles} ${kind} files.`);
+    }
+
+    await Promise.all(
+      selectedFiles.map(async (file) => {
+        if (file.size > limit.maxSize) {
+          setFormError(`${file.name} is too large.`);
+          return;
+        }
+
+        const id = crypto.randomUUID();
+        const previewUrl =
+          kind === "image" ? URL.createObjectURL(file) : undefined;
+        const filePath = generateUploadFilePath(user.id, file.name);
+        setAssets((current) => [
+          ...current,
+          {
+            id,
+            name: file.name,
+            url: "",
+            kind,
+            progress: 0,
+            status: "uploading",
+            previewUrl,
+          },
+        ]);
+
+        try {
+          const { uploadUrl } = await getPresignedUrlMutation.mutateAsync({
+            filePath,
+            contentType: file.type || "application/octet-stream",
+          });
+          const url = await uploadToR2({
+            filePath,
+            contentType: file.type || "application/octet-stream",
+            file,
+            uploadUrl,
+            onProgress: (progress) => {
+              setAssets((current) =>
+                current.map((asset) =>
+                  asset.id === id
+                    ? { ...asset, progress: progress.percentage }
+                    : asset,
+                ),
+              );
+            },
+          });
+          setAssets((current) =>
+            current.map((asset) =>
+              asset.id === id
+                ? { ...asset, status: "success", progress: 100, url }
+                : asset,
+            ),
+          );
+        } catch (error) {
+          setAssets((current) =>
+            current.map((asset) =>
+              asset.id === id
+                ? {
+                    ...asset,
+                    status: "error",
+                    error:
+                      error instanceof Error ? error.message : "Upload failed",
+                  }
+                : asset,
+            ),
+          );
+        }
+      }),
+    );
+  };
+
+  const addPortraitAsset = (portrait: PortraitItem) => {
+    setSelectedPortrait(portrait);
+    setAssets((current) => {
+      if (current.some((asset) => asset.id === `portrait:${portrait.id}`)) {
+        return current;
+      }
+
+      const imageCount = current.filter(
+        (asset) => asset.kind === "image",
+      ).length;
+      if (imageCount >= ASSET_LIMITS.image.maxFiles) {
+        setFormError(
+          `You can upload up to ${ASSET_LIMITS.image.maxFiles} image files.`,
+        );
+        return current;
+      }
+
+      return [
+        ...current,
+        {
+          id: `portrait:${portrait.id}`,
+          name: `${portrait.country} ${portrait.age} ${portrait.occupation}`,
+          url: portrait.url,
+          kind: "image",
+          progress: 100,
+          status: "success",
+          previewUrl: portrait.url,
+        },
+      ];
+    });
+  };
+
+  const validateAndBuildInput = () => {
+    const trimmedPrompt = prompt.trim();
+    if (trimmedPrompt.length < 3) {
+      throw new Error("Prompt must be at least 3 characters.");
+    }
+
+    const base = {
+      prompt: trimmedPrompt,
+      resolution: toApiResolution(resolution),
+      aspectRatio: toApiAspectRatio(aspectRatio),
+      duration,
+      generateAudio,
+    };
+
+    if (activeTab === "text-to-video") {
+      return { ...base, mode: "text-to-video" as const };
+    }
+
+    if (activeTab === "image-to-video") {
+      const images = getSuccessfulUrls(assets, "image");
+      if (!images[0]) {
+        throw new Error("Upload a first frame image.");
+      }
+      return {
+        ...base,
+        mode: "image-to-video" as const,
+        firstFrameUrl: images[0],
+        ...(addEndFrame && images[1] ? { lastFrameUrl: images[1] } : {}),
+      };
+    }
+
+    const referenceImageUrls = getSuccessfulUrls(assets, "image");
+    const referenceVideoUrls = getSuccessfulUrls(assets, "video");
+    const referenceAudioUrls = getSuccessfulUrls(assets, "audio");
+    if (referenceImageUrls.length + referenceVideoUrls.length === 0) {
+      throw new Error("Upload at least one image or video reference.");
+    }
+
+    return {
+      ...base,
+      mode: "multi-reference" as const,
+      referenceImageUrls,
+      referenceVideoUrls,
+      referenceAudioUrls,
+    };
+  };
+
+  const handleGenerate = async () => {
+    setFormError("");
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+
+    const estimatedCost = creditCostQuery.data?.creditCost ?? 0;
+    const balance = creditsQuery.data?.total ?? 0;
+    if (estimatedCost > 0 && balance < estimatedCost) {
+      openPricingModal();
+      return;
+    }
+
+    try {
+      const input = validateAndBuildInput();
+      onTaskStateChange?.({
+        status: "pending",
+        videoUrls: [],
+        imageUrls: [],
+      });
+      const result = await createTaskMutation.mutateAsync(input);
+      setCurrentTaskId(result.taskId);
+      onTaskStateChange?.({
+        taskId: result.taskId,
+        status: "processing",
+        videoUrls: [],
+        imageUrls: [],
+      });
+      utils.user.getCredits.invalidate();
+    } catch (error) {
+      const message = getTrpcErrorMessage(error, "Generation failed.");
+      setFormError(message);
+      onTaskStateChange?.({
+        status: "failed",
+        videoUrls: [],
+        imageUrls: [],
+        errorMessage: message,
+      });
+    }
+  };
+
+  const successfulUploads = assets.some((asset) => asset.status === "success");
+  const isUploading = assets.some((asset) => asset.status === "uploading");
+  const estimatedCost = creditCostQuery.data?.creditCost ?? null;
+  const balance = creditsQuery.data?.total;
 
   return (
     <div
@@ -94,12 +427,7 @@ export function GenerationForm({
         "w-full lg:w-[450px] xl:w-[500px]",
       )}
     >
-      {/* Tab Bar */}
-      <div
-        className={cn(
-          "flex w-full rounded-lg border border-border/50 bg-secondary/70 p-1",
-        )}
-      >
+      <div className="flex w-full rounded-lg border border-border/50 bg-secondary/70 p-1">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -108,9 +436,7 @@ export function GenerationForm({
               type="button"
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex flex-1 items-center justify-center gap-1.5",
-                "rounded-md px-2 py-2.5 font-medium text-xs leading-4",
-                "transition duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]",
+                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-2.5 font-medium text-xs leading-4 transition",
                 isActive
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -125,308 +451,115 @@ export function GenerationForm({
         })}
       </div>
 
-      {/* AI Model Dropdown */}
       <div className="space-y-2">
-        <label className="flex items-center gap-2 font-medium text-muted-foreground text-sm peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label className="flex items-center gap-2 font-medium text-muted-foreground text-sm">
           <Layers className="h-4 w-4" />
           AI Model
         </label>
-        <Select defaultValue="seedance2">
-          <SelectTrigger
-            className={cn(
-              "flex h-auto min-h-14 w-full items-center justify-between",
-              "overflow-hidden rounded-xl border-border/50 px-4 py-2",
-              "bg-background/50 text-sm shadow-sm ring-offset-background backdrop-blur-sm",
-              "transition-colors duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]",
-              "hover:bg-background/70 focus-visible:ring-1 focus-visible:ring-primary/20",
-              "[&>span]:line-clamp-none [&>span]:min-w-0 [&>span]:overflow-hidden",
-            )}
-          >
-            <SelectValue placeholder="Select a model">
-              <div className="flex min-w-0 items-center gap-3">
-                <img
-                  src="/seedance2-assets/seedance2-icon.png"
-                  alt="Seedance"
-                  className="h-7 w-7 object-contain"
-                />
-                <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-                  <div className="flex w-full min-w-0 items-center gap-1.5">
-                    <span className="min-w-0 truncate font-semibold text-foreground">
-                      Seedance 2.0
-                    </span>
-                    <span
-                      className={cn(
-                        "inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 font-medium text-[10px]",
-                        "bg-primary/60 text-foreground",
-                      )}
-                    >
-                      With Audio
-                    </span>
-                  </div>
-                  <span className="w-full min-w-0 truncate text-left text-[10px] text-muted-foreground leading-none">
-                    Multimodal input with powerful reference capabilities
-                  </span>
-                </div>
-              </div>
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent
-            position="popper"
-            className={cn(
-              "w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]",
-              "[&_[data-slot=select-item]]:focus:bg-primary/10",
-              "[&_svg]:text-primary",
-            )}
-          >
-            <SelectItem value="seedance2">
-              <div className="flex min-w-0 items-center gap-3">
-                <img
-                  src="/seedance2-assets/seedance2-icon.png"
-                  alt="Seedance"
-                  className="h-7 w-7 object-contain"
-                />
-                <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-                  <div className="flex w-full min-w-0 items-center gap-1.5">
-                    <span className="min-w-0 truncate font-semibold text-foreground">
-                      Seedance 2.0
-                    </span>
-                    <span className="inline-flex shrink-0 items-center rounded-full bg-primary/20 px-1.5 py-0.5 font-medium text-[10px] text-foreground">
-                      With Audio
-                    </span>
-                  </div>
-                  <span className="w-full min-w-0 truncate text-left text-[10px] text-muted-foreground leading-none">
-                    Multimodal input with powerful reference capabilities
-                  </span>
-                </div>
-              </div>
-            </SelectItem>
-            <SelectItem value="seedance2-fast">
-              <div className="flex min-w-0 items-center gap-3">
-                <img
-                  src="/seedance2-assets/seedance2-icon.png"
-                  alt="Seedance"
-                  className="h-7 w-7 object-contain"
-                />
-                <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-                  <div className="flex w-full min-w-0 items-center gap-1.5">
-                    <span className="min-w-0 truncate font-semibold text-foreground">
-                      Seedance 2.0 Fast
-                    </span>
-                  </div>
-                  <span className="w-full min-w-0 truncate text-left text-[10px] text-muted-foreground leading-none">
-                    Faster generation with lower cost
-                  </span>
-                </div>
-              </div>
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex min-h-14 items-center gap-3 rounded-xl border border-border/50 bg-background/50 px-4 py-2 text-sm shadow-sm">
+          <img
+            src="/seedance2-assets/seedance2-icon.png"
+            alt="Seedance"
+            className="h-7 w-7 object-contain"
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-foreground">
+                Seedance 2.0
+              </span>
+              <span className="rounded-full bg-primary/20 px-1.5 py-0.5 font-medium text-[10px]">
+                With Audio
+              </span>
+            </div>
+            <p className="truncate text-[10px] text-muted-foreground">
+              bytedance/seedance-2
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Select Virtual Portrait */}
-      <PortraitLibrary
-        open={portraitLibraryOpen}
-        onOpenChange={setPortraitLibraryOpen}
-        onSelect={(item) => setSelectedPortrait(item)}
-      />
+      {activeTab === "multi-reference" && (
+        <div className="flex flex-col gap-4">
+          <PortraitLibrary
+            open={portraitLibraryOpen}
+            onOpenChange={setPortraitLibraryOpen}
+            onSelect={addPortraitAsset}
+          />
+          <UploadSlot
+            assets={assets.filter((asset) => asset.kind === "image")}
+            icon={<Upload className="h-6 w-6 text-primary" />}
+            kind="image"
+            label="Reference Images"
+            limitText="max 9, 30MB each"
+            secondaryAction={{
+              label: selectedPortrait
+                ? selectedPortrait.country
+                : "Select Virtual Portrait",
+              icon: <UserRound className="h-3.5 w-3.5" />,
+              onClick: () => setPortraitLibraryOpen(true),
+            }}
+            onFilesSelected={uploadFiles}
+            onRemove={removeAsset}
+          />
+          <UploadSlot
+            assets={assets.filter((asset) => asset.kind === "video")}
+            icon={<Upload className="h-6 w-6 text-primary" />}
+            kind="video"
+            label="Reference Videos"
+            limitText="max 3, 50MB each"
+            onFilesSelected={uploadFiles}
+            onRemove={removeAsset}
+          />
+          <UploadSlot
+            assets={assets.filter((asset) => asset.kind === "audio")}
+            icon={<Upload className="h-6 w-6 text-primary" />}
+            kind="audio"
+            label="Reference Audios"
+            limitText="max 3, 15MB each"
+            onFilesSelected={uploadFiles}
+            onRemove={removeAsset}
+          />
+        </div>
+      )}
 
-      {/* Tab Content */}
-      <div className="w-full">
-        {activeTab === "multi-reference" && (
-          <div className="flex flex-col gap-4">
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 font-medium text-foreground text-sm">
-                  <Image className="h-4 w-4" />
-                  Reference Images (max 9)
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-xs">0 / 9</span>
-                  {showVirtualPortrait && (
-                    <button
-                      type="button"
-                      onClick={() => setPortraitLibraryOpen(true)}
-                      className={cn(
-                        "inline-flex items-center gap-1.5",
-                        "h-8 rounded-md px-2 text-xs",
-                        "bg-primary/10 text-primary",
-                        "transition-colors hover:bg-primary/15",
-                        "disabled:cursor-not-allowed disabled:opacity-50",
-                      )}
-                    >
-                      <UserRound className="h-3.5 w-3.5" />
-                      {selectedPortrait
-                        ? `${selectedPortrait.country}`
-                        : "Select Virtual Portrait"}
-                    </button>
-                  )}
-                </div>
-              </div>
-              <UploadArea
-                icon={<Upload className="h-6 w-6 text-primary" />}
-                title="Click to upload images"
-                hint="png, jpg, jpeg, webp (9 remaining)"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 font-medium text-foreground text-sm">
-                  <Video className="h-4 w-4" />
-                  Reference Videos (max 3, total 15s)
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  0 / 3 | 0.0s / 15s
-                </span>
-              </div>
-              <UploadArea
-                icon={<Upload className="h-6 w-6 text-primary" />}
-                title="Click to upload videos"
-                hint="mp4, mov (3 remaining)"
-              />
-              <p className="mt-1 text-muted-foreground text-xs">Max 50MB</p>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 font-medium text-foreground text-sm">
-                  <Music className="h-4 w-4" />
-                  Reference Audios (max 3, total 15s)
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  0 / 3 | 0.0s / 15s
-                </span>
-              </div>
-              <UploadArea
-                icon={<Upload className="h-6 w-6 text-primary" />}
-                title="Click to upload audio"
-                hint="mp3, wav (3 remaining)"
-              />
-            </div>
-
-            <label className="flex cursor-pointer items-center gap-2.5">
-              <Checkbox
-                checked={returnLastFrame}
-                onCheckedChange={(checked) =>
-                  setReturnLastFrame(checked === true)
-                }
-              />
-              <span className="font-medium text-foreground text-sm">
-                Return Last Frame
-              </span>
+      {activeTab === "image-to-video" && (
+        <div className="flex flex-col gap-4">
+          <PortraitLibrary
+            open={portraitLibraryOpen}
+            onOpenChange={setPortraitLibraryOpen}
+            onSelect={addPortraitAsset}
+          />
+          <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+            <span className="flex items-center gap-2 font-medium text-sm">
+              <Image className="h-4 w-4" />
+              Images
+            </span>
+            <label className="flex items-center gap-2 text-muted-foreground text-xs">
+              End frame
+              <Switch checked={addEndFrame} onCheckedChange={setAddEndFrame} />
             </label>
           </div>
-        )}
+          <UploadSlot
+            assets={assets.filter((asset) => asset.kind === "image")}
+            icon={<Upload className="h-6 w-6 text-primary" />}
+            kind="image"
+            label={addEndFrame ? "First and End Frame" : "First Frame"}
+            limitText={addEndFrame ? "upload 1-2 images" : "upload 1 image"}
+            secondaryAction={{
+              label: selectedPortrait
+                ? selectedPortrait.country
+                : "Select Virtual Portrait",
+              icon: <UserRound className="h-3.5 w-3.5" />,
+              onClick: () => setPortraitLibraryOpen(true),
+            }}
+            onFilesSelected={uploadFiles}
+            onRemove={removeAsset}
+          />
+        </div>
+      )}
 
-        {activeTab === "image-to-video" && (
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between rounded-lg border-border/60 bg-muted/30 px-3 py-2">
-              <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4" />
-                <span className="font-medium text-sm">
-                  How Image to Video Works
-                </span>
-              </div>
-              <Info className="h-3.5 w-3.5 cursor-pointer text-muted-foreground hover:text-white" />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 font-medium text-foreground text-sm">
-                  <Image className="h-4 w-4" />
-                  Images
-                </span>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <span className="whitespace-nowrap text-muted-foreground text-xs">
-                      Add end frame
-                    </span>
-                    <Switch
-                      checked={addEndFrame}
-                      onCheckedChange={setAddEndFrame}
-                      className="scale-75"
-                    />
-                  </div>
-                  {showVirtualPortrait && (
-                    <button
-                      type="button"
-                      onClick={() => setPortraitLibraryOpen(true)}
-                      className={cn(
-                        "inline-flex items-center gap-1.5",
-                        "h-8 rounded-md px-2 text-xs",
-                        "bg-primary/10 text-primary",
-                        "transition-colors hover:bg-primary/15",
-                        "disabled:cursor-not-allowed disabled:opacity-50",
-                      )}
-                    >
-                      <UserRound className="h-3.5 w-3.5" />
-                      {selectedPortrait
-                        ? `${selectedPortrait.country}`
-                        : "Select Virtual Portrait"}
-                    </button>
-                  )}
-                </div>
-              </div>
-              <UploadArea
-                icon={<Upload className="h-6 w-6 text-primary" />}
-                title="Click to upload or drag & drop"
-                hint="png, jpg, jpeg, webp (9 remaining)"
-                secondaryAction={{
-                  label: "Generate images with AI",
-                  icon: <Sparkles className="h-3 w-3" />,
-                }}
-              />
-            </div>
-
-            {addEndFrame && (
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-foreground text-sm">
-                    Add end frame
-                  </span>
-                </div>
-                <UploadArea
-                  icon={<Upload className="h-6 w-6 text-primary" />}
-                  title="Click to upload or drag & drop"
-                  hint="png, jpg, jpeg, webp (remaining)"
-                />
-              </div>
-            )}
-
-            <label className="flex cursor-pointer items-center gap-2.5">
-              <Checkbox
-                checked={returnLastFrame}
-                onCheckedChange={(checked) =>
-                  setReturnLastFrame(checked === true)
-                }
-              />
-              <span className="font-medium text-foreground text-sm">
-                Return Last Frame
-              </span>
-            </label>
-          </div>
-        )}
-
-        {activeTab === "text-to-video" && (
-          <div className="flex flex-col gap-4">
-            <label className="flex cursor-pointer items-center gap-2.5">
-              <Checkbox
-                checked={returnLastFrame}
-                onCheckedChange={(checked) =>
-                  setReturnLastFrame(checked === true)
-                }
-              />
-              <span className="font-medium text-foreground text-sm">
-                Return Last Frame
-              </span>
-            </label>
-          </div>
-        )}
-      </div>
-
-      {/* Prompt Section */}
       <div className="flex min-h-[140px] w-full flex-1 flex-col space-y-2">
-        <label className="flex items-center gap-2 font-medium text-muted-foreground text-sm peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label className="flex items-center gap-2 font-medium text-muted-foreground text-sm">
           <FileText className="h-4 w-4" />
           Prompt
         </label>
@@ -437,65 +570,215 @@ export function GenerationForm({
               "border-border/50 bg-background/50 shadow-sm backdrop-blur-sm",
               "text-base text-foreground md:text-sm",
               "placeholder:text-muted-foreground",
-              "transition-all",
-              "focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20",
-              "focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/20",
-              "disabled:cursor-not-allowed disabled:opacity-50",
+              "transition-all focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20",
             )}
             placeholder={PROMPT_PLACEHOLDERS[activeTab]}
-            maxLength={5000}
+            maxLength={20_000}
             rows={4}
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
           />
           <div className="absolute right-3 bottom-3 rounded-full border-border/50 bg-background/80 px-2 py-0.5 font-mono text-muted-foreground text-xs">
-            <span>0/5000</span>
+            {prompt.length}/20000
           </div>
         </div>
       </div>
 
-      {/* Settings Panel */}
       <SettingsPanel
         resolution={resolution}
-        onResolutionChange={(val) =>
-          setResolution(val as GenerationFormState["resolution"])
-        }
+        onResolutionChange={(val) => setResolution(val as Resolution)}
         duration={duration}
         onDurationChange={setDuration}
         aspectRatio={aspectRatio}
         onAspectRatioChange={setAspectRatio}
       />
 
-      {/* Generate Button */}
+      <label className="flex items-center justify-between rounded-lg border border-border/50 bg-background/30 px-4 py-3 text-sm">
+        <span className="flex items-center gap-2 font-medium">
+          <Music className="h-4 w-4 text-primary" />
+          Generate audio
+        </span>
+        <Switch checked={generateAudio} onCheckedChange={setGenerateAudio} />
+      </label>
+
+      <div className="flex items-center justify-between rounded-lg bg-muted/30 px-4 py-3 text-sm">
+        <span className="text-muted-foreground">Estimated cost</span>
+        <span className="font-semibold">
+          {estimatedCost ?? "--"} credits
+          {typeof balance === "number" && (
+            <span className="ml-2 font-normal text-muted-foreground">
+              Balance {balance}
+            </span>
+          )}
+        </span>
+      </div>
+
+      {formError && (
+        <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-destructive text-sm">
+          {formError}
+        </p>
+      )}
+
       <button
         type="button"
-        disabled
+        disabled={createTaskMutation.isPending || isUploading}
+        onClick={handleGenerate}
         className={cn(
-          "group relative inline-flex h-14 w-full items-center justify-center gap-2",
-          "overflow-hidden rounded-xl px-4",
-          "bg-primary text-primary-foreground",
-          "font-semibold text-base leading-6",
-          "transition-all duration-300",
-          "disabled:pointer-events-none disabled:opacity-40",
-          "hover:enabled:brightness-110",
+          "group relative inline-flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-4",
+          "bg-primary text-primary-foreground font-semibold text-base leading-6 transition-all duration-300",
+          "disabled:pointer-events-none disabled:opacity-40 hover:enabled:brightness-110",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
         )}
-        style={{
-          boxShadow:
-            "0 0 20px rgba(0, 217, 146, 0.25), 0 4px 6px -4px rgba(0, 217, 146, 0.15)",
-        }}
       >
         <span className="absolute inset-0 translate-y-full bg-white/20 transition-transform duration-300 ease-in-out group-hover:translate-y-0" />
         <span className="relative flex items-center justify-center gap-2">
-          <Sparkles className="h-5 w-5 fill-primary-foreground/30" />
-          Generate
+          {createTaskMutation.isPending ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Sparkles className="h-5 w-5 fill-primary-foreground/30" />
+          )}
+          {createTaskMutation.isPending
+            ? "Creating task"
+            : isUploading
+              ? "Uploading files"
+              : successfulUploads || activeTab === "text-to-video"
+                ? "Generate"
+                : "Upload references"}
         </span>
       </button>
     </div>
   );
 }
 
-// Internal helper type so the inline cast is self-documenting.
-type GenerationFormState = {
-  resolution: "480p" | "720p" | "1080p" | "4K";
-};
+function UploadSlot({
+  assets,
+  icon,
+  kind,
+  label,
+  limitText,
+  onFilesSelected,
+  onRemove,
+  secondaryAction,
+}: {
+  assets: UploadedAsset[];
+  icon: React.ReactNode;
+  kind: MediaKind;
+  label: string;
+  limitText: string;
+  onFilesSelected: (files: FileList | null, kind: MediaKind) => void;
+  onRemove: (id: string) => void;
+  secondaryAction?: {
+    label: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+  };
+}) {
+  const inputId = React.useId();
+  const limit = ASSET_LIMITS[kind];
+
+  return (
+    <div>
+      <div className="flex items-center justify-between">
+        <span className="flex items-center gap-2 font-medium text-foreground text-sm">
+          {kind === "image" ? (
+            <Image className="h-4 w-4" />
+          ) : kind === "video" ? (
+            <Video className="h-4 w-4" />
+          ) : (
+            <Music className="h-4 w-4" />
+          )}
+          {label}
+        </span>
+        <span className="text-muted-foreground text-xs">
+          {assets.length} / {limit.maxFiles}
+        </span>
+      </div>
+      {secondaryAction && (
+        <button
+          type="button"
+          onClick={secondaryAction.onClick}
+          className={cn(
+            "mt-2 inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs",
+            "bg-primary/10 text-primary transition-colors hover:bg-primary/15",
+          )}
+        >
+          {secondaryAction.icon}
+          {secondaryAction.label}
+        </button>
+      )}
+
+      <label
+        htmlFor={inputId}
+        className={cn(
+          "relative mt-2.5 flex h-[150px] w-full cursor-pointer flex-col items-center justify-center rounded-xl",
+          "border-2 border-muted-foreground/25 border-dashed bg-transparent py-8",
+          "transition-colors hover:border-muted-foreground/40 hover:bg-muted/50",
+        )}
+      >
+        <input
+          id={inputId}
+          className="sr-only"
+          type="file"
+          accept={limit.accept}
+          multiple
+          onChange={(event) => {
+            onFilesSelected(event.target.files, kind);
+            event.currentTarget.value = "";
+          }}
+        />
+        <div className="mb-3 rounded-full bg-primary/20 p-3 text-primary">
+          {icon}
+        </div>
+        <p className="mb-1 font-medium text-foreground text-sm">
+          Click to upload {kind}s
+        </p>
+        <p className="text-muted-foreground text-xs">{limitText}</p>
+      </label>
+
+      {assets.length > 0 && (
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          {assets.map((asset) => (
+            <div
+              key={asset.id}
+              className="flex min-w-0 items-center gap-2 rounded-lg border border-border/50 bg-background/50 px-2 py-2"
+            >
+              {asset.previewUrl ? (
+                <img
+                  src={asset.previewUrl}
+                  alt=""
+                  className="h-9 w-9 rounded-md object-cover"
+                />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted">
+                  {kind === "video" ? (
+                    <Video className="h-4 w-4" />
+                  ) : (
+                    <Music className="h-4 w-4" />
+                  )}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs">{asset.name}</p>
+                <p className="text-muted-foreground text-[10px]">
+                  {asset.status === "uploading"
+                    ? `${asset.progress}%`
+                    : asset.status}
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Remove file"
+                onClick={() => onRemove(asset.id)}
+                className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default GenerationForm;

@@ -2,14 +2,18 @@ import * as React from "react";
 import { cn } from "~/lib/utils";
 import { GenerationForm } from "./generation-form";
 import { VideoPreview } from "./video-preview";
-
-type GenerationTab = "multi-reference" | "image-to-video" | "text-to-video";
+import type { GenerationTab, WorkspaceTaskState } from "./workspace-types";
 
 export type VideoWorkspaceProps = {};
 
 export function VideoWorkspace(_props: VideoWorkspaceProps) {
   const [activeTab, setActiveTab] =
     React.useState<GenerationTab>("multi-reference");
+  const [taskState, setTaskState] = React.useState<WorkspaceTaskState>({
+    status: "idle",
+    videoUrls: [],
+    imageUrls: [],
+  });
 
   return (
     <div
@@ -18,8 +22,15 @@ export function VideoWorkspace(_props: VideoWorkspaceProps) {
         "rounded-3xl border border-border/50 bg-card shadow-xl",
       )}
     >
-      <GenerationForm activeTab={activeTab} onTabChange={setActiveTab} />
-      <VideoPreview showGuide={activeTab === "multi-reference"} />
+      <GenerationForm
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onTaskStateChange={setTaskState}
+      />
+      <VideoPreview
+        showGuide={activeTab === "multi-reference"}
+        taskState={taskState}
+      />
     </div>
   );
 }

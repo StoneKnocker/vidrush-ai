@@ -17,6 +17,22 @@ interface VerifyKieWebhookSignatureParams {
 }
 
 const textEncoder = new TextEncoder();
+const hmacKeyCache = new Map<string, CryptoKey>();
+
+async function importHmacKey(secret: string): Promise<CryptoKey> {
+  const cached = hmacKeyCache.get(secret);
+  if (cached) return cached;
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    textEncoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  hmacKeyCache.set(secret, key);
+  return key;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -52,7 +68,9 @@ export function mapKieJobState(state: string): LocalTaskStatus {
     case "fail":
       return TASK_STATUS.FAILED;
     default:
-      throw new Error(`Unknown KIE job state: ${state}`);
+      // Unknown states are treated as failed so tasks don't get stuck in limbo.
+      // The caller can inspect the original state if needed for logging.
+      return TASK_STATUS.FAILED;
   }
 }
 
@@ -132,13 +150,7 @@ export async function verifyKieWebhookSignature({
     return false;
   }
 
-  const key = await crypto.subtle.importKey(
-    "raw",
-    textEncoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
+  const key = await importHmacKey(secret);
   const digest = await crypto.subtle.sign(
     "HMAC",
     key,

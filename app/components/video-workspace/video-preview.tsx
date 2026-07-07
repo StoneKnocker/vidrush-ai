@@ -4,15 +4,26 @@ import {
   ExternalLink,
   FileText,
   Info,
+  Loader2,
 } from "lucide-react";
 import type * as React from "react";
 import { cn } from "~/lib/utils";
+import type { WorkspaceTaskState } from "./workspace-types";
 
 export interface VideoPreviewProps {
   showGuide?: boolean;
+  taskState?: WorkspaceTaskState;
 }
 
-export function VideoPreview({ showGuide = false }: VideoPreviewProps) {
+export function VideoPreview({
+  showGuide = false,
+  taskState = { status: "idle", videoUrls: [], imageUrls: [] },
+}: VideoPreviewProps) {
+  const activeVideoUrl = taskState.videoUrls[0];
+  const isWorking =
+    taskState.status === "pending" || taskState.status === "processing";
+  const isFailed = taskState.status === "failed";
+
   return (
     <div className="flex w-full flex-1 flex-col gap-4 lg:w-auto">
       <div
@@ -28,18 +39,44 @@ export function VideoPreview({ showGuide = false }: VideoPreviewProps) {
             <div className="flex h-full h-full w-full flex-col overflow-hidden rounded-2xl opacity-80 transition-opacity duration-500 hover:opacity-100">
               <div className="relative flex flex-1 flex-col">
                 <div className="group relative aspect-video overflow-hidden rounded-xl bg-black">
-                  <video
-                    className="h-full w-full object-contain"
-                    controls
-                    poster="/seedance2-assets/example-poster.webp"
-                    preload="metadata"
-                    playsInline
-                  >
-                    <source
-                      src="/seedance2-assets/example-video.mp4"
-                      type="video/mp4"
-                    />
-                  </video>
+                  {isWorking ? (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-white">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <p className="font-medium text-sm">
+                        {taskState.status === "pending"
+                          ? "Task queued"
+                          : "Generating video"}
+                      </p>
+                    </div>
+                  ) : isFailed ? (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 px-6 text-center text-white">
+                      <p className="font-semibold text-sm">Generation failed</p>
+                      <p className="max-w-md text-muted-foreground text-xs">
+                        {taskState.errorMessage || "Please try again."}
+                      </p>
+                    </div>
+                  ) : (
+                    <video
+                      key={activeVideoUrl ?? "example-video"}
+                      className="h-full w-full object-contain"
+                      controls
+                      poster={
+                        activeVideoUrl
+                          ? undefined
+                          : "/seedance2-assets/example-poster.webp"
+                      }
+                      preload="metadata"
+                      playsInline
+                    >
+                      <source
+                        src={
+                          activeVideoUrl ??
+                          "/seedance2-assets/example-video.mp4"
+                        }
+                        type="video/mp4"
+                      />
+                    </video>
+                  )}
                   <button
                     type="button"
                     aria-label="Previous video"

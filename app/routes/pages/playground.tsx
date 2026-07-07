@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { VideoWorkspace } from "~/components/video-workspace";
 import { getPublicEnv } from "~/lib/env.server";
 import { getCanonicalUrl, getHreflangTags } from "~/lib/utils";
 import resources from "~/locales";
@@ -52,32 +52,8 @@ export const loader = async ({ context }: Route.LoaderArgs) => {
   };
 };
 
-const PLAYGROUNDS = [
-  {
-    key: "xl",
-    src: "https://corallight-f-scheduler-4k.hf.space",
-    height: 700,
-  },
-  {
-    key: "pony",
-    src: "https://rioshiina-imagegen.hf.space",
-    height: 700,
-  },
-] as const;
-
 export default function PlaygroundRoute({ loaderData }: Route.ComponentProps) {
   const { content } = loaderData;
-  const [activeTab, setActiveTab] = useState<
-    (typeof PLAYGROUNDS)[number]["key"]
-  >(PLAYGROUNDS[0].key);
-
-  const tabLabels: Record<string, string> = {
-    xl: content.tabXL,
-    pony: content.tabPony,
-  };
-
-  const currentTab =
-    PLAYGROUNDS.find((tab) => tab.key === activeTab) ?? PLAYGROUNDS[0];
 
   return (
     <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-background">
@@ -94,43 +70,7 @@ export default function PlaygroundRoute({ loaderData }: Route.ComponentProps) {
           </p>
         </section>
 
-        <div className="w-full">
-          <div className="overflow-hidden rounded-lg border ">
-            <div className="flex bg-card" role="tablist">
-              {PLAYGROUNDS.map((tab, i) => {
-                const isActive = activeTab === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={
-                      "relative flex-1 px-5 py-3 font-medium text-sm transition-all" +
-                      (isActive
-                        ? "bg-background text-foreground"
-                        : "bg-transparent text-muted-foreground hover:bg-card hover:text-muted-foreground") +
-                      (i === 0 ? "" : "border-l")
-                    }
-                  >
-                    {isActive && (
-                      <span className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
-                    )}
-                    {tabLabels[tab.key]}
-                  </button>
-                );
-              })}
-            </div>
-            <iframe
-              key={currentTab.key}
-              src={currentTab.src}
-              title={tabLabels[currentTab.key]}
-              className="w-full border-t"
-              height={currentTab.height}
-            />
-          </div>
-        </div>
+        <VideoWorkspace />
       </div>
     </main>
   );

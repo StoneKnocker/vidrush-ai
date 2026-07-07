@@ -17,6 +17,12 @@ describe("KIE shared helpers", () => {
     expect(mapKieJobState("fail")).toBe(TASK_STATUS.FAILED);
   });
 
+  it("maps unknown KIE states to failed so callbacks don't silently stall", () => {
+    expect(mapKieJobState("paused")).toBe(TASK_STATUS.FAILED);
+    expect(mapKieJobState("canceled")).toBe(TASK_STATUS.FAILED);
+    expect(mapKieJobState("")).toBe(TASK_STATUS.FAILED);
+  });
+
   it("extracts callback task id and state from wrapped KIE payloads", () => {
     const payload = extractKieCallbackPayload({
       code: 200,
@@ -83,5 +89,23 @@ describe("KIE shared helpers", () => {
         secret,
       }),
     ).resolves.toBe(false);
+  });
+
+  it("verifies KIE webhook signatures when callback uses camelCase taskId", async () => {
+    const secret = "test-secret";
+    const taskId = "kie-task-2";
+    const timestamp = "1767600001";
+    const signature = createHmac("sha256", secret)
+      .update(`${taskId}.${timestamp}`)
+      .digest("base64");
+
+    await expect(
+      verifyKieWebhookSignature({
+        payload: { data: { taskId } },
+        timestamp,
+        signature,
+        secret,
+      }),
+    ).resolves.toBe(true);
   });
 });
