@@ -17,6 +17,12 @@ import { Switch } from "~/components/ui/switch";
 import { useAuth } from "~/hooks/use-auth";
 import { useLoginModal } from "~/hooks/use-login-modal";
 import { usePricingModal } from "~/hooks/use-pricing-modal";
+import {
+  addPortraitAsset as addPortraitAssetToState,
+  removeAssetById,
+  type MediaKind,
+  type UploadedAsset,
+} from "./asset-state";
 import { getTrpcErrorMessage } from "~/lib/trpc/error";
 import { trpc } from "~/lib/trpc/trpc-provider";
 import { generateUploadFilePath, uploadToR2 } from "~/lib/r2/r2.client";
@@ -36,18 +42,6 @@ type ApiAspectRatio =
   | "3:4"
   | "21:9"
   | "1:1";
-type MediaKind = "image" | "video" | "audio";
-
-interface UploadedAsset {
-  id: string;
-  name: string;
-  url: string;
-  kind: MediaKind;
-  progress: number;
-  status: "uploading" | "success" | "error";
-  previewUrl?: string;
-  error?: string;
-}
 
 interface GenerationFormProps {
   activeTab?: GenerationTab;
@@ -201,9 +195,16 @@ export function GenerationForm({
 
   const removeAsset = (id: string) => {
     setAssets((current) => {
-      const asset = current.find((item) => item.id === id);
-      if (asset?.previewUrl) URL.revokeObjectURL(asset.previewUrl);
-      return current.filter((item) => item.id !== id);
+      const result = removeAssetById({
+        assets: current,
+        id,
+        selectedPortrait,
+      });
+      if (result.previewUrlToRevoke) {
+        URL.revokeObjectURL(result.previewUrlToRevoke);
+      }
+      setSelectedPortrait(result.selectedPortrait);
+      return result.assets;
     });
   };
 
@@ -295,34 +296,18 @@ export function GenerationForm({
   };
 
   const addPortraitAsset = (portrait: PortraitItem) => {
-    setSelectedPortrait(portrait);
     setAssets((current) => {
-      if (current.some((asset) => asset.id === `portrait:${portrait.id}`)) {
-        return current;
+      const result = addPortraitAssetToState({
+        assets: current,
+        portrait,
+        selectedPortrait,
+        maxImageFiles: ASSET_LIMITS.image.maxFiles,
+      });
+      setSelectedPortrait(result.selectedPortrait);
+      if (result.error) {
+        setFormError(result.error);
       }
-
-      const imageCount = current.filter(
-        (asset) => asset.kind === "image",
-      ).length;
-      if (imageCount >= ASSET_LIMITS.image.maxFiles) {
-        setFormError(
-          `You can upload up to ${ASSET_LIMITS.image.maxFiles} image files.`,
-        );
-        return current;
-      }
-
-      return [
-        ...current,
-        {
-          id: `portrait:${portrait.id}`,
-          name: `${portrait.country} ${portrait.age} ${portrait.occupation}`,
-          url: portrait.url,
-          kind: "image",
-          progress: 100,
-          status: "success",
-          previewUrl: portrait.url,
-        },
-      ];
+      return result.assets;
     });
   };
 

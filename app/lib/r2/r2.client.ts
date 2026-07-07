@@ -64,6 +64,7 @@ export function generateUploadFilePath(
   fileName: string,
 ): string {
   const timestamp = Date.now();
+  const uniqueId = crypto.randomUUID();
   const ext = fileName.split(".").pop()?.toLowerCase() || "jpg";
-  return `uploads/${userId}/${timestamp}.${ext}`;
+  return `uploads/${userId}/${timestamp}-${uniqueId}.${ext}`;
 }
