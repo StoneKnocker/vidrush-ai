@@ -19,6 +19,7 @@ import { useLoginModal } from "~/hooks/use-login-modal";
 import { usePricingModal } from "~/hooks/use-pricing-modal";
 import {
   addPortraitAsset as addPortraitAssetToState,
+  getPendingAssetsForGeneration,
   removeAssetById,
   type MediaKind,
   type UploadedAsset,
@@ -135,6 +136,7 @@ export function GenerationForm({
   const [portraitLibraryOpen, setPortraitLibraryOpen] = React.useState(false);
   const [selectedPortrait, setSelectedPortrait] =
     React.useState<PortraitItem | null>(null);
+  const pendingFilesRef = React.useRef<Map<string, File>>(new Map());
 
   const getPresignedUrlMutation = trpc.r2.getPresignedUrl.useMutation();
   const creditsQuery = trpc.user.getCredits.useQuery(undefined, {
@@ -194,6 +196,7 @@ export function GenerationForm({
   };
 
   const removeAsset = (id: string) => {
+    pendingFilesRef.current.delete(id);
     setAssets((current) => {
       const result = removeAssetById({
         assets: current,
@@ -208,7 +211,7 @@ export function GenerationForm({
     });
   };
 
-  const uploadFiles = async (files: FileList | null, kind: MediaKind) => {
+  const selectFiles = (files: FileList | null, kind: MediaKind) => {
     if (!files || files.length === 0) return;
     if (!isAuthenticated || !user?.id) {
       setFormError("Sign in and click Generate to upload references.");
@@ -226,30 +229,48 @@ export function GenerationForm({
       setFormError(`You can upload up to ${limit.maxFiles} ${kind} files.`);
     }
 
+    selectedFiles.forEach((file) => {
+      if (file.size > limit.maxSize) {
+        setFormError(`${file.name} is too large.`);
+        return;
+      }
+
+      const id = crypto.randomUUID();
+      const previewUrl =
+        kind === "image" ? URL.createObjectURL(file) : undefined;
+      pendingFilesRef.current.set(id, file);
+      setAssets((current) => [
+        ...current,
+        {
+          id,
+          name: file.name,
+          url: "",
+          kind,
+          progress: 0,
+          status: "pending",
+          previewUrl,
+        },
+      ]);
+    });
+  };
+
+  const uploadPendingAssets = async (pendingAssets: UploadedAsset[]) => {
+    if (pendingAssets.length === 0) return true;
+
+    let hasError = false;
+
     await Promise.all(
-      selectedFiles.map(async (file) => {
-        if (file.size > limit.maxSize) {
-          setFormError(`${file.name} is too large.`);
-          return;
-        }
+      pendingAssets.map(async (asset) => {
+        const file = pendingFilesRef.current.get(asset.id);
+        if (!file || !user?.id) return;
 
-        const id = crypto.randomUUID();
-        const previewUrl =
-          kind === "image" ? URL.createObjectURL(file) : undefined;
+        setAssets((current) =>
+          current.map((a) =>
+            a.id === asset.id ? { ...a, status: "uploading" } : a,
+          ),
+        );
+
         const filePath = generateUploadFilePath(user.id, file.name);
-        setAssets((current) => [
-          ...current,
-          {
-            id,
-            name: file.name,
-            url: "",
-            kind,
-            progress: 0,
-            status: "uploading",
-            previewUrl,
-          },
-        ]);
-
         try {
           const { uploadUrl } = await getPresignedUrlMutation.mutateAsync({
             filePath,
@@ -262,37 +283,41 @@ export function GenerationForm({
             uploadUrl,
             onProgress: (progress) => {
               setAssets((current) =>
-                current.map((asset) =>
-                  asset.id === id
-                    ? { ...asset, progress: progress.percentage }
-                    : asset,
+                current.map((a) =>
+                  a.id === asset.id
+                    ? { ...a, progress: progress.percentage }
+                    : a,
                 ),
               );
             },
           });
+          pendingFilesRef.current.delete(asset.id);
           setAssets((current) =>
-            current.map((asset) =>
-              asset.id === id
-                ? { ...asset, status: "success", progress: 100, url }
-                : asset,
+            current.map((a) =>
+              a.id === asset.id
+                ? { ...a, status: "success", progress: 100, url }
+                : a,
             ),
           );
         } catch (error) {
+          hasError = true;
           setAssets((current) =>
-            current.map((asset) =>
-              asset.id === id
+            current.map((a) =>
+              a.id === asset.id
                 ? {
-                    ...asset,
+                    ...a,
                     status: "error",
                     error:
                       error instanceof Error ? error.message : "Upload failed",
                   }
-                : asset,
+                : a,
             ),
           );
         }
       }),
     );
+
+    return !hasError;
   };
 
   const addPortraitAsset = (portrait: PortraitItem) => {
@@ -373,6 +398,17 @@ export function GenerationForm({
     }
 
     try {
+      const uploadSuccess = await uploadPendingAssets(
+        getPendingAssetsForGeneration({
+          assets,
+          activeTab,
+          addEndFrame,
+        }),
+      );
+      if (!uploadSuccess) {
+        throw new Error("Some files failed to upload.");
+      }
+
       const input = validateAndBuildInput();
       onTaskStateChange?.({
         status: "pending",
@@ -400,8 +436,8 @@ export function GenerationForm({
     }
   };
 
-  const successfulUploads = assets.some((asset) => asset.status === "success");
   const isUploading = assets.some((asset) => asset.status === "uploading");
+  const isProcessing = createTaskMutation.isPending || isUploading;
   const estimatedCost = creditCostQuery.data?.creditCost ?? null;
   const balance = creditsQuery.data?.total;
 
@@ -419,12 +455,14 @@ export function GenerationForm({
             <button
               key={tab.id}
               type="button"
+              disabled={isProcessing}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
                 "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-2.5 font-medium text-xs leading-4 transition",
                 isActive
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                isProcessing && "pointer-events-none opacity-60",
               )}
             >
               {tab.icon}
@@ -476,6 +514,7 @@ export function GenerationForm({
             kind="image"
             label="Reference Images"
             limitText="max 9, 30MB each"
+            disabled={isProcessing}
             secondaryAction={{
               label: selectedPortrait
                 ? selectedPortrait.country
@@ -483,7 +522,7 @@ export function GenerationForm({
               icon: <UserRound className="h-3.5 w-3.5" />,
               onClick: () => setPortraitLibraryOpen(true),
             }}
-            onFilesSelected={uploadFiles}
+            onFilesSelected={selectFiles}
             onRemove={removeAsset}
           />
           <UploadSlot
@@ -492,7 +531,8 @@ export function GenerationForm({
             kind="video"
             label="Reference Videos"
             limitText="max 3, 50MB each"
-            onFilesSelected={uploadFiles}
+            disabled={isProcessing}
+            onFilesSelected={selectFiles}
             onRemove={removeAsset}
           />
           <UploadSlot
@@ -501,7 +541,8 @@ export function GenerationForm({
             kind="audio"
             label="Reference Audios"
             limitText="max 3, 15MB each"
-            onFilesSelected={uploadFiles}
+            disabled={isProcessing}
+            onFilesSelected={selectFiles}
             onRemove={removeAsset}
           />
         </div>
@@ -519,7 +560,12 @@ export function GenerationForm({
               <Image className="h-4 w-4" />
               Images
             </span>
-            <label className="flex items-center gap-2 text-muted-foreground text-xs">
+            <label
+              className={cn(
+                "flex items-center gap-2 text-muted-foreground text-xs",
+                isProcessing && "pointer-events-none opacity-60",
+              )}
+            >
               End frame
               <Switch checked={addEndFrame} onCheckedChange={setAddEndFrame} />
             </label>
@@ -530,6 +576,7 @@ export function GenerationForm({
             kind="image"
             label={addEndFrame ? "First and End Frame" : "First Frame"}
             limitText={addEndFrame ? "upload 1-2 images" : "upload 1 image"}
+            disabled={isProcessing}
             secondaryAction={{
               label: selectedPortrait
                 ? selectedPortrait.country
@@ -537,7 +584,7 @@ export function GenerationForm({
               icon: <UserRound className="h-3.5 w-3.5" />,
               onClick: () => setPortraitLibraryOpen(true),
             }}
-            onFilesSelected={uploadFiles}
+            onFilesSelected={selectFiles}
             onRemove={removeAsset}
           />
         </div>
@@ -560,6 +607,7 @@ export function GenerationForm({
             placeholder={PROMPT_PLACEHOLDERS[activeTab]}
             maxLength={20_000}
             rows={4}
+            disabled={isProcessing}
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
           />
@@ -576,9 +624,15 @@ export function GenerationForm({
         onDurationChange={setDuration}
         aspectRatio={aspectRatio}
         onAspectRatioChange={setAspectRatio}
+        disabled={isProcessing}
       />
 
-      <label className="flex items-center justify-between rounded-lg border border-border/50 bg-background/30 px-4 py-3 text-sm">
+      <label
+        className={cn(
+          "flex items-center justify-between rounded-lg border border-border/50 bg-background/30 px-4 py-3 text-sm",
+          isProcessing && "pointer-events-none opacity-60",
+        )}
+      >
         <span className="flex items-center gap-2 font-medium">
           <Music className="h-4 w-4 text-primary" />
           Generate audio
@@ -606,7 +660,7 @@ export function GenerationForm({
 
       <button
         type="button"
-        disabled={createTaskMutation.isPending || isUploading}
+        disabled={isProcessing}
         onClick={handleGenerate}
         className={cn(
           "group relative inline-flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-4",
@@ -626,9 +680,7 @@ export function GenerationForm({
             ? "Creating task"
             : isUploading
               ? "Uploading files"
-              : successfulUploads || activeTab === "text-to-video"
-                ? "Generate"
-                : "Upload references"}
+              : "Generate"}
         </span>
       </button>
     </div>
@@ -644,6 +696,7 @@ function UploadSlot({
   onFilesSelected,
   onRemove,
   secondaryAction,
+  disabled,
 }: {
   assets: UploadedAsset[];
   icon: React.ReactNode;
@@ -657,6 +710,7 @@ function UploadSlot({
     icon: React.ReactNode;
     onClick: () => void;
   };
+  disabled?: boolean;
 }) {
   const inputId = React.useId();
   const limit = ASSET_LIMITS[kind];
@@ -681,10 +735,12 @@ function UploadSlot({
       {secondaryAction && (
         <button
           type="button"
+          disabled={disabled}
           onClick={secondaryAction.onClick}
           className={cn(
             "mt-2 inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs",
             "bg-primary/10 text-primary transition-colors hover:bg-primary/15",
+            disabled && "pointer-events-none opacity-60",
           )}
         >
           {secondaryAction.icon}
@@ -698,6 +754,7 @@ function UploadSlot({
           "relative mt-2.5 flex h-[150px] w-full cursor-pointer flex-col items-center justify-center rounded-xl",
           "border-2 border-muted-foreground/25 border-dashed bg-transparent py-8",
           "transition-colors hover:border-muted-foreground/40 hover:bg-muted/50",
+          disabled && "pointer-events-none opacity-60",
         )}
       >
         <input
@@ -706,6 +763,7 @@ function UploadSlot({
           type="file"
           accept={limit.accept}
           multiple
+          disabled={disabled}
           onChange={(event) => {
             onFilesSelected(event.target.files, kind);
             event.currentTarget.value = "";
@@ -747,14 +805,20 @@ function UploadSlot({
                 <p className="text-muted-foreground text-[10px]">
                   {asset.status === "uploading"
                     ? `${asset.progress}%`
-                    : asset.status}
+                    : asset.status === "pending"
+                      ? "ready"
+                      : asset.status}
                 </p>
               </div>
               <button
                 type="button"
                 aria-label="Remove file"
+                disabled={disabled}
                 onClick={() => onRemove(asset.id)}
-                className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                className={cn(
+                  "rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground",
+                  disabled && "pointer-events-none opacity-60",
+                )}
               >
                 <X className="h-3.5 w-3.5" />
               </button>

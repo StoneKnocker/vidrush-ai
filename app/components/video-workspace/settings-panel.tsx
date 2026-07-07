@@ -10,6 +10,7 @@ interface SettingsPanelProps {
   onDurationChange: (val: number) => void;
   aspectRatio: string;
   onAspectRatioChange: (val: string) => void;
+  disabled?: boolean;
 }
 
 const RESOLUTIONS = ["480p", "720p", "1080p", "4K"] as const;
@@ -67,6 +68,7 @@ export function SettingsPanel({
   onDurationChange,
   aspectRatio,
   onAspectRatioChange,
+  disabled,
 }: SettingsPanelProps) {
   return (
     <div className="flex flex-col gap-5">
@@ -82,12 +84,14 @@ export function SettingsPanel({
               <button
                 key={option}
                 type="button"
+                disabled={disabled}
                 onClick={() => onResolutionChange(option)}
                 className={cn(
                   "rounded-lg border px-4 py-2 font-medium text-sm transition-all",
                   selected
                     ? "border-primary bg-primary text-primary-foreground shadow-md ring-2 ring-primary/20"
                     : "border-border/50 bg-background/50 text-muted-foreground hover:bg-muted hover:text-foreground",
+                  disabled && "pointer-events-none opacity-60",
                 )}
               >
                 {option}
@@ -98,7 +102,12 @@ export function SettingsPanel({
       </div>
 
       {/* Duration */}
-      <div className="space-y-2">
+      <div
+        className={cn(
+          "space-y-2",
+          disabled && "pointer-events-none opacity-60",
+        )}
+      >
         <SectionLabel icon={<Clock className="h-3.5 w-3.5" />}>
           Duration
         </SectionLabel>
@@ -112,6 +121,7 @@ export function SettingsPanel({
             min={4}
             max={15}
             step={1}
+            disabled={disabled}
           />
           <span className="w-8 text-right font-medium font-mono text-xs">
             {duration}s
@@ -132,6 +142,7 @@ export function SettingsPanel({
                 key={ar.value}
                 type="button"
                 title={ar.value}
+                disabled={disabled}
                 onClick={() => onAspectRatioChange(ar.value)}
                 className={cn(
                   "flex flex-col items-center justify-center",
@@ -139,6 +150,7 @@ export function SettingsPanel({
                   selected
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-transparent bg-muted/30 text-muted-foreground hover:bg-muted/50",
+                  disabled && "pointer-events-none opacity-60",
                 )}
               >
                 {ar.type === "icon" ? (

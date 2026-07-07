@@ -1,4 +1,5 @@
 import type { PortraitItem } from "./portrait-library";
+import type { GenerationTab } from "./workspace-types";
 
 export type MediaKind = "image" | "video" | "audio";
 
@@ -8,7 +9,7 @@ export interface UploadedAsset {
   url: string;
   kind: MediaKind;
   progress: number;
-  status: "uploading" | "success" | "error";
+  status: "pending" | "uploading" | "success" | "error";
   previewUrl?: string;
   error?: string;
 }
@@ -82,4 +83,34 @@ export function removeAssetById({
       ? asset.previewUrl
       : undefined,
   };
+}
+
+export function getPendingAssetsForGeneration({
+  assets,
+  activeTab,
+  addEndFrame,
+}: {
+  assets: UploadedAsset[];
+  activeTab: GenerationTab;
+  addEndFrame: boolean;
+}): UploadedAsset[] {
+  if (activeTab === "text-to-video") {
+    return [];
+  }
+
+  if (activeTab === "image-to-video") {
+    const requiredImageCount = addEndFrame ? 2 : 1;
+    return assets
+      .filter((asset) => asset.kind === "image")
+      .slice(0, requiredImageCount)
+      .filter((asset) => asset.status === "pending");
+  }
+
+  return assets.filter(
+    (asset) =>
+      asset.status === "pending" &&
+      (asset.kind === "image" ||
+        asset.kind === "video" ||
+        asset.kind === "audio"),
+  );
 }

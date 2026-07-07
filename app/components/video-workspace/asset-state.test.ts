@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   addPortraitAsset,
+  getPendingAssetsForGeneration,
   removeAssetById,
   type UploadedAsset,
 } from "./asset-state";
@@ -60,5 +61,94 @@ describe("video workspace asset state", () => {
     expect(result.assets).toEqual([]);
     expect(result.selectedPortrait).toBeNull();
     expect(result.previewUrlToRevoke).toBeUndefined();
+  });
+
+  test("does not upload pending assets for text-to-video generation", () => {
+    const pendingImage: UploadedAsset = {
+      id: "pending-image",
+      name: "unused.png",
+      url: "",
+      kind: "image",
+      progress: 0,
+      status: "pending",
+    };
+
+    expect(
+      getPendingAssetsForGeneration({
+        assets: [pendingImage],
+        activeTab: "text-to-video",
+        addEndFrame: false,
+      }),
+    ).toEqual([]);
+  });
+
+  test("uploads only image-to-video pending frames needed by the current frame settings", () => {
+    const firstFrame: UploadedAsset = {
+      id: "first-frame",
+      name: "first.png",
+      url: "https://cdn.example.com/first.png",
+      kind: "image",
+      progress: 100,
+      status: "success",
+    };
+    const unusedPendingImage: UploadedAsset = {
+      id: "unused-pending-image",
+      name: "unused.png",
+      url: "",
+      kind: "image",
+      progress: 0,
+      status: "pending",
+    };
+    const unusedPendingVideo: UploadedAsset = {
+      id: "unused-pending-video",
+      name: "unused.mp4",
+      url: "",
+      kind: "video",
+      progress: 0,
+      status: "pending",
+    };
+
+    expect(
+      getPendingAssetsForGeneration({
+        assets: [firstFrame, unusedPendingImage, unusedPendingVideo],
+        activeTab: "image-to-video",
+        addEndFrame: false,
+      }),
+    ).toEqual([]);
+  });
+
+  test("uploads the pending end frame when image-to-video end frame is enabled", () => {
+    const firstFrame: UploadedAsset = {
+      id: "first-frame",
+      name: "first.png",
+      url: "https://cdn.example.com/first.png",
+      kind: "image",
+      progress: 100,
+      status: "success",
+    };
+    const endFrame: UploadedAsset = {
+      id: "end-frame",
+      name: "end.png",
+      url: "",
+      kind: "image",
+      progress: 0,
+      status: "pending",
+    };
+    const extraFrame: UploadedAsset = {
+      id: "extra-frame",
+      name: "extra.png",
+      url: "",
+      kind: "image",
+      progress: 0,
+      status: "pending",
+    };
+
+    expect(
+      getPendingAssetsForGeneration({
+        assets: [firstFrame, endFrame, extraFrame],
+        activeTab: "image-to-video",
+        addEndFrame: true,
+      }),
+    ).toEqual([endFrame]);
   });
 });
