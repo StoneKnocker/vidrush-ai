@@ -160,7 +160,7 @@ export async function handleKieCallback({
   const task = await getTaskByProviderTaskId(payload.taskId);
 
   if (!task) {
-    console.warn("[kie-callback] Unknown KIE task", {
+    console.warn("[kie-callback] Unknown video task", {
       providerTaskId: payload.taskId,
     });
     return { status: 200, message: "OK" };
@@ -179,7 +179,7 @@ export async function handleKieCallback({
   if (localStatus === TASK_STATUS.FAILED) {
     await setTaskFailed(
       task.id,
-      payload.failMessage ?? "KIE task processing failed",
+      payload.failMessage ?? "video task processing failed",
     );
     return { status: 200, message: "OK" };
   }

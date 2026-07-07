@@ -104,10 +104,10 @@ export function extractKieCallbackPayload(
   const state = getString(data.state);
 
   if (!taskId) {
-    throw new Error("Missing KIE task id");
+    throw new Error("Missing task id");
   }
   if (!state) {
-    throw new Error("Missing KIE task state");
+    throw new Error("Missing task state");
   }
 
   return {

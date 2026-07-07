@@ -68,10 +68,10 @@ async function requestKieTask(payload: Record<string, unknown>) {
 
   const body = (await response.json()) as KieApiResponse;
   if (body.code !== 200) {
-    throw new Error(`KIE task creation failed: ${body.msg ?? "unknown error"}`);
+    throw new Error(`task creation failed: ${body.msg ?? "unknown error"}`);
   }
   if (!body.data?.taskId) {
-    throw new Error("KIE task creation failed: missing taskId");
+    throw new Error("task creation failed: missing taskId");
   }
 
   return {
@@ -90,7 +90,7 @@ export async function createKieVideoTask({
   size,
 }: KieCreateVideoTaskParams): Promise<KieTaskResult> {
   if (!model) {
-    throw new Error("KIE model is required");
+    throw new Error("video model is required");
   }
 
   const input: Record<string, unknown> = {

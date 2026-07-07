@@ -119,12 +119,14 @@ export const videoRouter = router({
       } catch (error) {
         await setTaskFailed(
           taskId,
-          error instanceof Error ? error.message : "KIE task creation failed",
+          error instanceof Error ? error.message : "video task creation failed",
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
-            error instanceof Error ? error.message : "KIE task creation failed",
+            error instanceof Error
+              ? error.message
+              : "video task creation failed",
         });
       }
     }),
@@ -166,12 +168,12 @@ export const videoRouter = router({
             };
           }
           if (providerState.status === TASK_STATUS.FAILED) {
-            await setTaskFailed(task.id, "KIE task processing failed");
+            await setTaskFailed(task.id, "video task processing failed");
             return {
               taskId: task.id,
               status: TASK_STATUS.FAILED,
               resultData: task.resultData,
-              errorMessage: "KIE task processing failed",
+              errorMessage: "video task processing failed",
             };
           }
         } catch (error) {
