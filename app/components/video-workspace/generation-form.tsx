@@ -512,9 +512,7 @@ export function GenerationForm({
             limitText="max 9, 30MB each"
             disabled={isProcessing}
             secondaryAction={{
-              label: selectedPortrait
-                ? selectedPortrait.country
-                : "Select Virtual Portrait",
+              label: "Select Virtual Portrait",
               icon: <UserRound className="h-3.5 w-3.5" />,
               onClick: () => setPortraitLibraryOpen(true),
             }}
@@ -574,9 +572,7 @@ export function GenerationForm({
             limitText={addEndFrame ? "upload 1-2 images" : "upload 1 image"}
             disabled={isProcessing}
             secondaryAction={{
-              label: selectedPortrait
-                ? selectedPortrait.country
-                : "Select Virtual Portrait",
+              label: "Select Virtual Portrait",
               icon: <UserRound className="h-3.5 w-3.5" />,
               onClick: () => setPortraitLibraryOpen(true),
             }}
