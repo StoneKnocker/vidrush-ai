@@ -213,10 +213,6 @@ export function GenerationForm({
 
   const selectFiles = (files: FileList | null, kind: MediaKind) => {
     if (!files || files.length === 0) return;
-    if (!isAuthenticated || !user?.id) {
-      setFormError("Sign in and click Generate to upload references.");
-      return;
-    }
 
     const limit = ASSET_LIMITS[kind];
     const existingCount = assets.filter((asset) => asset.kind === kind).length;
