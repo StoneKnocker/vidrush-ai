@@ -20,14 +20,8 @@ export function SeedanceCTA() {
             into stunning videos with Seedance 2.0.
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <Button className="rounded-full bg-card px-8 py-4 font-semibold text-primary hover:bg-card/80 hover:text-primary">
-              Start Creating Free
-            </Button>
-            <Button
-              variant="outline"
-              className="rounded-full border-border bg-transparent px-8 py-4 font-semibold text-foreground hover:bg-muted/30"
-            >
-              View Pricing
+            <Button className="rounded-full border border-primary/60 bg-card px-8 py-4 font-semibold text-primary shadow-[0_0_20px_rgba(0,217,146,0.12)] hover:bg-black/20 hover:text-primary">
+              Start Now
             </Button>
           </div>
         </div>
