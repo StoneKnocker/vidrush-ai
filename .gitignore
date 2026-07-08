@@ -27,3 +27,5 @@ data/
 .baoyu-skills/
 .worktrees/
 .claude
+docs/design-references/
+docs/research
