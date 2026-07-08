@@ -63,7 +63,7 @@ export function VideoPreview({
                       poster={
                         activeVideoUrl
                           ? undefined
-                          : "/seedance2-assets/example-poster.webp"
+                          : "https://cdn.vidrushai.com/seedance2-assets/example-poster.webp"
                       }
                       preload="metadata"
                       playsInline
@@ -71,7 +71,7 @@ export function VideoPreview({
                       <source
                         src={
                           activeVideoUrl ??
-                          "/seedance2-assets/example-video.mp4"
+                          "https://cdn.vidrushai.com/seedance2-assets/example-video.mp4"
                         }
                         type="video/mp4"
                       />

@@ -6,105 +6,118 @@ const TESTIMONIALS = [
       "Seedance 2.0's multi-modal input is a game-changer. I can finally reference a dance video and apply it to any character I want. The motion replication is incredibly accurate!",
     name: "Sarah Chen",
     role: "Content Creator",
-    avatar: "/seedance2-assets/avatars/sarah-chen.jpg",
+    avatar: "https://cdn.vidrushai.com/seedance2-assets/avatars/sarah-chen.jpg",
   },
   {
     quote:
       "The reference capability is mind-blowing. I uploaded a film clip and the model perfectly replicated the camera movement and pacing. This is what AI video should be.",
     name: "Marcus Rodriguez",
     role: "Filmmaker",
-    avatar: "/seedance2-assets/avatars/marcus-rodriguez.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/marcus-rodriguez.jpg",
   },
   {
     quote:
       "Finally, character consistency that actually works! Faces, clothing, even small text - everything stays consistent throughout the video. Seedance 2.0 solved our biggest problem.",
     name: "Emily Watson",
     role: "Art Director",
-    avatar: "/seedance2-assets/avatars/emily-watson.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/emily-watson.jpg",
   },
   {
     quote:
       "The video extension feature is seamless. I can extend clips naturally and even merge different scenes together. It's like having an AI editor that understands continuity.",
     name: "David Kim",
     role: "Video Editor",
-    avatar: "/seedance2-assets/avatars/david-kim.jpg",
+    avatar: "https://cdn.vidrushai.com/seedance2-assets/avatars/david-kim.jpg",
   },
   {
     quote:
       "Being able to reference trending video templates and recreate them with my own style has 10x'd my content output. The multi-modal approach just makes sense.",
     name: "Priya Sharma",
     role: "Social Media Manager",
-    avatar: "/seedance2-assets/avatars/priya-sharma.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/priya-sharma.jpg",
   },
   {
     quote:
       "The audio generation feature is incredibly useful. I can generate videos with perfectly synced soundtracks without searching for stock music.",
     name: "Alex Turner",
     role: "Music Producer",
-    avatar: "/seedance2-assets/avatars/alex-turner.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/alex-turner.jpg",
   },
   {
     quote:
       "As an educator, Seedance 2.0 helps me create engaging visual explanations for complex topics. My students love the animated lessons.",
     name: "Jessica Liu",
     role: "Online Educator",
-    avatar: "/seedance2-assets/avatars/jessica-liu.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/jessica-liu.jpg",
   },
   {
     quote:
       "The consistency across multiple shots is unmatched. I can generate a full brand campaign and every video looks like it came from the same production house.",
     name: "Mohammed Hassan",
     role: "Brand Strategist",
-    avatar: "/seedance2-assets/avatars/mohammed-hassan.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/mohammed-hassan.jpg",
   },
   {
     quote:
       "Real estate walkthroughs used to take days. Now I can turn a few photos into a cinematic tour in minutes. My clients are amazed.",
     name: "Olivia Martinez",
     role: "Real Estate Agent",
-    avatar: "/seedance2-assets/avatars/olivia-martinez.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/olivia-martinez.jpg",
   },
   {
     quote:
       "I use Seedance 2.0 for pre-visualization on every project. It saves thousands in pre-production costs and helps me communicate ideas clearly.",
     name: "Thomas Anderson",
     role: "Creative Director",
-    avatar: "/seedance2-assets/avatars/thomas-anderson.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/thomas-anderson.jpg",
   },
   {
     quote:
       "The multi-modal input lets me combine reference videos, images, and music all at once. It's the most intuitive AI video tool I've ever used.",
     name: "Dr. Linda Park",
     role: "Research Scientist",
-    avatar: "/seedance2-assets/avatars/dr-linda-park.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/dr-linda-park.jpg",
   },
   {
     quote:
       "We create training videos at scale now. The ability to edit existing footage instead of reshooting saves our team countless hours.",
     name: "Robert Chen",
     role: "Corporate Trainer",
-    avatar: "/seedance2-assets/avatars/robert-chen.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/robert-chen.jpg",
   },
   {
     quote:
       "The motion replication is scary good. I uploaded a choreography clip and Seedance applied the exact movements to my character on the first try.",
     name: "Aria Johnson",
     role: "Dance Choreographer",
-    avatar: "/seedance2-assets/avatars/aria-johnson.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/aria-johnson.jpg",
   },
   {
     quote:
       "From concept to final video, Seedance 2.0 has become an essential part of my creative workflow. The quality keeps getting better.",
     name: "Jake Morrison",
     role: "YouTuber",
-    avatar: "/seedance2-assets/avatars/jake-morrison.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/jake-morrison.jpg",
   },
   {
     quote:
       "I create recipe and food content. The camera movement replication helps me achieve professional-looking shots without a film crew.",
     name: "Chef Maria Santos",
     role: "Culinary Creator",
-    avatar: "/seedance2-assets/avatars/chef-maria-santos.jpg",
+    avatar:
+      "https://cdn.vidrushai.com/seedance2-assets/avatars/chef-maria-santos.jpg",
   },
 ];
 

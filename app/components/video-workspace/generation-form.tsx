@@ -477,7 +477,7 @@ export function GenerationForm({
         </label>
         <div className="flex min-h-14 items-center gap-3 rounded-xl border border-border/50 bg-background/50 px-4 py-2 text-sm shadow-sm">
           <img
-            src="/seedance2-assets/seedance2-icon.png"
+            src="https://cdn.vidrushai.com/seedance2-assets/seedance2-icon.png"
             alt="Seedance"
             className="h-7 w-7 object-contain"
           />
