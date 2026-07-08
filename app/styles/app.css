@@ -353,6 +353,40 @@
   --ring: 160 100% 43%;
 }
 
+@keyframes sd-scroll-up {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes sd-scroll-down {
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-sd-scroll-up {
+  animation: sd-scroll-up 35s linear infinite;
+}
+
+.animate-sd-scroll-up-slow {
+  animation: sd-scroll-up 45s linear infinite;
+}
+
+.animate-sd-scroll-down {
+  animation: sd-scroll-down 40s linear infinite;
+}
+
+html {
+  scroll-padding-top: 5rem;
+}
+
 /*
   基础样式重置
   确保边框颜色正确应用
