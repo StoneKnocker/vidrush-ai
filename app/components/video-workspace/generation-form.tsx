@@ -477,7 +477,7 @@ export function GenerationForm({
         </label>
         <div className="flex min-h-14 items-center gap-3 rounded-xl border border-border/50 bg-background/50 px-4 py-2 text-sm shadow-sm">
           <img
-            src="https://cdn.vidrushai.com/seedance2-assets/seedance2-icon.png"
+            src="/logo.png"
             alt="Seedance"
             className="h-7 w-7 object-contain"
           />
@@ -657,11 +657,10 @@ export function GenerationForm({
         className={cn(
           "group relative inline-flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-4",
           "bg-primary text-primary-foreground font-semibold text-base leading-6 transition-all duration-300",
-          "disabled:pointer-events-none disabled:opacity-40 hover:enabled:brightness-110",
-          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+          "disabled:pointer-events-none disabled:opacity-40 hover:brightness-110",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         )}
       >
-        <span className="absolute inset-0 translate-y-full bg-white/20 transition-transform duration-300 ease-in-out group-hover:translate-y-0" />
         <span className="relative flex items-center justify-center gap-2">
           {createTaskMutation.isPending ? (
             <Loader2 className="h-5 w-5 animate-spin" />
