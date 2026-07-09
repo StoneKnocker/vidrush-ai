@@ -125,6 +125,7 @@ describe("video workspace asset state", () => {
       kind: "image",
       progress: 100,
       status: "success",
+      frameSlot: "first",
     };
     const endFrame: UploadedAsset = {
       id: "end-frame",
@@ -133,6 +134,7 @@ describe("video workspace asset state", () => {
       kind: "image",
       progress: 0,
       status: "pending",
+      frameSlot: "last",
     };
     const extraFrame: UploadedAsset = {
       id: "extra-frame",

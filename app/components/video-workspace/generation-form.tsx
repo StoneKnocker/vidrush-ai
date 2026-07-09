@@ -4,6 +4,7 @@ import {
   Layers,
   Loader2,
   Music,
+  Plus,
   Sparkles,
   Type,
   Upload,
@@ -17,17 +18,23 @@ import { Switch } from "~/components/ui/switch";
 import { useAuth } from "~/hooks/use-auth";
 import { useLoginModal } from "~/hooks/use-login-modal";
 import { usePricingModal } from "~/hooks/use-pricing-modal";
-import {
-  addPortraitAsset as addPortraitAssetToState,
-  getPendingAssetsForGeneration,
-  removeAssetById,
-  type MediaKind,
-  type UploadedAsset,
-} from "./asset-state";
+import { generateUploadFilePath, uploadToR2 } from "~/lib/r2/r2.client";
 import { getTrpcErrorMessage } from "~/lib/trpc/error";
 import { trpc } from "~/lib/trpc/trpc-provider";
-import { generateUploadFilePath, uploadToR2 } from "~/lib/r2/r2.client";
 import { cn } from "~/lib/utils";
+import {
+  addPortraitAsset as addPortraitAssetToState,
+  type FrameSlot,
+  getFrameAsset,
+  getI2vFrameUrls,
+  getImageAssets,
+  getPendingAssetsForGeneration,
+  type MediaKind,
+  mapAssetsForEndFrameToggle,
+  removeAssetById,
+  replaceFrameAsset,
+  type UploadedAsset,
+} from "./asset-state";
 import type { PortraitItem } from "./portrait-library";
 import { PortraitLibrary } from "./portrait-library";
 import { SettingsPanel } from "./settings-panel";
@@ -318,6 +325,38 @@ export function GenerationForm({
 
   const addPortraitAsset = (portrait: PortraitItem) => {
     setAssets((current) => {
+      if (activeTab === "image-to-video" && addEndFrame) {
+        const slot: FrameSlot | null = !getFrameAsset(current, "first")
+          ? "first"
+          : !getFrameAsset(current, "last")
+            ? "last"
+            : null;
+        if (!slot) {
+          setFormError("Both first and last frames are already set.");
+          return current;
+        }
+
+        const result = replaceFrameAsset({
+          assets: current,
+          slot,
+          nextAsset: {
+            id: `portrait:${portrait.id}`,
+            name: `${portrait.country} ${portrait.age} ${portrait.occupation}`,
+            url: portrait.url,
+            kind: "image",
+            progress: 100,
+            status: "success",
+            previewUrl: portrait.url,
+            frameSlot: slot,
+          },
+        });
+        if (result.previewUrlToRevoke) {
+          URL.revokeObjectURL(result.previewUrlToRevoke);
+        }
+        setSelectedPortrait(portrait);
+        return result.assets;
+      }
+
       const result = addPortraitAssetToState({
         assets: current,
         portrait,
@@ -351,15 +390,18 @@ export function GenerationForm({
     }
 
     if (activeTab === "image-to-video") {
-      const images = getSuccessfulUrls(assets, "image");
-      if (!images[0]) {
+      const { firstFrameUrl, lastFrameUrl } = getI2vFrameUrls(
+        assets,
+        addEndFrame,
+      );
+      if (!firstFrameUrl) {
         throw new Error("Upload a first frame image.");
       }
       return {
         ...base,
         mode: "image-to-video" as const,
-        firstFrameUrl: images[0],
-        ...(addEndFrame && images[1] ? { lastFrameUrl: images[1] } : {}),
+        firstFrameUrl,
+        ...(addEndFrame && lastFrameUrl ? { lastFrameUrl } : {}),
       };
     }
 
@@ -432,10 +474,61 @@ export function GenerationForm({
     }
   };
 
+  const handleAddEndFrameChange = (checked: boolean) => {
+    setAddEndFrame(checked);
+    setAssets((current) =>
+      mapAssetsForEndFrameToggle({ assets: current, addEndFrame: checked }),
+    );
+  };
+
+  const selectFrameFile = (slot: FrameSlot, files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+
+    const limit = ASSET_LIMITS.image;
+    if (file.size > limit.maxSize) {
+      setFormError(`${file.name} is too large.`);
+      return;
+    }
+
+    const id = crypto.randomUUID();
+    const previewUrl = URL.createObjectURL(file);
+    pendingFilesRef.current.set(id, file);
+
+    setAssets((current) => {
+      const result = replaceFrameAsset({
+        assets: current,
+        slot,
+        nextAsset: {
+          id,
+          name: file.name,
+          url: "",
+          kind: "image",
+          progress: 0,
+          status: "pending",
+          previewUrl,
+          frameSlot: slot,
+        },
+      });
+      if (result.previewUrlToRevoke) {
+        URL.revokeObjectURL(result.previewUrlToRevoke);
+        // Drop the replaced pending file if it was local-only.
+        const previous = getFrameAsset(current, slot);
+        if (previous) {
+          pendingFilesRef.current.delete(previous.id);
+        }
+      }
+      return result.assets;
+    });
+  };
+
   const isUploading = assets.some((asset) => asset.status === "uploading");
   const isProcessing = createTaskMutation.isPending || isUploading;
   const estimatedCost = creditCostQuery.data?.creditCost ?? null;
   const balance = creditsQuery.data?.total;
+  const imageAssets = getImageAssets(assets);
+  const firstFrameAsset = getFrameAsset(assets, "first");
+  const lastFrameAsset = getFrameAsset(assets, "last");
 
   return (
     <div
@@ -543,42 +636,105 @@ export function GenerationForm({
       )}
 
       {activeTab === "image-to-video" && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <PortraitLibrary
             open={portraitLibraryOpen}
             onOpenChange={setPortraitLibraryOpen}
             onSelect={addPortraitAsset}
           />
-          <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-            <span className="flex items-center gap-2 font-medium text-sm">
-              <Image className="h-4 w-4" />
-              Images
-            </span>
-            <label
-              className={cn(
-                "flex items-center gap-2 text-muted-foreground text-xs",
-                isProcessing && "pointer-events-none opacity-60",
-              )}
-            >
-              End frame
-              <Switch checked={addEndFrame} onCheckedChange={setAddEndFrame} />
-            </label>
-          </div>
-          <UploadSlot
-            assets={assets.filter((asset) => asset.kind === "image")}
-            icon={<Upload className="h-6 w-6 text-primary" />}
-            kind="image"
-            label={addEndFrame ? "First and End Frame" : "First Frame"}
-            limitText={addEndFrame ? "upload 1-2 images" : "upload 1 image"}
+          <button
+            type="button"
             disabled={isProcessing}
-            secondaryAction={{
-              label: "Select Virtual Portrait",
-              icon: <UserRound className="h-3.5 w-3.5" />,
-              onClick: () => setPortraitLibraryOpen(true),
-            }}
-            onFilesSelected={selectFiles}
-            onRemove={removeAsset}
-          />
+            onClick={() => setPortraitLibraryOpen(true)}
+            className={cn(
+              "inline-flex h-8 w-fit items-center gap-1.5 rounded-md px-2 text-xs",
+              "bg-primary/10 text-primary transition-colors hover:bg-primary/15",
+              isProcessing && "pointer-events-none opacity-60",
+            )}
+          >
+            <UserRound className="h-3.5 w-3.5" />
+            Select Virtual Portrait
+          </button>
+
+          <div className={addEndFrame ? "space-y-4" : "space-y-3"}>
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-2 font-medium text-foreground text-sm">
+                <Image className="h-4 w-4" />
+                Images
+              </span>
+              <div className="flex items-center gap-3">
+                <div
+                  className={cn(
+                    "flex items-center gap-1",
+                    isProcessing && "pointer-events-none opacity-60",
+                  )}
+                >
+                  <span className="whitespace-nowrap text-muted-foreground text-xs">
+                    Add end frame
+                  </span>
+                  <Switch
+                    checked={addEndFrame}
+                    onCheckedChange={handleAddEndFrameChange}
+                    className={cn(
+                      "scale-75",
+                      addEndFrame ? "bg-primary" : "bg-zinc-600",
+                    )}
+                  />
+                </div>
+                {!addEndFrame && (
+                  <span className="text-muted-foreground text-sm">
+                    {imageAssets.length}/{ASSET_LIMITS.image.maxFiles}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {addEndFrame ? (
+              <div className="flex items-center gap-3">
+                <FrameUploadSlot
+                  label="Upload First Frame"
+                  asset={firstFrameAsset}
+                  disabled={isProcessing}
+                  onFilesSelected={(files) => selectFrameFile("first", files)}
+                  onRemove={() =>
+                    firstFrameAsset && removeAsset(firstFrameAsset.id)
+                  }
+                />
+                <div className="flex-shrink-0 text-muted-foreground">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </div>
+                <FrameUploadSlot
+                  label="Upload Last Frame"
+                  asset={lastFrameAsset}
+                  disabled={isProcessing}
+                  onFilesSelected={(files) => selectFrameFile("last", files)}
+                  onRemove={() =>
+                    lastFrameAsset && removeAsset(lastFrameAsset.id)
+                  }
+                />
+              </div>
+            ) : (
+              <I2vSingleUpload
+                assets={imageAssets}
+                disabled={isProcessing}
+                onFilesSelected={(files) => selectFiles(files, "image")}
+                onRemove={removeAsset}
+              />
+            )}
+          </div>
         </div>
       )}
 
@@ -656,8 +812,8 @@ export function GenerationForm({
         onClick={handleGenerate}
         className={cn(
           "group relative inline-flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-4",
-          "bg-primary text-primary-foreground font-semibold text-base leading-6 transition-all duration-300",
-          "disabled:pointer-events-none disabled:opacity-40 hover:brightness-110",
+          "bg-primary font-semibold text-base text-primary-foreground leading-6 transition-all duration-300",
+          "hover:brightness-110 disabled:pointer-events-none disabled:opacity-40",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         )}
       >
@@ -674,6 +830,191 @@ export function GenerationForm({
               : "Generate"}
         </span>
       </button>
+    </div>
+  );
+}
+
+function FrameUploadSlot({
+  label,
+  asset,
+  disabled,
+  onFilesSelected,
+  onRemove,
+}: {
+  label: string;
+  asset?: UploadedAsset;
+  disabled?: boolean;
+  onFilesSelected: (files: FileList | null) => void;
+  onRemove: () => void;
+}) {
+  const inputId = React.useId();
+
+  if (asset) {
+    return (
+      <div className="relative h-[140px] min-w-0 max-w-[200px] flex-1 overflow-hidden rounded-xl border-2 border-border/50">
+        {asset.previewUrl ? (
+          <img
+            src={asset.previewUrl}
+            alt={asset.name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-muted">
+            <Image className="h-8 w-8 text-muted-foreground" />
+          </div>
+        )}
+        <div className="absolute inset-x-0 bottom-0 bg-background/80 px-2 py-1 backdrop-blur-sm">
+          <p className="truncate text-[10px] text-foreground">{asset.name}</p>
+          <p className="text-[10px] text-muted-foreground">
+            {asset.status === "uploading"
+              ? `${asset.progress}%`
+              : asset.status === "pending"
+                ? "ready"
+                : asset.status}
+          </p>
+        </div>
+        <button
+          type="button"
+          aria-label="Remove frame"
+          disabled={disabled}
+          onClick={onRemove}
+          className={cn(
+            "absolute top-1.5 right-1.5 rounded-md bg-background/80 p-1 text-muted-foreground backdrop-blur-sm hover:bg-muted hover:text-foreground",
+            disabled && "pointer-events-none opacity-60",
+          )}
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-w-0 max-w-[200px] flex-1">
+      <label
+        htmlFor={inputId}
+        className={cn(
+          "relative flex h-[140px] w-full cursor-pointer items-center justify-center rounded-xl border-2 border-dashed p-4 text-center",
+          "border-muted-foreground/25 transition-all duration-300 ease-in-out",
+          "hover:border-primary/60 hover:bg-primary/5",
+          disabled && "pointer-events-none opacity-60",
+        )}
+      >
+        <input
+          id={inputId}
+          className="sr-only"
+          type="file"
+          accept={ASSET_LIMITS.image.accept}
+          disabled={disabled}
+          onChange={(event) => {
+            onFilesSelected(event.target.files);
+            event.currentTarget.value = "";
+          }}
+        />
+        <div className="flex flex-col items-center gap-2">
+          <div className="rounded-full bg-primary/15 p-2">
+            <Plus className="h-5 w-5 text-primary" />
+          </div>
+          <p className="font-medium text-muted-foreground text-xs">{label}</p>
+        </div>
+      </label>
+    </div>
+  );
+}
+
+function I2vSingleUpload({
+  assets,
+  disabled,
+  onFilesSelected,
+  onRemove,
+}: {
+  assets: UploadedAsset[];
+  disabled?: boolean;
+  onFilesSelected: (files: FileList | null) => void;
+  onRemove: (id: string) => void;
+}) {
+  const inputId = React.useId();
+  const remaining = Math.max(0, ASSET_LIMITS.image.maxFiles - assets.length);
+
+  return (
+    <div>
+      {assets.length > 0 && (
+        <div className="mb-2 grid grid-cols-2 gap-2">
+          {assets.map((asset) => (
+            <div
+              key={asset.id}
+              className="flex min-w-0 items-center gap-2 rounded-lg border border-border/50 bg-background/50 px-2 py-2"
+            >
+              {asset.previewUrl ? (
+                <img
+                  src={asset.previewUrl}
+                  alt=""
+                  className="h-9 w-9 rounded-md object-cover"
+                />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted">
+                  <Image className="h-4 w-4" />
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs">{asset.name}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {asset.status === "uploading"
+                    ? `${asset.progress}%`
+                    : asset.status === "pending"
+                      ? "ready"
+                      : asset.status}
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Remove file"
+                disabled={disabled}
+                onClick={() => onRemove(asset.id)}
+                className={cn(
+                  "rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground",
+                  disabled && "pointer-events-none opacity-60",
+                )}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <label
+        htmlFor={inputId}
+        className={cn(
+          "relative flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed py-10",
+          "border-muted-foreground/30 bg-transparent transition-all duration-300 ease-in-out",
+          "hover:border-muted-foreground/50 hover:bg-muted/30",
+          disabled && "pointer-events-none opacity-60",
+          remaining === 0 && "pointer-events-none opacity-50",
+        )}
+      >
+        <input
+          id={inputId}
+          className="sr-only"
+          type="file"
+          accept={ASSET_LIMITS.image.accept}
+          multiple
+          disabled={disabled || remaining === 0}
+          onChange={(event) => {
+            onFilesSelected(event.target.files);
+            event.currentTarget.value = "";
+          }}
+        />
+        <div className="mb-3 rounded-full bg-primary/20 p-3 text-primary">
+          <Upload className="h-6 w-6" />
+        </div>
+        <p className="mb-1 font-medium text-foreground text-sm">
+          Click to upload or drag & drop
+        </p>
+        <p className="text-muted-foreground text-xs">
+          jpeg, jpg, png, webp, bmp, tiff, tif, gif ({remaining} remaining)
+        </p>
+      </label>
     </div>
   );
 }
@@ -763,7 +1104,7 @@ function UploadSlot({
               )}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs">{asset.name}</p>
-                <p className="text-muted-foreground text-[10px]">
+                <p className="text-[10px] text-muted-foreground">
                   {asset.status === "uploading"
                     ? `${asset.progress}%`
                     : asset.status === "pending"

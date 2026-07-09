@@ -3,6 +3,8 @@ import type { GenerationTab } from "./workspace-types";
 
 export type MediaKind = "image" | "video" | "audio";
 
+export type FrameSlot = "first" | "last";
+
 export interface UploadedAsset {
   id: string;
   name: string;
@@ -12,6 +14,8 @@ export interface UploadedAsset {
   status: "pending" | "uploading" | "success" | "error";
   previewUrl?: string;
   error?: string;
+  /** Image-to-video dual-frame mode: which frame this image fills. */
+  frameSlot?: FrameSlot;
 }
 
 export function addPortraitAsset({
@@ -85,6 +89,94 @@ export function removeAssetById({
   };
 }
 
+export function getImageAssets(assets: UploadedAsset[]) {
+  return assets.filter((asset) => asset.kind === "image");
+}
+
+export function getFrameAsset(
+  assets: UploadedAsset[],
+  slot: FrameSlot,
+): UploadedAsset | undefined {
+  return assets.find(
+    (asset) => asset.kind === "image" && asset.frameSlot === slot,
+  );
+}
+
+export function getI2vFrameUrls(assets: UploadedAsset[], addEndFrame: boolean) {
+  if (addEndFrame) {
+    const first = getFrameAsset(assets, "first");
+    const last = getFrameAsset(assets, "last");
+    return {
+      firstFrameUrl: first?.status === "success" ? first.url : undefined,
+      lastFrameUrl: last?.status === "success" ? last.url : undefined,
+    };
+  }
+
+  const firstImage = getImageAssets(assets).find(
+    (asset) => asset.status === "success",
+  );
+  return {
+    firstFrameUrl: firstImage?.url,
+    lastFrameUrl: undefined as string | undefined,
+  };
+}
+
+export function mapAssetsForEndFrameToggle({
+  assets,
+  addEndFrame,
+}: {
+  assets: UploadedAsset[];
+  addEndFrame: boolean;
+}): UploadedAsset[] {
+  const images = getImageAssets(assets);
+  const nonImages = assets.filter((asset) => asset.kind !== "image");
+
+  if (addEndFrame) {
+    const mapped = images.slice(0, 2).map((image, index) => ({
+      ...image,
+      frameSlot: (index === 0 ? "first" : "last") as FrameSlot,
+    }));
+    return [...nonImages, ...mapped];
+  }
+
+  return [
+    ...nonImages,
+    ...images.map(({ frameSlot: _frameSlot, ...image }) => image),
+  ];
+}
+
+export function replaceFrameAsset({
+  assets,
+  slot,
+  nextAsset,
+}: {
+  assets: UploadedAsset[];
+  slot: FrameSlot;
+  nextAsset: UploadedAsset;
+}): {
+  assets: UploadedAsset[];
+  previewUrlToRevoke?: string;
+} {
+  const existing = getFrameAsset(assets, slot);
+  const withoutSlot = assets.filter(
+    (asset) => !(asset.kind === "image" && asset.frameSlot === slot),
+  );
+
+  return {
+    assets: [
+      ...withoutSlot,
+      {
+        ...nextAsset,
+        kind: "image",
+        frameSlot: slot,
+      },
+    ],
+    previewUrlToRevoke: existing?.previewUrl?.startsWith("blob:")
+      ? existing.previewUrl
+      : undefined,
+  };
+}
+
 export function getPendingAssetsForGeneration({
   assets,
   activeTab,
@@ -99,10 +191,17 @@ export function getPendingAssetsForGeneration({
   }
 
   if (activeTab === "image-to-video") {
-    const requiredImageCount = addEndFrame ? 2 : 1;
-    return assets
-      .filter((asset) => asset.kind === "image")
-      .slice(0, requiredImageCount)
+    if (addEndFrame) {
+      return assets.filter(
+        (asset) =>
+          asset.kind === "image" &&
+          (asset.frameSlot === "first" || asset.frameSlot === "last") &&
+          asset.status === "pending",
+      );
+    }
+
+    return getImageAssets(assets)
+      .slice(0, 1)
       .filter((asset) => asset.status === "pending");
   }
 
