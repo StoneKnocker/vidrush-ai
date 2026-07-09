@@ -18,6 +18,7 @@ export default [
         route("blog/:slug", "routes/pages/blog-post.tsx"),
         route("playground", "routes/pages/playground.tsx"),
         route("feedback", "routes/pages/feedback.tsx"),
+        route("showcase", "routes/pages/showcase.tsx"),
         route("_test", "routes/_test.tsx"),
         ...prefix("user", [
           layout("routes/pages/user/layout.tsx", [

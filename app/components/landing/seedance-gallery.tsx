@@ -1,6 +1,7 @@
-import { Play, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Play } from "lucide-react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
+import { VideoLightbox } from "~/components/video-lightbox";
 
 const VIDEO_BASE = "https://cdn.vidrushai.com/seedance2-assets";
 
@@ -127,60 +128,6 @@ function GalleryCard({
   );
 }
 
-function VideoLightbox({
-  item,
-  onClose,
-}: {
-  item: GalleryItem;
-  onClose: () => void;
-}) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [onClose]);
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-    >
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Close video"
-        className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-200 hover:bg-white/20"
-      >
-        <X className="h-5 w-5" />
-      </button>
-      <div
-        className="w-full max-w-4xl overflow-hidden rounded-xl border border-border bg-black shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <video
-          className="aspect-video h-auto w-full bg-black"
-          src={`${VIDEO_BASE}/video-${item.videoNum}.mp4`}
-          poster={item.poster}
-          controls
-          autoPlay
-          muted
-          loop
-          playsInline
-        />
-      </div>
-    </div>
-  );
-}
-
 export function SeedanceGallery() {
   const [activeItem, setActiveItem] = useState<GalleryItem | null>(null);
 
@@ -221,7 +168,11 @@ export function SeedanceGallery() {
       </div>
 
       {activeItem && (
-        <VideoLightbox item={activeItem} onClose={() => setActiveItem(null)} />
+        <VideoLightbox
+          src={`${VIDEO_BASE}/video-${activeItem.videoNum}.mp4`}
+          poster={activeItem.poster}
+          onClose={() => setActiveItem(null)}
+        />
       )}
     </section>
   );
