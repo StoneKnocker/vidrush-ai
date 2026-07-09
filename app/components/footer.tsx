@@ -38,6 +38,8 @@ const languageSwitcherClass = cn(
   "focus-visible:border-primary/70 focus-visible:outline-none",
 );
 
+const showLanguageSwitcher = i18nConfig.supportLanguages.length > 0;
+
 type FooterLinkItem =
   | { label: string; to: string }
   | { label: string; href: string };
@@ -155,10 +157,7 @@ export default function Footer() {
   const navGroups: FooterNavGroup[] = [
     {
       title: t("footer.service"),
-      links: [
-        { label: t("header.playground"), to: "/playground" },
-        { label: "Pollo AI", href: "https://pollo.ai?ref=mgq1nzk" },
-      ],
+      links: [{ label: t("header.showcase"), to: "/showcase" }],
     },
     {
       title: t("footer.resources"),
@@ -297,45 +296,49 @@ export default function Footer() {
             ) : null}
           </div>
           <div className="flex shrink-0 flex-col items-start gap-3 lg:items-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                aria-label={t("footer.language")}
-                className={cn(
-                  languageSwitcherClass,
-                  "min-w-24 justify-between",
-                )}
-              >
-                <Globe className="size-4 text-muted-foreground" />
-                <span className="text-sm">
-                  {languageDisplayNames[currentLocale] ?? currentLocale}
-                </span>
-                <ChevronDown className="size-3.5 text-muted-foreground" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="rounded-lg bg-card/95 p-1 text-foreground shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-sm"
-              >
-                {languageLinks.map((language) => (
-                  <DropdownMenuItem key={language} asChild>
-                    <Link
-                      to={localizedTarget}
-                      locale={language}
-                      className="block rounded-md px-3 py-2 text-muted-foreground text-sm no-underline transition-colors hover:text-primary focus:bg-background focus:text-primary"
-                    >
+            {showLanguageSwitcher ? (
+              <>
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    aria-label={t("footer.language")}
+                    className={cn(
+                      languageSwitcherClass,
+                      "min-w-24 justify-between",
+                    )}
+                  >
+                    <Globe className="size-4 text-muted-foreground" />
+                    <span className="text-sm">
+                      {languageDisplayNames[currentLocale] ?? currentLocale}
+                    </span>
+                    <ChevronDown className="size-3.5 text-muted-foreground" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="rounded-lg bg-card/95 p-1 text-foreground shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-sm"
+                  >
+                    {languageLinks.map((language) => (
+                      <DropdownMenuItem key={language} asChild>
+                        <Link
+                          to={localizedTarget}
+                          locale={language}
+                          className="block rounded-md px-3 py-2 text-muted-foreground text-sm no-underline transition-colors hover:text-primary focus:bg-background focus:text-primary"
+                        >
+                          {languageDisplayNames[language] ?? language}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                {/* Crawler-visible fallback links: DropdownMenuContent unmounts when closed */}
+                <nav className="sr-only">
+                  {languageLinks.map((language) => (
+                    <Link key={language} to={localizedTarget} locale={language}>
                       {languageDisplayNames[language] ?? language}
                     </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {/* Crawler-visible fallback links: DropdownMenuContent unmounts when closed */}
-            <nav className="sr-only">
-              {languageLinks.map((language) => (
-                <Link key={language} to={localizedTarget} locale={language}>
-                  {languageDisplayNames[language] ?? language}
-                </Link>
-              ))}
-            </nav>
+                  ))}
+                </nav>
+              </>
+            ) : null}
             <div className="flex flex-col gap-1 text-left lg:text-right">
               <p className="text-balance text-muted-foreground">
                 © {currentYear} {appName}. {t("footer.allRightsReserved")}

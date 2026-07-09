@@ -48,8 +48,8 @@ const Header: React.FC = () => {
 
           {/* Center: Desktop Navigation */}
           <nav className="hidden items-center gap-6 md:flex">
-            <Link to="/playground" className={desktopNavLinkClass}>
-              {t("header.playground")}
+            <Link to="/showcase" className={desktopNavLinkClass}>
+              {t("header.showcase")}
             </Link>
           </nav>
 
@@ -86,8 +86,8 @@ const Header: React.FC = () => {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="slide-in-from-top-5 absolute top-16 right-0 left-0 flex animate-in flex-col gap-4 border-b bg-background p-4 shadow-[0_20px_60px_rgba(0,0,0,0.7)] duration-200 md:hidden">
-          <Link to="/playground" className={mobileNavLinkClass}>
-            {t("header.playground")}
+          <Link to="/showcase" className={mobileNavLinkClass}>
+            {t("header.showcase")}
           </Link>
 
           <div className="mt-4 flex flex-col gap-3 border-t pt-4">

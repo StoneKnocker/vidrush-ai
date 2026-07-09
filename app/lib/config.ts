@@ -5,5 +5,4 @@ export const i18nConfig = {
 
 export const languageDisplayNames: Record<string, string> = {
   en: "English",
-  ja: "日本語",
 };
