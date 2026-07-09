@@ -51,6 +51,9 @@ const Header: React.FC = () => {
             <Link to="/showcase" className={desktopNavLinkClass}>
               {t("header.showcase")}
             </Link>
+            <Link to="/guide" className={desktopNavLinkClass}>
+              {t("header.guide", "Guide")}
+            </Link>
           </nav>
 
           {/* Right: Actions */}
@@ -88,6 +91,9 @@ const Header: React.FC = () => {
         <div className="slide-in-from-top-5 absolute top-16 right-0 left-0 flex animate-in flex-col gap-4 border-b bg-background p-4 shadow-[0_20px_60px_rgba(0,0,0,0.7)] duration-200 md:hidden">
           <Link to="/showcase" className={mobileNavLinkClass}>
             {t("header.showcase")}
+          </Link>
+          <Link to="/guide" className={mobileNavLinkClass}>
+            {t("header.guide", "Guide")}
           </Link>
 
           <div className="mt-4 flex flex-col gap-3 border-t pt-4">
