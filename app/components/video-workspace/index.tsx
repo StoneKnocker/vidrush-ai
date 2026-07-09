@@ -17,9 +17,10 @@ export function VideoWorkspace(_props: VideoWorkspaceProps) {
 
   return (
     <div
+      id="workspace"
       className={cn(
         "landing-theme mx-auto my-4 flex h-full w-full max-w-[90rem] flex-col items-start gap-8 p-6 lg:flex-row",
-        "rounded-3xl border border-border/50 bg-card shadow-xl",
+        "scroll-mt-20 rounded-3xl border border-border/50 bg-card shadow-xl",
       )}
     >
       <GenerationForm

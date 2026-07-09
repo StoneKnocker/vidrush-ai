@@ -326,15 +326,12 @@ export function GenerationForm({
   const addPortraitAsset = (portrait: PortraitItem) => {
     setAssets((current) => {
       if (activeTab === "image-to-video" && addEndFrame) {
-        const slot: FrameSlot | null = !getFrameAsset(current, "first")
+        // Prefer empty slot; when both are set, replace the first frame.
+        const slot: FrameSlot = !getFrameAsset(current, "first")
           ? "first"
           : !getFrameAsset(current, "last")
             ? "last"
-            : null;
-        if (!slot) {
-          setFormError("Both first and last frames are already set.");
-          return current;
-        }
+            : "first";
 
         const result = replaceFrameAsset({
           assets: current,

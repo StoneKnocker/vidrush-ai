@@ -1,5 +1,6 @@
-import { Play } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import { useState } from "react";
+import { Link } from "~/components/i18n-link";
 import { Button } from "~/components/ui/button";
 import { VideoLightbox } from "~/components/video-lightbox";
 
@@ -153,16 +154,13 @@ export function SeedanceGallery() {
         <div className="mt-12 text-center">
           <Button
             asChild
-            className="rounded-full bg-card px-8 py-3 font-medium text-primary hover:bg-card/80 hover:text-primary"
+            size="lg"
+            className="h-12 rounded-full bg-primary px-8 font-semibold text-primary-foreground shadow-[0_0_24px_rgba(0,217,146,0.28)] transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_36px_rgba(0,217,146,0.4)]"
           >
-            <a
-              href="https://seedance2.ai/showcase"
-              target="_blank"
-              rel="noreferrer"
-            >
+            <Link to="/showcase">
               View More Showcases
-              <Play className="ml-2 h-4 w-4" fill="currentColor" />
-            </a>
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
           </Button>
         </div>
       </div>

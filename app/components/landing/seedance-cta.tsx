@@ -1,6 +1,9 @@
 import { Button } from "~/components/ui/button";
+import { useWorkspace } from "~/contexts/workspace-context";
 
 export function SeedanceCTA() {
+  const { showWorkspaceWithTemplate } = useWorkspace();
+
   return (
     <section className="relative overflow-hidden border-y border-border bg-background py-20">
       <div
@@ -20,7 +23,12 @@ export function SeedanceCTA() {
             into stunning videos with Seedance 2.0.
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <Button className="rounded-full border border-primary/60 bg-card px-8 py-4 font-semibold text-primary shadow-[0_0_20px_rgba(0,217,146,0.12)] hover:bg-black/20 hover:text-primary">
+            <Button
+              type="button"
+              size="lg"
+              className="h-12 rounded-full bg-primary px-8 font-semibold text-primary-foreground shadow-[0_0_24px_rgba(0,217,146,0.28)] transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_36px_rgba(0,217,146,0.4)]"
+              onClick={() => showWorkspaceWithTemplate()}
+            >
               Start Now
             </Button>
           </div>

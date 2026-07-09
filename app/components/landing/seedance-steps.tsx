@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { useWorkspace } from "~/contexts/workspace-context";
 
 const STEPS = [
   {
@@ -39,6 +40,8 @@ function StepCard({ step }: { step: (typeof STEPS)[number] }) {
 }
 
 export function SeedanceSteps() {
+  const { showWorkspaceWithTemplate } = useWorkspace();
+
   return (
     <section className="relative overflow-hidden bg-background py-20">
       <div className="container relative z-10 mx-auto px-4">
@@ -62,7 +65,12 @@ export function SeedanceSteps() {
         </div>
 
         <div className="mt-16 text-center">
-          <Button className="rounded-full bg-card px-8 py-4 font-semibold text-primary hover:bg-card/80 hover:text-primary">
+          <Button
+            type="button"
+            size="lg"
+            className="h-12 rounded-full bg-primary px-8 font-semibold text-primary-foreground shadow-[0_0_24px_rgba(0,217,146,0.28)] transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_36px_rgba(0,217,146,0.4)]"
+            onClick={() => showWorkspaceWithTemplate()}
+          >
             Start Creating Now
           </Button>
         </div>
