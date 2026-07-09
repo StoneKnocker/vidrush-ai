@@ -146,7 +146,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-1.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-1.mp4",
                 ],
                 images: [],
               },
@@ -155,7 +155,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-1.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-1.webp",
                     alt: "Image 1",
                     caption: "Image 1",
                   },
@@ -180,7 +180,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-2.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-2.mp4",
                 ],
                 images: [],
               },
@@ -189,7 +189,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-2.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-2.webp",
                     alt: "Image 1",
                     caption: "Image 1",
                   },
@@ -207,7 +207,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-3.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-3.mp4",
                 ],
                 images: [],
               },
@@ -216,7 +216,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-3.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-3.webp",
                     alt: "Image 1",
                     caption: "Image 1",
                   },
@@ -241,7 +241,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-4.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-4.mp4",
                 ],
                 images: [],
               },
@@ -250,7 +250,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-4.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-4.webp",
                     alt: "Image 1",
                     caption: "Image 1",
                   },
@@ -268,7 +268,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-5.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-5.mp4",
                 ],
                 images: [],
               },
@@ -277,7 +277,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-5.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-5.webp",
                     alt: "Image 1 & Image 2",
                     caption: "Image 1 & Image 2",
                   },
@@ -314,7 +314,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-6.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-6.mp4",
                 ],
                 images: [],
               },
@@ -323,7 +323,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-6.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-6.webp",
                     alt: "Image 1, 2, 3",
                     caption: "Image 1, 2, 3",
                   },
@@ -341,7 +341,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-7.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-7.mp4",
                 ],
                 images: [],
               },
@@ -350,7 +350,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-7.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-7.webp",
                     alt: "Reference Images",
                     caption: "Reference Images",
                   },
@@ -368,7 +368,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-8.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-8.mp4",
                 ],
                 images: [],
               },
@@ -377,7 +377,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-8.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-8.webp",
                     alt: "Image 1, 2, 3",
                     caption: "Image 1, 2, 3",
                   },
@@ -402,7 +402,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-9.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-9.mp4",
                 ],
                 images: [],
               },
@@ -411,7 +411,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-9.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-9.webp",
                     alt: "Image 1 (Logo) & Image 2 (Character)",
                     caption: "Image 1 (Logo) & Image 2 (Character)",
                   },
@@ -429,7 +429,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-10.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-10.mp4",
                 ],
                 images: [],
               },
@@ -438,7 +438,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-10.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-10.webp",
                     alt: "Cat & Dog Reference Images",
                     caption: "Cat & Dog Reference Images",
                   },
@@ -456,7 +456,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-11.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-11.mp4",
                 ],
                 images: [],
               },
@@ -465,7 +465,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-11.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-11.webp",
                     alt: "Image 1-5 (Girl, Outfit, Boy, Restaurant, Logo)",
                     caption: "Image 1-5 (Girl, Outfit, Boy, Restaurant, Logo)",
                   },
@@ -483,7 +483,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-12.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-12.mp4",
                 ],
                 images: [],
               },
@@ -492,7 +492,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-12.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-12.webp",
                     alt: "Storyboard Image",
                     caption: "Storyboard Image",
                   },
@@ -510,7 +510,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-13.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-13.mp4",
                 ],
                 images: [],
               },
@@ -519,7 +519,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
                 videos: [],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-13.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-13.webp",
                     alt: "Image 1-4 (Girl, Dad, Storyboard panels)",
                     caption: "Image 1-4 (Girl, Dad, Storyboard panels)",
                   },
@@ -554,18 +554,18 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-14.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-14.mp4",
                 ],
                 images: [],
               },
               {
                 badge: "Reference Input",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/input/input-video-14.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-14.mp4",
                 ],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-14.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-14.webp",
                     alt: "Image 1 & Image 2 (Characters)",
                     caption: "Image 1 & Image 2 (Characters)",
                   },
@@ -583,14 +583,14 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-15.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-15.mp4",
                 ],
                 images: [],
               },
               {
                 badge: "Reference Input",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/input/input-video-15.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-15.mp4",
                 ],
                 images: [],
               },
@@ -613,18 +613,18 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-16.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-16.mp4",
                 ],
                 images: [],
               },
               {
                 badge: "Reference Input",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/input/input-video-16.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-16.mp4",
                 ],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-16.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-16.webp",
                     alt: "Image 1 (Tech Park)",
                     caption: "Image 1 (Tech Park)",
                   },
@@ -649,18 +649,18 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-17.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-17.mp4",
                 ],
                 images: [],
               },
               {
                 badge: "Reference Input",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/input/input-video-17.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-17.mp4",
                 ],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-17.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-17.webp",
                     alt: "Image 1 (Character)",
                     caption: "Image 1 (Character)",
                   },
@@ -678,18 +678,18 @@ export const GUIDE_SECTIONS: GuideSection[] = [
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-18.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-18.mp4",
                 ],
                 images: [],
               },
               {
                 badge: "Reference Input",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/input/input-video-18.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-18.mp4",
                 ],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-18.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-18.webp",
                     alt: "Image 1 (Girl)",
                     caption: "Image 1 (Girl)",
                   },
@@ -726,14 +726,14 @@ Modify Element: Replace [Original Element Description] in [Video N] with [Desire
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-19.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-19.mp4",
                 ],
                 images: [],
               },
               {
                 badge: "Reference Input",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/input/input-video-19.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-19.mp4",
                 ],
                 images: [],
               },
@@ -749,14 +749,14 @@ Modify Element: Replace [Original Element Description] in [Video N] with [Desire
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-20.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-20.mp4",
                 ],
                 images: [],
               },
               {
                 badge: "Reference Input",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/input/input-video-20.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-20.mp4",
                 ],
                 images: [],
               },
@@ -772,18 +772,18 @@ Modify Element: Replace [Original Element Description] in [Video N] with [Desire
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-21.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-21.mp4",
                 ],
                 images: [],
               },
               {
                 badge: "Reference Input",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/input/input-video-21.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-21.mp4",
                 ],
                 images: [
                   {
-                    src: "https://cdn.seedance2.ai/guide/input/input-image-21.webp",
+                    src: "https://cdn.vidrushai.com/seedance2-guide/input/input-image-21.webp",
                     alt: "Image 1 (Face Cream)",
                     caption: "Image 1 (Face Cream)",
                   },
@@ -812,14 +812,14 @@ Modify Element: Replace [Original Element Description] in [Video N] with [Desire
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-22.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-22.mp4",
                 ],
                 images: [],
               },
               {
                 badge: "Reference Input",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/input/input-video-22.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-22.mp4",
                 ],
                 images: [],
               },
@@ -835,14 +835,14 @@ Modify Element: Replace [Original Element Description] in [Video N] with [Desire
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-23.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-23.mp4",
                 ],
                 images: [],
               },
               {
                 badge: "Reference Input",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/input/input-video-23.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-23.mp4",
                 ],
                 images: [],
               },
@@ -869,15 +869,15 @@ Modify Element: Replace [Original Element Description] in [Video N] with [Desire
               {
                 badge: "Output",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/output/output-video-24.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/output/output-video-24.mp4",
                 ],
                 images: [],
               },
               {
                 badge: "Reference Input",
                 videos: [
-                  "https://cdn.seedance2.ai/guide/input/input-video-24-1.mp4",
-                  "https://cdn.seedance2.ai/guide/input/input-video-24-2.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-24-1.mp4",
+                  "https://cdn.vidrushai.com/seedance2-guide/input/input-video-24-2.mp4",
                 ],
                 images: [],
               },
