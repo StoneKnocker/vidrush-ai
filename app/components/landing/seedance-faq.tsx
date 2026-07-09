@@ -10,7 +10,7 @@ const FAQS = [
   {
     question: "Do you support API access?",
     answer:
-      "Yes. You can call the Seedance model through our API. Before making requests, subscribe to a plan or purchase a one-time credit pack so your account has available credits. The API is available to both individual and team users. See the API documentation for setup details.",
+      "API access is currently under planning. We will announce more details when it becomes available.",
   },
   {
     question: "What inputs does Seedance 2.0 support?",
