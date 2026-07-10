@@ -157,7 +157,10 @@ export default function Footer() {
   const navGroups: FooterNavGroup[] = [
     {
       title: t("footer.service"),
-      links: [{ label: t("header.showcase"), to: "/showcase" }],
+      links: [
+        { label: t("header.showcase"), to: "/showcase" },
+        { label: t("header.pricing"), to: "/pricing" },
+      ],
     },
     {
       title: t("footer.resources"),

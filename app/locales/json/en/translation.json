@@ -21,8 +21,10 @@
     "lastModified": "Last modified: "
   },
   "header": {
+    "studio": "Studio",
     "showcase": "Showcase",
     "guide": "Guide",
+    "pricing": "Pricing",
     "startGenerating": "Start Now",
     "closeMobileMenu": "Close navigation menu",
     "openMobileMenu": "Open navigation menu",
