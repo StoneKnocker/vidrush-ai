@@ -20,10 +20,11 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 /**
  * Shared shell styles for login modal DialogContent and sign-in page card.
+ * Border is host-specific: modal adds it, sign-in page does not.
  * Width constraints stay on the host (page vs dialog) so mobile gutters don't fight.
  */
 export const loginPanelClassName =
-  "gap-0 rounded-xl border border-border/60 bg-card p-6 text-foreground shadow-[0_0_50px_rgba(0,217,146,0.12)] sm:p-8";
+  "gap-0 rounded-xl bg-card p-6 text-foreground shadow-[0_0_50px_rgba(0,217,146,0.12)] sm:p-8";
 
 export type LoginFormProps = {
   /** Unique prefix for form control ids when multiple instances may exist. */
@@ -166,11 +167,11 @@ export function LoginForm({
       <div className="flex flex-col items-center gap-4 text-center">
         <AppLogo />
         <div className="flex flex-col gap-1.5">
-          <h2 className="font-semibold text-foreground text-xl tracking-tight">
-            {isOtpSent
-              ? t("auth.verifyYourEmail")
-              : t("auth.signInToYourAccount")}
-          </h2>
+          {isOtpSent && (
+            <h2 className="font-semibold text-foreground text-xl tracking-tight">
+              {t("auth.verifyYourEmail")}
+            </h2>
+          )}
           <p className="text-muted-foreground text-sm">
             {isGoogleLoading && googleMode === "popup" ? (
               t("auth.completeSignInInPopup")

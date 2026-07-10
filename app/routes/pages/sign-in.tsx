@@ -36,7 +36,13 @@ export default function LoginPage() {
 
   return (
     <main className="landing-theme flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
-      <div className={cn(loginPanelClassName, "w-full max-w-[400px]")}>
+      <div
+        className={cn(
+          loginPanelClassName,
+          // Page form sits on the page background — no card surface.
+          "w-full max-w-[400px] bg-transparent shadow-none",
+        )}
+      >
         <LoginForm
           idPrefix="page"
           googleMode="redirect"

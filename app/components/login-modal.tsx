@@ -31,8 +31,9 @@ export function LoginModal() {
       <DialogContent
         className={cn(
           loginPanelClassName,
+          // Border only on modal; sign-in page stays borderless.
           // Keep dialog mobile gutters (base max-w calc) and match page desktop width.
-          "w-full sm:max-w-[400px] [&>button:hover]:text-primary [&>button]:text-muted-foreground",
+          "w-full border border-border/60 sm:max-w-[400px] [&>button:hover]:text-primary [&>button]:text-muted-foreground",
         )}
       >
         {/* Visually hidden for a11y; visible title lives inside LoginForm */}
