@@ -232,9 +232,9 @@ export function LoginForm({
                   </Label>
                   <Input
                     id={emailId}
-                    placeholder="name@example.com"
+                    placeholder={t("auth.email")}
                     type="email"
-                    className="bg-background text-foreground placeholder:text-muted-foreground focus-visible:border-primary/70 focus-visible:ring-primary/30"
+                    className="bg-background text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary/70 focus-visible:ring-primary/30"
                     autoCapitalize="none"
                     autoComplete="email"
                     autoCorrect="off"
