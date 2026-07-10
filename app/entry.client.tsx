@@ -20,6 +20,12 @@ async function main() {
       detection: { order: ["htmlTag"], caches: [] },
       // Update this to the path where your locales will be served
       backend: { loadPath: "/api/locales/{{lng}}/{{ns}}" },
+      interpolation: {
+        defaultVariables: {
+          // Set by root loader script before hydrate
+          appName: window.ENV?.APP_NAME ?? "",
+        },
+      },
     });
 
   startTransition(() => {

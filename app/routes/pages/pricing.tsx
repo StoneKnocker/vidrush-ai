@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import FAQ from "~/components/faq";
 import { SeedancePricing } from "~/components/landing/seedance-pricing";
 import { StructuredData } from "~/components/structured-data";
+import { replaceAppNamePlaceholders } from "~/lib/content-placeholder";
 import { getPublicEnv } from "~/lib/env.server";
 import { useSupportEmail } from "~/lib/public-env";
 import { buildPricingStructuredData } from "~/lib/structured-data";
@@ -26,13 +27,14 @@ export const meta: Route.MetaFunction = ({
 export const loader = async ({ context }: Route.LoaderArgs) => {
   const locale = getLocale(context);
 
-  const contentData = resources[locale]?.pricing as PricingPageContent;
+  const raw = resources[locale]?.pricing as PricingPageContent | undefined;
 
-  if (!contentData) {
+  if (!raw) {
     throw new Error(`No content data found for locale: ${locale}`);
   }
 
   const publicEnv = getPublicEnv();
+  const contentData = replaceAppNamePlaceholders(raw, publicEnv.APP_NAME);
 
   return {
     appName: publicEnv.APP_NAME,

@@ -49,7 +49,7 @@ titsdrop里的 key/secret 对所有bucket有效，直接复制即可
 - preject-rebrand skill:
   - .env配置修改
   - wrangler.jsonc  配置
-  - public-env.shared DEFAULT_APP_NAME 修改
+  - APP_NAME env（.env / wrangler）— 品牌名唯一来源
 - setup-cloudflare-resource skill:
   - support邮箱配置, www跳转配置
   - cdn.xxx.com r2配置

@@ -1,12 +1,14 @@
 import { FileTextIcon } from "lucide-react";
 import { PolicyPage, policyMeta } from "~/components/content/policy-page";
 import { policyLoader } from "~/lib/content/policy.server";
-import { DEFAULT_APP_NAME } from "~/lib/public-env.shared";
 import type { Route } from "./+types/terms-and-conditions";
 
 export const meta: Route.MetaFunction = ({ loaderData, params }) => {
+  if (!loaderData) {
+    return [];
+  }
   return policyMeta({
-    appName: loaderData?.appName || DEFAULT_APP_NAME,
+    appName: loaderData.appName,
     params,
     type: "terms",
   });

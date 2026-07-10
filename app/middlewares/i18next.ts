@@ -3,6 +3,7 @@ import { createI18nextMiddleware } from "remix-i18next";
 import resources from "~/locales"; // Import your locales
 import "i18next";
 import { i18nConfig } from "~/lib/config";
+import { getPublicEnv } from "~/lib/env.server";
 
 export const [i18nextMiddleware, getLocale, getInstance] =
   createI18nextMiddleware({
@@ -22,7 +23,14 @@ export const [i18nextMiddleware, getLocale, getInstance] =
         return locale;
       },
     },
-    i18next: { resources }, // Your locales
+    i18next: {
+      resources,
+      interpolation: {
+        defaultVariables: {
+          appName: getPublicEnv().APP_NAME,
+        },
+      },
+    },
     plugins: [initReactI18next], // Plugins you may need, like react-i18next
   });
 

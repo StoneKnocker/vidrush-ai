@@ -1,4 +1,3 @@
-import { DEFAULT_APP_NAME } from "~/lib/public-env.shared";
 import { getCanonicalUrl } from "~/lib/utils";
 import type { LandingPageContent } from "~/types/landingpage";
 import type { PricingPageContent } from "~/types/pricing";
@@ -6,7 +5,7 @@ import type { PricingPageContent } from "~/types/pricing";
 type JsonLdNode = Record<string, unknown>;
 
 interface SchemaContext {
-  appName?: string;
+  appName: string;
   appUrl?: string;
   locale: string;
   path?: string;
@@ -14,10 +13,6 @@ interface SchemaContext {
 
 function getBaseUrl(appUrl?: string) {
   return appUrl || "";
-}
-
-function getAppName(context: SchemaContext) {
-  return context.appName || DEFAULT_APP_NAME;
 }
 
 function toAbsoluteUrl(pathOrUrl: string, appUrl?: string) {
@@ -43,12 +38,11 @@ function getHomeUrl(context: SchemaContext) {
 
 function organizationSchema(context: SchemaContext): JsonLdNode {
   const homeUrl = getHomeUrl(context);
-  const appName = getAppName(context);
 
   return {
     "@type": "Organization",
     "@id": `${homeUrl}#organization`,
-    name: appName,
+    name: context.appName,
     url: homeUrl,
     logo: toAbsoluteUrl("/logo.png", context.appUrl),
   };
@@ -56,12 +50,11 @@ function organizationSchema(context: SchemaContext): JsonLdNode {
 
 function websiteSchema(context: SchemaContext): JsonLdNode {
   const homeUrl = getHomeUrl(context);
-  const appName = getAppName(context);
 
   return {
     "@type": "WebSite",
     "@id": `${homeUrl}#website`,
-    name: appName,
+    name: context.appName,
     url: homeUrl,
     publisher: {
       "@id": `${homeUrl}#organization`,
@@ -79,12 +72,11 @@ function softwareApplicationSchema({
   offers?: JsonLdNode[];
 }): JsonLdNode {
   const homeUrl = getHomeUrl(context);
-  const appName = getAppName(context);
 
   return {
     "@type": "SoftwareApplication",
     "@id": `${homeUrl}#software`,
-    name: appName,
+    name: context.appName,
     applicationCategory: "MultimediaApplication",
     operatingSystem: "Web",
     url: homeUrl,
@@ -172,8 +164,6 @@ function pricingOffers({
 }: SchemaContext & {
   contentData: PricingPageContent;
 }) {
-  const context = { appName, appUrl, locale };
-  const resolvedAppName = getAppName(context);
   const pricingUrl = getCanonicalUrl(locale, "/pricing", appUrl);
   const subscriptionOffers = contentData.subscriptionPlans
     .map((plan) => {
@@ -185,7 +175,7 @@ function pricingOffers({
 
       return {
         "@type": "Offer",
-        name: `${resolvedAppName} ${plan.name}`,
+        name: `${appName} ${plan.name}`,
         description: stripHtml(plan.description),
         price: String(yearlyPrice),
         priceCurrency: "USD",
@@ -196,7 +186,7 @@ function pricingOffers({
     .filter(Boolean) as JsonLdNode[];
   const creditPackOffers = contentData.creditPacks.map((pack) => ({
     "@type": "Offer",
-    name: `${resolvedAppName} ${pack.name}`,
+    name: `${appName} ${pack.name}`,
     description: stripHtml(
       pack.description || pack.features.join(". ") || `${pack.credits} credits`,
     ),

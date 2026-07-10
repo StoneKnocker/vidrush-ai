@@ -1,6 +1,7 @@
 /// <reference path="../../worker-configuration.d.ts" />
 import { env as cloudflareEnv } from "cloudflare:workers";
 import { z } from "zod";
+import type { PublicEnv } from "./public-env";
 
 /**
  * Server environment schema definition with validation rules
@@ -88,7 +89,7 @@ export const isDevelopment = serverEnv.ENVIRONMENT === "development";
  * SECURITY WARNING: Be careful what you expose here - never include API keys,
  * secrets, or sensitive information as these will be visible in the browser.
  */
-export function getPublicEnv() {
+export function getPublicEnv(): PublicEnv {
   return {
     SEND_FROM_EMAIL: serverEnv.SEND_FROM_EMAIL,
     APP_NAME: serverEnv.APP_NAME,

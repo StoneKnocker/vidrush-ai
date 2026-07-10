@@ -1,7 +1,6 @@
 import { i18nConfig } from "~/lib/config";
 import { replaceAppNamePlaceholders } from "~/lib/content-placeholder";
 import { getPublicEnv } from "~/lib/env.server";
-import { DEFAULT_APP_NAME } from "~/lib/public-env.shared";
 
 interface LoaderArgs {
   params: { locale?: string };
@@ -30,8 +29,7 @@ export async function policyLoader({
   filePattern: string;
 }): Promise<PolicyLoaderData> {
   const locale = params.locale || i18nConfig.defaultLanguage;
-  const { APP_NAME } = getPublicEnv();
-  const appName = APP_NAME ?? DEFAULT_APP_NAME;
+  const { APP_NAME: appName } = getPublicEnv();
 
   try {
     // Dynamic import to handle the generated module.

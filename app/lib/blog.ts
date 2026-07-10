@@ -1,6 +1,5 @@
 import { replaceAppNamePlaceholders } from "~/lib/content-placeholder";
 import { getPublicEnv } from "~/lib/env.server";
-import { DEFAULT_APP_NAME } from "~/lib/public-env.shared";
 import resources from "~/locales";
 import type { BlogPost } from "~/types/blog";
 
@@ -29,11 +28,10 @@ type TranslationCopy = {
 export async function getBlogPosts(locale: string) {
   const posts = await getAllContentPosts();
   const { APP_NAME } = getPublicEnv();
-  const appName = APP_NAME ?? DEFAULT_APP_NAME;
 
   return posts
     .filter((post) => post.kind === "blog" && post.lang === locale && post.slug)
-    .map((post) => replaceAppNamePlaceholders(post, appName))
+    .map((post) => replaceAppNamePlaceholders(post, APP_NAME))
     .sort((a, b) => {
       const aTime = new Date(a.publishedAt || a.lastModified).getTime();
       const bTime = new Date(b.publishedAt || b.lastModified).getTime();
@@ -56,7 +54,7 @@ export function getBlogCopy(locale: string) {
     throw new Error(`No blog copy found for locale: ${locale}`);
   }
 
-  return copy;
+  return replaceAppNamePlaceholders(copy, getPublicEnv().APP_NAME);
 }
 
 export function getBlogLabels(locale: string) {

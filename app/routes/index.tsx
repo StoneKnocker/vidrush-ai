@@ -1,6 +1,7 @@
 import { VideoWorkspace } from "~/components/video-workspace";
 import { StructuredData } from "~/components/structured-data";
 import { SeedanceLandingSections } from "~/components/landing/seedance-landing-sections";
+import { replaceAppNamePlaceholders } from "~/lib/content-placeholder";
 import { getPublicEnv } from "~/lib/env.server";
 import { buildSocialMeta } from "~/lib/seo";
 import { buildHomeStructuredData } from "~/lib/structured-data";
@@ -40,13 +41,14 @@ export const meta: Route.MetaFunction = ({
 
 export const loader = async ({ context }: Route.LoaderArgs) => {
   const locale = getLocale(context);
-  const contentData = resources[locale]?.index as LandingPageContent;
+  const raw = resources[locale]?.index as LandingPageContent | undefined;
 
-  if (!contentData) {
+  if (!raw) {
     throw new Error(`No content data found for locale: ${locale}`);
   }
 
   const publicEnv = getPublicEnv();
+  const contentData = replaceAppNamePlaceholders(raw, publicEnv.APP_NAME);
 
   return {
     appName: publicEnv.APP_NAME,
