@@ -2,6 +2,10 @@ import { Check, Gift, Zap } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import {
+  type CheckoutProvider,
+  PaymentProviderModal,
+} from "~/components/payment-provider-modal";
 import { LoadingButton } from "~/components/ui/loading";
 import { useAuth } from "~/hooks/use-auth";
 import { useLoginModal } from "~/hooks/use-login-modal";
@@ -184,16 +188,30 @@ export function SeedancePricing({
   );
   const [pendingPlanId, setPendingPlanId] = useState<string | null>(null);
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
+  const [providerModalOpen, setProviderModalOpen] = useState(false);
+  const [planAwaitingProvider, setPlanAwaitingProvider] = useState<
+    string | null
+  >(null);
 
   const { isAuthenticated } = useAuth();
   const { openLoginModal, closeLoginModal } = useLoginModal();
   const checkoutMutation = trpc.payment.createCheckout.useMutation();
+  const providersQuery = trpc.payment.listProviders.useQuery(undefined, {
+    staleTime: 60_000,
+  });
+
+  const enabledProviders = (providersQuery.data?.providers ?? [
+    "creem",
+  ]) as CheckoutProvider[];
 
   const proceedWithCheckout = useCallback(
-    async (planId: string) => {
+    async (planId: string, provider: CheckoutProvider = "creem") => {
       setActivePlanId(planId);
       try {
-        const result = await checkoutMutation.mutateAsync({ planId });
+        const result = await checkoutMutation.mutateAsync({
+          planId,
+          provider,
+        });
         window.location.href = result.checkoutUrl;
       } catch (error) {
         console.error("Error creating checkout:", error);
@@ -204,22 +222,34 @@ export function SeedancePricing({
     [checkoutMutation, t],
   );
 
+  const startCheckoutFlow = useCallback(
+    async (planId: string) => {
+      if (enabledProviders.length <= 1) {
+        await proceedWithCheckout(planId, enabledProviders[0] ?? "creem");
+        return;
+      }
+      setPlanAwaitingProvider(planId);
+      setProviderModalOpen(true);
+    },
+    [enabledProviders, proceedWithCheckout],
+  );
+
   const handleCheckout = async (planId: string) => {
     if (!isAuthenticated) {
       setPendingPlanId(planId);
       openLoginModal();
       return;
     }
-    await proceedWithCheckout(planId);
+    await startCheckoutFlow(planId);
   };
 
   useEffect(() => {
     if (isAuthenticated && pendingPlanId) {
       closeLoginModal();
-      void proceedWithCheckout(pendingPlanId);
+      void startCheckoutFlow(pendingPlanId);
       setPendingPlanId(null);
     }
-  }, [isAuthenticated, pendingPlanId, closeLoginModal, proceedWithCheckout]);
+  }, [isAuthenticated, pendingPlanId, closeLoginModal, startCheckoutFlow]);
 
   const isCheckingOut = checkoutMutation.isPending;
 
@@ -231,6 +261,24 @@ export function SeedancePricing({
         className,
       )}
     >
+      <PaymentProviderModal
+        open={providerModalOpen}
+        providers={enabledProviders}
+        isLoading={isCheckingOut}
+        onOpenChange={(open) => {
+          setProviderModalOpen(open);
+          if (!open) {
+            setPlanAwaitingProvider(null);
+            setActivePlanId(null);
+          }
+        }}
+        onSelect={(provider) => {
+          if (!planAwaitingProvider) return;
+          setProviderModalOpen(false);
+          void proceedWithCheckout(planAwaitingProvider, provider);
+          setPlanAwaitingProvider(null);
+        }}
+      />
       {showHeader && (
         <>
           <div className="mx-auto mb-10 max-w-2xl px-4">

@@ -26,6 +26,16 @@ const serverEnvSchema = z.object({
   CREEM_WEBHOOK_SECRET: z.string().optional(),
   KIE_API_KEY: z.string().optional(),
   KIE_WEBHOOK_HMAC_KEY: z.string().optional(),
+
+  // PayPal (optional — enable with PAYPAL_ENABLED=true + credentials)
+  PAYPAL_ENABLED: z.string().optional().default("false"),
+  PAYPAL_CLIENT_ID: z.string().optional(),
+  PAYPAL_CLIENT_SECRET: z.string().optional(),
+  PAYPAL_WEBHOOK_ID: z.string().optional(),
+  PAYPAL_ENVIRONMENT: z
+    .enum(["sandbox", "production"])
+    .optional()
+    .default("sandbox"),
 });
 
 type RequiredBindingName = "APP_KV" | "DB" | "R2";

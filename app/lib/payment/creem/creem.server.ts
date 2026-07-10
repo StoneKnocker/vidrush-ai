@@ -2,7 +2,7 @@ import { createCreem } from "creem_io";
 import { PAYMENT_STATUS } from "@/lib/consts";
 import { createPayment, updatePaymentSessionId } from "@/lib/model/payment";
 import { isDevelopment, serverEnv } from "~/lib/env.server";
-import { getProduct } from "~/lib/payment/product";
+import { getProduct, priceToCents } from "~/lib/payment/product";
 
 export const creem = createCreem({
   apiKey: serverEnv.CREEM_API_KEY,
@@ -13,10 +13,7 @@ export const creem = createCreem({
 export async function createCheckout(planId: string, userId: string) {
   const product = getProduct(planId);
 
-  if (!product) {
-    throw new Error(`Product not found for planId: ${planId}`);
-  }
-  if (!product.productId) {
+  if (!product.creemProductId) {
     throw new Error(`Missing Creem product ID for planId: ${planId}`);
   }
 
@@ -24,7 +21,7 @@ export async function createCheckout(planId: string, userId: string) {
     // Create payment record first
     const payment = await createPayment({
       userId,
-      amount: Math.round(product.price * 100), // Convert to cents
+      amount: priceToCents(product.price),
       currency: "USD",
       planId,
       provider: "creem",
@@ -38,7 +35,7 @@ export async function createCheckout(planId: string, userId: string) {
 
     // Create a checkout session
     const checkout = await creem.checkouts.create({
-      productId: product.productId,
+      productId: product.creemProductId,
       successUrl: successUrl.toString(),
       metadata: { payment_id: payment.id.toString() },
     });

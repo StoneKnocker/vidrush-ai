@@ -2,6 +2,10 @@ import { ArrowRight, Check, Clock, Coins, Zap } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import {
+  type CheckoutProvider,
+  PaymentProviderModal,
+} from "~/components/payment-provider-modal";
 import { LoadingButton } from "~/components/ui/loading";
 import { useAuth } from "~/hooks/use-auth";
 import { useLoginModal } from "~/hooks/use-login-modal";
@@ -33,6 +37,10 @@ export default function PricingGrid({
   const [mode, setMode] = useState<"subscription" | "credits">(initialMode);
   const [isAnnual, setIsAnnual] = useState(true);
   const [pendingPlanId, setPendingPlanId] = useState<string | null>(null);
+  const [providerModalOpen, setProviderModalOpen] = useState(false);
+  const [planAwaitingProvider, setPlanAwaitingProvider] = useState<
+    string | null
+  >(null);
 
   const subscriptionPlans = showFreePlan
     ? contentData.subscriptionPlans
@@ -45,6 +53,12 @@ export default function PricingGrid({
 
   // tRPC mutation for creating checkout
   const checkoutMutation = trpc.payment.createCheckout.useMutation();
+  const providersQuery = trpc.payment.listProviders.useQuery(undefined, {
+    staleTime: 60_000,
+  });
+  const enabledProviders = (providersQuery.data?.providers ?? [
+    "creem",
+  ]) as CheckoutProvider[];
 
   const handleCheckout = async (planId: string) => {
     // Handle special cases for free and enterprise plans
@@ -69,14 +83,15 @@ export default function PricingGrid({
     }
 
     // User is authenticated, proceed with checkout
-    await proceedWithCheckout(planId);
+    await startCheckoutFlow(planId);
   };
 
   const proceedWithCheckout = useCallback(
-    async (planId: string) => {
+    async (planId: string, provider: CheckoutProvider = "creem") => {
       try {
         const result = await checkoutMutation.mutateAsync({
           planId,
+          provider,
         });
 
         window.location.href = result.checkoutUrl;
@@ -88,14 +103,26 @@ export default function PricingGrid({
     [checkoutMutation, t],
   );
 
+  const startCheckoutFlow = useCallback(
+    async (planId: string) => {
+      if (enabledProviders.length <= 1) {
+        await proceedWithCheckout(planId, enabledProviders[0] ?? "creem");
+        return;
+      }
+      setPlanAwaitingProvider(planId);
+      setProviderModalOpen(true);
+    },
+    [enabledProviders, proceedWithCheckout],
+  );
+
   // Effect to handle checkout after successful login
   useEffect(() => {
     if (isAuthenticated && pendingPlanId) {
       closeLoginModal();
-      proceedWithCheckout(pendingPlanId);
+      void startCheckoutFlow(pendingPlanId);
       setPendingPlanId(null);
     }
-  }, [isAuthenticated, pendingPlanId, closeLoginModal, proceedWithCheckout]);
+  }, [isAuthenticated, pendingPlanId, closeLoginModal, startCheckoutFlow]);
 
   const subscriptionGridClasses = compact
     ? "grid grid-cols-1 gap-4 md:grid-cols-2"
@@ -116,6 +143,23 @@ export default function PricingGrid({
 
   return (
     <div className="text-foreground">
+      <PaymentProviderModal
+        open={providerModalOpen}
+        providers={enabledProviders}
+        isLoading={checkoutMutation.isPending}
+        onOpenChange={(open) => {
+          setProviderModalOpen(open);
+          if (!open) {
+            setPlanAwaitingProvider(null);
+          }
+        }}
+        onSelect={(provider) => {
+          if (!planAwaitingProvider) return;
+          setProviderModalOpen(false);
+          void proceedWithCheckout(planAwaitingProvider, provider);
+          setPlanAwaitingProvider(null);
+        }}
+      />
       {/* Mode Toggle - only show if not in compact mode or if explicitly requested */}
       {!compact && (
         <div className="mb-8 flex flex-wrap items-center justify-center gap-2">
@@ -255,7 +299,7 @@ export default function PricingGrid({
                   ) : (
                     <div className="flex items-baseline gap-2">
                       {showDiscount && (
-                        <span className="text-muted-foreground/70 text-lg line-through">
+                        <span className="text-lg text-muted-foreground/70 line-through">
                           ${originalPrice}
                         </span>
                       )}
@@ -348,7 +392,7 @@ export default function PricingGrid({
                 )}
 
                 <div className={cn("mb-6 text-center", pack.popular && "pt-4")}>
-                  <h3 className="mb-3 font-semibold text-muted-foreground text-base uppercase tracking-wider">
+                  <h3 className="mb-3 font-semibold text-base text-muted-foreground uppercase tracking-wider">
                     {pack.name}
                   </h3>
                   <div className="mb-2 font-bold text-5xl text-foreground">

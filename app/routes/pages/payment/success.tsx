@@ -5,7 +5,7 @@ import {
   ReceiptText,
   XCircle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import { getTrpcErrorMessage } from "~/lib/trpc/error";
@@ -19,9 +19,16 @@ const POLLING_TIMEOUT_MS = 30000;
 export function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const publicId = url.searchParams.get("public_id");
+  // PayPal may append token (order id) or subscription_id
   let sessionId = url.searchParams.get("checkout_id");
   if (!sessionId) {
     sessionId = url.searchParams.get("session");
+  }
+  if (!sessionId) {
+    sessionId = url.searchParams.get("token");
+  }
+  if (!sessionId) {
+    sessionId = url.searchParams.get("subscription_id");
   }
 
   return {
@@ -35,8 +42,11 @@ export default function PaymentSuccessPage({
 }: Route.ComponentProps) {
   const { publicId, sessionId } = loaderData;
   const [hasTimedOut, setHasTimedOut] = useState(false);
+  const confirmAttempted = useRef(false);
   const { t, i18n } = useTranslation("paymentSuccess");
   const hasLookupKey = Boolean(publicId || sessionId);
+
+  const confirmCheckoutMutation = trpc.payment.confirmCheckout.useMutation();
 
   const checkStatusQuery = trpc.payment.checkStatus.useQuery(
     {
@@ -62,7 +72,33 @@ export default function PaymentSuccessPage({
     },
   );
 
-  const queryData: PaymentStatusResult | undefined = checkStatusQuery.data;
+  // PayPal return_url: actively capture/activate instead of waiting only on webhook
+  useEffect(() => {
+    if (!publicId || confirmAttempted.current) {
+      return;
+    }
+    confirmAttempted.current = true;
+
+    void confirmCheckoutMutation
+      .mutateAsync({ publicId })
+      .then(() => {
+        void checkStatusQuery.refetch();
+      })
+      .catch((error) => {
+        console.error("confirmCheckout failed:", error);
+        // Still poll — webhook may fulfill later
+        void checkStatusQuery.refetch();
+      });
+    // Only run once on mount for a given publicId
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [publicId]);
+
+  const queryData: PaymentStatusResult | undefined =
+    checkStatusQuery.data?.status === "paid"
+      ? checkStatusQuery.data
+      : confirmCheckoutMutation.data?.status === "paid"
+        ? confirmCheckoutMutation.data
+        : (checkStatusQuery.data ?? confirmCheckoutMutation.data);
 
   useEffect(() => {
     if (!hasLookupKey || hasTimedOut) {
@@ -88,7 +124,13 @@ export default function PaymentSuccessPage({
 
   const handleRefresh = () => {
     setHasTimedOut(false);
-    void checkStatusQuery.refetch();
+    if (publicId) {
+      void confirmCheckoutMutation.mutateAsync({ publicId }).finally(() => {
+        void checkStatusQuery.refetch();
+      });
+    } else {
+      void checkStatusQuery.refetch();
+    }
   };
 
   const handleGoHome = () => {
@@ -325,7 +367,7 @@ export default function PaymentSuccessPage({
               {summaryRows.map((row) => (
                 <div
                   key={row.label}
-                  className="flex items-center justify-between gap-4 /70 border-b pb-4 last:border-b-0 last:pb-0"
+                  className="/70 flex items-center justify-between gap-4 border-b pb-4 last:border-b-0 last:pb-0"
                 >
                   <dt className="text-muted-foreground text-sm">{row.label}</dt>
                   <dd className="text-right text-sm">{row.value}</dd>

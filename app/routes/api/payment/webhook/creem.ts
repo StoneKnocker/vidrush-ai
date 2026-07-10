@@ -1,49 +1,21 @@
 import { data } from "react-router";
-import {
-  CREDIT_EVENT,
-  CREDIT_TYPE,
-  PAYMENT_STATUS,
-  SUBSCRIPTION_STATUS,
-} from "@/lib/consts";
-import { addCreditHistory } from "@/lib/model/creditHistory";
-import {
-  createPayment,
-  getPaymentById,
-  getPaymentBySessionId,
-  updatePaymentStatus,
-} from "@/lib/model/payment";
-import {
-  createSubscription,
-  getSubscriptionByProviderId,
-  updateSubscriptionPeriod,
-  updateSubscriptionStatus,
-} from "@/lib/model/subscription";
-import {
-  addPermanentCredits,
-  addSubscriptionCredits,
-} from "@/lib/model/userBalance";
+import { PAYMENT_STATUS, SUBSCRIPTION_STATUS } from "@/lib/consts";
+import { getPaymentById, getPaymentBySessionId } from "@/lib/model/payment";
+import { getSubscriptionByProviderId } from "@/lib/model/subscription";
 import { creem } from "~/lib/payment/creem/creem.server";
-import { getProduct } from "~/lib/payment/product";
+import {
+  fulfillNewSubscription,
+  fulfillOneTimePurchase,
+  fulfillSubscriptionRenewal,
+  markSubscriptionCanceled,
+  syncSubscriptionState,
+} from "~/lib/payment/fulfillment.server";
 import type { Route } from "./+types/creem";
 
 async function getLocalPayment(checkoutId?: string, paymentId?: string) {
   return (
     (paymentId ? await getPaymentById(Number(paymentId)) : null) ||
     (checkoutId ? await getPaymentBySessionId(checkoutId) : null)
-  );
-}
-
-async function syncSubscriptionState(
-  providerSubscriptionId: string,
-  status: string,
-  periodStart: Date,
-  periodEnd: Date,
-) {
-  await updateSubscriptionStatus(providerSubscriptionId, status);
-  return updateSubscriptionPeriod(
-    providerSubscriptionId,
-    periodStart,
-    periodEnd,
   );
 }
 
@@ -82,7 +54,6 @@ export async function action({ request }: Route.ActionArgs) {
           return;
         }
 
-        // recurring = subscription, one-time = one-time purchase
         if (billingType === "recurring") {
           console.log("Scenario: New subscription created");
 
@@ -91,74 +62,17 @@ export async function action({ request }: Route.ActionArgs) {
             throw new Error("Missing subscription data in webhook");
           }
 
-          await updatePaymentStatus(
-            payment.id,
-            PAYMENT_STATUS.PAID,
-            checkoutId,
-          );
-
-          const existingSubscription = await getSubscriptionByProviderId(
-            creemSubscription.id,
-          );
-
-          if (existingSubscription) {
-            console.log("Subscription already exists, skipping credit grant", {
-              subscriptionId: creemSubscription.id,
-            });
-            await syncSubscriptionState(
-              creemSubscription.id,
-              SUBSCRIPTION_STATUS.ACTIVE,
-              new Date(creemSubscription.currentPeriodStartDate),
-              new Date(creemSubscription.currentPeriodEndDate),
-            );
-            return;
-          }
-
-          await createSubscription({
-            userId: payment.userId,
+          await fulfillNewSubscription(payment, {
             provider: "creem",
             providerSubscriptionId: creemSubscription.id,
-            status: SUBSCRIPTION_STATUS.ACTIVE,
-            planId: payment.planId,
             periodStart: new Date(creemSubscription.currentPeriodStartDate),
             periodEnd: new Date(creemSubscription.currentPeriodEndDate),
-          });
-
-          await addSubscriptionCredits(
-            payment.userId,
-            Number(payment.creditsAmount),
-            new Date(creemSubscription.currentPeriodEndDate),
-          );
-
-          await addCreditHistory({
-            userId: payment.userId,
-            amount: payment.creditsAmount,
-            creditType: CREDIT_TYPE.SUBSCRIPTION,
-            creditEvent: CREDIT_EVENT.SUBSCRIPTION_GRANT,
-            description: "Subscription credits granted",
-            referenceId: creemSubscription.id,
+            providerSessionId: checkoutId,
           });
         } else {
           console.log("Scenario: One-time purchase");
-
-          await updatePaymentStatus(
-            payment.id,
-            PAYMENT_STATUS.PAID,
-            checkoutId,
-          );
-
-          await addPermanentCredits(
-            payment.userId,
-            Number(payment.creditsAmount),
-          );
-
-          await addCreditHistory({
-            userId: payment.userId,
-            amount: payment.creditsAmount,
-            creditType: CREDIT_TYPE.PERMANENT,
-            creditEvent: CREDIT_EVENT.PURCHASE,
-            description: "One-time purchase credits",
-            referenceId: checkoutId,
+          await fulfillOneTimePurchase(payment, {
+            providerSessionId: checkoutId,
           });
         }
       },
@@ -180,46 +94,10 @@ export async function action({ request }: Route.ActionArgs) {
 
         console.log("Scenario: Subscription renewal");
 
-        await updateSubscriptionStatus(
-          subscription.id,
-          SUBSCRIPTION_STATUS.ACTIVE,
-        );
-
-        const isChanged = await updateSubscriptionPeriod(
-          subscription.id,
-          new Date(subscription.currentPeriodStartDate),
-          new Date(subscription.currentPeriodEndDate),
-        );
-        if (!isChanged) {
-          console.log("subscription renewal had been handled, skipping...");
-          return;
-        }
-
-        const product = getProduct(localSubscription.planId);
-
-        await createPayment({
-          userId: localSubscription.userId,
-          amount: subscription.product.price,
-          planId: localSubscription.planId,
-          provider: "creem",
-          creditType: CREDIT_TYPE.SUBSCRIPTION,
-          creditsAmount: product.creditsAmount,
-          status: PAYMENT_STATUS.PAID,
-        });
-
-        await addSubscriptionCredits(
-          localSubscription.userId,
-          product.creditsAmount,
-          new Date(subscription.currentPeriodEndDate),
-        );
-
-        await addCreditHistory({
-          userId: localSubscription.userId,
-          amount: product.creditsAmount,
-          creditType: CREDIT_TYPE.SUBSCRIPTION,
-          creditEvent: CREDIT_EVENT.SUBSCRIPTION_GRANT,
-          description: "Subscription renewal credits",
-          referenceId: subscription.id,
+        await fulfillSubscriptionRenewal(localSubscription, {
+          periodStart: new Date(subscription.currentPeriodStartDate),
+          periodEnd: new Date(subscription.currentPeriodEndDate),
+          amountCents: subscription.product.price,
         });
       },
       onSubscriptionCanceled: async (subscription) => {
@@ -238,10 +116,7 @@ export async function action({ request }: Route.ActionArgs) {
           return;
         }
 
-        await updateSubscriptionStatus(
-          subscription.id,
-          SUBSCRIPTION_STATUS.CANCELED,
-        );
+        await markSubscriptionCanceled(subscription.id);
       },
       onSubscriptionUpdate: async (subscription) => {
         console.log("Received subscription.update webhook:", {

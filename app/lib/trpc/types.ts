@@ -32,6 +32,7 @@ export type TaskStatusResult =
 export interface CheckoutCreateResult {
   checkoutUrl: string;
   checkoutId: string;
+  publicId?: string;
 }
 
 export type PaymentStatusState = "pending" | "paid" | "canceled" | "not_found";
