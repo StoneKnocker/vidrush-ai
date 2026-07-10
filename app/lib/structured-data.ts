@@ -25,9 +25,12 @@ function toAbsoluteUrl(pathOrUrl: string, appUrl?: string) {
   return new URL(pathOrUrl, baseUrl).toString();
 }
 
-function stripHtml(value: string) {
+/** Strip HTML tags and light markdown markers for plain-text schema fields. */
+function stripMarkup(value: string) {
   return value
     .replace(/<[^>]*>/g, " ")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -80,7 +83,7 @@ function softwareApplicationSchema({
     applicationCategory: "MultimediaApplication",
     operatingSystem: "Web",
     url: homeUrl,
-    description: stripHtml(description),
+    description: stripMarkup(description),
     offers:
       offers && offers.length > 0
         ? offers
@@ -105,8 +108,8 @@ function faqPageSchema({
 }): JsonLdNode | null {
   const visibleItems = items
     .map((item) => ({
-      question: stripHtml(item.question),
-      answer: stripHtml(item.answer),
+      question: stripMarkup(item.question),
+      answer: stripMarkup(item.answer),
     }))
     .filter((item) => item.question && item.answer);
 
@@ -176,7 +179,7 @@ function pricingOffers({
       return {
         "@type": "Offer",
         name: `${appName} ${plan.name}`,
-        description: stripHtml(plan.description),
+        description: stripMarkup(plan.description),
         price: String(yearlyPrice),
         priceCurrency: "USD",
         url: pricingUrl,
@@ -187,7 +190,7 @@ function pricingOffers({
   const creditPackOffers = contentData.creditPacks.map((pack) => ({
     "@type": "Offer",
     name: `${appName} ${pack.name}`,
-    description: stripHtml(pack.description || `${pack.credits} credits`),
+    description: stripMarkup(pack.description || `${pack.credits} credits`),
     price: String(pack.price),
     priceCurrency: "USD",
     url: pricingUrl,

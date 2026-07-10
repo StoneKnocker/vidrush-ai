@@ -16,7 +16,7 @@
     "items": [
       {
         "question": "How many credits does it take to generate one video with Seedance 2.0?",
-        "answer": "The credit cost isn't fixed — it depends on the output resolution and whether you enable audio generation.<br/><br/><strong class=\"font-semibold text-slate-900\">Resolution (base cost per video)</strong><br/>480p costs 10 credits, 720p costs 20 credits, 1080p costs 40 credits, and 4K costs 80 credits.<br/><br/><strong class=\"font-semibold text-slate-900\">Audio</strong><br/>When audio generation is enabled, the cost is 1.5× the base resolution cost (rounded up)."
+        "answer": "The credit cost isn't fixed — it depends on the output resolution and whether you enable audio generation.\n\n**Resolution (base cost per video)**\n\n480p costs 10 credits, 720p costs 20 credits, 1080p costs 40 credits, and 4K costs 80 credits.\n\n**Audio**\n\nWhen audio generation is enabled, the cost is 1.5× the base resolution cost (rounded up)."
       },
       {
         "question": "Do unused credits accumulate?",
@@ -36,7 +36,7 @@
       },
       {
         "question": "How can I purchase more credits?",
-        "answer": "There are two ways to get additional credits:<br/><br/><strong class=\"font-semibold text-slate-900\">One-time Credit Packages</strong><br/>Purchase our one-time payment packages to get credits instantly. These can be purchased multiple times and work alongside any existing subscription.<br/><br/><strong class=\"font-semibold text-slate-900\">Subscription Upgrade</strong><br/>If you're already subscribed, switch to a higher-tier plan on this page to receive more monthly credits."
+        "answer": "There are two ways to get additional credits:\n\n**One-time Credit Packages**\n\nPurchase our one-time payment packages to get credits instantly. These can be purchased multiple times and work alongside any existing subscription.\n\n**Subscription Upgrade**\n\nIf you're already subscribed, switch to a higher-tier plan on this page to receive more monthly credits."
       },
       {
         "question": "What refund policy do you have?",

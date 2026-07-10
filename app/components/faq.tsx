@@ -1,8 +1,26 @@
 import { Minus, Plus } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import type { FAQProps } from "@/types/faq";
-import { RichText } from "./rich-text";
+
+const markdownComponents = {
+  p: ({ children }: { children?: React.ReactNode }) => (
+    <p className="mb-3 last:mb-0">{children}</p>
+  ),
+  strong: ({ children }: { children?: React.ReactNode }) => (
+    <strong className="font-semibold text-slate-900">{children}</strong>
+  ),
+  ul: ({ children }: { children?: React.ReactNode }) => (
+    <ul className="mb-3 list-disc space-y-1 pl-5 last:mb-0">{children}</ul>
+  ),
+  ol: ({ children }: { children?: React.ReactNode }) => (
+    <ol className="mb-3 list-decimal space-y-1 pl-5 last:mb-0">{children}</ol>
+  ),
+  li: ({ children }: { children?: React.ReactNode }) => (
+    <li className="leading-relaxed">{children}</li>
+  ),
+};
 
 const FAQ: React.FC<FAQProps> = ({ items, title, description }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -68,11 +86,9 @@ const FAQ: React.FC<FAQProps> = ({ items, title, description }) => {
                 }`}
               >
                 <div className="px-8 pb-8 text-base text-slate-600 leading-relaxed">
-                  {typeof faq.answer === "string" ? (
-                    <RichText text={faq.answer} />
-                  ) : (
-                    faq.answer
-                  )}
+                  <ReactMarkdown components={markdownComponents}>
+                    {faq.answer}
+                  </ReactMarkdown>
                 </div>
               </div>
             </div>
