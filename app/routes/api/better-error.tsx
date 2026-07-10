@@ -1,4 +1,5 @@
 import { ArrowLeftIcon, ShieldAlert } from "lucide-react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { type LoaderFunctionArgs, useSearchParams } from "react-router";
 import { Link } from "@/components/i18n-link";
@@ -17,6 +18,21 @@ export default function BetterError() {
   const [searchParams] = useSearchParams();
   const error = searchParams.get("error");
   const error_description = searchParams.get("error_description");
+
+  // Dual insurance for popup OAuth: if better-auth still lands here instead of
+  // errorCallbackURL, close the window so the opener's closed-poll can settle.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!window.opener || window.opener.closed) return;
+    const timer = setTimeout(() => {
+      try {
+        window.close();
+      } catch {
+        // ignore
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="container mx-auto flex min-h-screen items-center px-6 py-12">

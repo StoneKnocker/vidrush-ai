@@ -1,54 +1,80 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router";
 import { Loading } from "~/components/ui/loading";
+import { fetchAuthSession } from "~/lib/auth/auth-session";
+import { notifyOAuthOpener } from "~/lib/auth/oauth-popup";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error && error.message ? error.message : fallback;
 }
 
+function closePopupSoon(ms = 300) {
+  setTimeout(() => {
+    try {
+      window.close();
+    } catch {
+      // ignore
+    }
+  }, ms);
+}
+
 export default function OAuthCallback() {
   const [searchParams] = useSearchParams();
-  const queryClient = useQueryClient();
+  const handledRef = useRef(false);
 
   useEffect(() => {
+    if (handledRef.current) return;
+    handledRef.current = true;
+
     const handleCallback = async () => {
+      const state = searchParams.get("state") ?? "";
+      const isPopup =
+        searchParams.get("popup") === "1" ||
+        searchParams.get("popup") === "true";
+      const error = searchParams.get("error");
+      const errorDescription = searchParams.get("error_description");
+
+      // Non-popup landings (e.g. bookmarked URL): send user home.
+      if (!isPopup) {
+        window.location.replace("/");
+        return;
+      }
+
+      if (error) {
+        notifyOAuthOpener({
+          type: "error",
+          state,
+          message: errorDescription || error || "Authentication failed",
+        });
+        closePopupSoon();
+        return;
+      }
+
       try {
-        const isPopup = searchParams.get("popup") === "true";
-
-        // Wait a bit for Better Auth to process the callback
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Invalidate auth queries to get the updated session
-        await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
-
-        if (isPopup && window.opener) {
-          window.opener.postMessage(
-            { type: "OAUTH_SUCCESS" },
-            window.location.origin,
-          );
+        const session = await fetchAuthSession();
+        if (session?.user) {
+          notifyOAuthOpener({ type: "success", state });
+        } else {
+          notifyOAuthOpener({
+            type: "error",
+            state,
+            message: "Authentication failed",
+          });
         }
-
-        setTimeout(() => window.close(), 500);
       } catch (err) {
         console.error("OAuth callback error:", err);
-
-        if (searchParams.get("popup") === "true" && window.opener) {
-          window.opener.postMessage(
-            {
-              type: "OAUTH_ERROR",
-              error: getErrorMessage(err, "Authentication failed"),
-            },
-            window.location.origin,
-          );
-        }
-
-        setTimeout(() => window.close(), 2000);
+        notifyOAuthOpener({
+          type: "error",
+          state,
+          message: getErrorMessage(err, "Authentication failed"),
+        });
       }
+
+      closePopupSoon();
     };
 
-    handleCallback();
-  }, [queryClient, searchParams]);
+    void handleCallback();
+  }, [searchParams]);
 
   return <Loading fullScreen />;
 }

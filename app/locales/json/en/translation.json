@@ -84,6 +84,8 @@
     "verifying": "Verifying...",
     "verifyAndSignIn": "Verify & Sign In",
     "backToEmail": "Back to Email",
+    "completeSignInInPopup": "Complete sign-in in the popup window…",
+    "waitingForGoogle": "Waiting for Google…",
     "byContinuing": "By clicking continue, you agree to our",
     "and": "and",
     "toast": {
@@ -93,7 +95,8 @@
     "errors": {
       "sendOtpFailed": "Failed to send OTP. Please try again.",
       "invalidOtp": "Invalid OTP. Please try again.",
-      "googleLoginFailed": "Google login failed. Please try again."
+      "googleLoginFailed": "Google login failed. Please try again.",
+      "popupBlocked": "Pop-up was blocked. Please allow pop-ups for this site and try again."
     },
     "testimonial": {
       "quote": "For pre-production, this is closer to what I need: a fast way to turn a character direction into a 3D draft I can keep refining.",

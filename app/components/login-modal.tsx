@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle2, Mail } from "lucide-react";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { GoogleIcon } from "@/components/icons";
@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth/auth.client";
 import { useLoginModal } from "~/hooks/use-login-modal";
+import { refreshAuthSession } from "~/lib/auth/auth-session";
+import { openOAuthPopup } from "~/lib/auth/oauth-popup";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error && error.message ? error.message : fallback;
@@ -34,28 +36,6 @@ export function LoginModal() {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [error, setError] = useState("");
 
-  // Listen for OAuth popup messages
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
-
-      const { type, error } = event.data || {};
-
-      if (type === "OAUTH_SUCCESS") {
-        // Refresh auth state when popup closes successfully
-        queryClient.invalidateQueries({ queryKey: ["auth-session"] });
-        toast.success(t("auth.toast.signedIn"));
-        // Dispatch event for workspace to show after login
-        window.dispatchEvent(new CustomEvent("auth:loginSuccess"));
-      } else if (type === "OAUTH_ERROR" && error) {
-        setError(error);
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [queryClient, t]);
-
   const resetState = () => {
     setEmail("");
     setOtp("");
@@ -67,7 +47,17 @@ export function LoginModal() {
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      resetState();
+      // Do not abort an in-flight popup; session refresh still completes in openOAuthPopup.
+      // Only reset form UI when the user dismisses the dialog.
+      if (!isGoogleLoading) {
+        resetState();
+      } else {
+        setError("");
+        setIsOtpSent(false);
+        setOtp("");
+        setEmail("");
+        setIsLoading(false);
+      }
       closeLoginModal();
     }
   };
@@ -105,12 +95,10 @@ export function LoginModal() {
         email,
         otp,
       });
-      await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+      await refreshAuthSession(queryClient);
       toast.success(t("auth.toast.loggedIn"));
       resetState();
       closeLoginModal();
-      // Dispatch event for workspace to show after login
-      window.dispatchEvent(new CustomEvent("auth:loginSuccess"));
     } catch (error) {
       console.error("OTP login failed:", error);
       setError(getErrorMessage(error, t("auth.errors.invalidOtp")));
@@ -123,20 +111,32 @@ export function LoginModal() {
     setError("");
 
     try {
-      const popupUrl = "/auth/popup";
+      const result = await openOAuthPopup({ provider: "google" });
 
-      const popup = window.open(
-        popupUrl,
-        "google_oauth_popup",
-        "width=500,height=600,scrollbars=yes,resizable=yes",
-      );
-
-      if (!popup) {
-        throw new Error("Popup was blocked");
+      switch (result.status) {
+        case "success": {
+          // Ensure React Query reflects cookie session even if message path already checked.
+          await refreshAuthSession(queryClient);
+          toast.success(t("auth.toast.signedIn"));
+          resetState();
+          closeLoginModal();
+          break;
+        }
+        case "blocked": {
+          setError(t("auth.errors.popupBlocked"));
+          setIsGoogleLoading(false);
+          break;
+        }
+        case "cancelled": {
+          setIsGoogleLoading(false);
+          break;
+        }
+        case "error": {
+          setError(result.message || t("auth.errors.googleLoginFailed"));
+          setIsGoogleLoading(false);
+          break;
+        }
       }
-
-      // Close modal immediately after opening popup
-      closeLoginModal();
     } catch (err) {
       console.error("Google login failed:", err);
       setIsGoogleLoading(false);
@@ -160,7 +160,9 @@ export function LoginModal() {
               : t("auth.signInToYourAccount")}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            {isOtpSent ? (
+            {isGoogleLoading ? (
+              t("auth.completeSignInInPopup")
+            ) : isOtpSent ? (
               <>
                 {t("auth.verificationCodeSentTo")}
                 <span className="mt-1 block font-medium text-foreground">
@@ -190,7 +192,7 @@ export function LoginModal() {
                 className="bg-background text-foreground hover:border-primary/70 hover:bg-black/20 hover:text-primary"
               >
                 {!isGoogleLoading && <GoogleIcon className="mr-2 h-4 w-4" />}
-                Google
+                {isGoogleLoading ? t("auth.waitingForGoogle") : "Google"}
               </Button>
 
               <div className="relative">
