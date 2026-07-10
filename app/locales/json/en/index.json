@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "CyberRealistic XL - High-Fidelity Photorealistic AI Generation",
-    "description": "Experience natural photorealism and robust scenic coherence. CyberRealistic XL is a leading open-source SDXL base model optimized for lifelike human textures, complex compositions, and straightforward prompting."
+    "title": "{{appName}} — AI Video Generator Powered by Seedance 2.0",
+    "description": "Create multi-modal AI videos with {{appName}}. Powered by Seedance 2.0 — combine images, video, audio, and text for controllable, production-ready video generation."
   }
 }
