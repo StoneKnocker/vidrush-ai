@@ -25,40 +25,48 @@ import { buildR2Url } from "~/lib/r2/r2.shared";
 import { trpc } from "~/lib/trpc/trpc-provider";
 import { getLocalizedPath } from "~/lib/utils";
 
+function resolveAvatarUrl(
+  image: string | null | undefined,
+  r2Domain: string | undefined,
+): string | undefined {
+  if (!image) return undefined;
+  if (image.startsWith("http://") || image.startsWith("https://")) {
+    return image;
+  }
+  // Relative R2 object key (any prefix the write path stores).
+  if (r2Domain) {
+    return buildR2Url(image, r2Domain);
+  }
+  return undefined;
+}
+
 export function UserNav() {
   const { t, i18n } = useTranslation();
   const { user, isAuthenticated, signOut, isSigningOut } = useAuth();
   const navigate = useNavigate();
   const r2Domain = useR2Domain();
-  const { data: credits } = trpc.user.getCredits.useQuery(undefined, {
-    enabled: !!user,
-  });
+  const { data: credits, isPending: isCreditsPending } =
+    trpc.user.getCredits.useQuery(undefined, {
+      enabled: !!user,
+    });
 
   if (!isAuthenticated || !user) {
     return null;
   }
 
-  const initials = user.name?.slice(0, 2) || user.email?.slice(0, 2) || "U";
-  const alt = user.name ?? t("userNav.avatarAlt");
-
-  let avatar: string;
-  if (user.image?.startsWith("http://") || user.image?.startsWith("https://")) {
-    avatar = user.image;
-  } else if (user.image?.startsWith("user-avatar/") && r2Domain) {
-    avatar = buildR2Url(user.image, r2Domain);
-  } else {
-    const seed = user.name || user.email || "Youarebrilliant";
-    avatar = `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(seed)}`;
-  }
-
+  const displayName =
+    user.name?.trim() || user.email || t("userNav.account", "Account");
+  const initials = displayName.slice(0, 2) || "U";
+  const alt = displayName;
+  const avatar = resolveAvatarUrl(user.image, r2Domain);
   const isAdmin = user.role === "admin";
 
   const handleSignOut = async () => {
     try {
       await signOut();
       navigate(getLocalizedPath(i18n.language, "/"));
-    } catch (error) {
-      console.error("Failed to sign out:", error);
+    } catch {
+      // useAuth already logs the mutation error
       toast.error(t("userNav.signOutFailed"));
     }
   };
@@ -66,18 +74,26 @@ export function UserNav() {
   const menuItemClass =
     "cursor-pointer rounded-md text-muted-foreground focus:bg-primary focus:text-primary-foreground [&_svg]:text-primary focus:[&_svg]:text-primary-foreground";
 
+  const creditsChipClass =
+    "flex h-8 min-w-[4.5rem] items-center justify-center gap-1.5 rounded-md border bg-card px-2.5 text-primary shadow-[0_0_15px_rgba(92,88,85,0.12)] transition-colors hover:border-primary/40 hover:bg-black/10";
+
   return (
     <div className="flex items-center gap-2">
-      {credits != null && (
+      {isCreditsPending ? (
+        <div
+          className="h-8 min-w-[4.5rem] animate-pulse rounded-md border bg-card"
+          aria-hidden
+        />
+      ) : credits != null ? (
         <Link
           to="/user/credits"
           aria-label={t("userNav.viewCredits")}
-          className="flex h-8 items-center gap-1.5 rounded-md border bg-card px-2.5 text-primary shadow-[0_0_15px_rgba(92,88,85,0.12)] transition-colors hover:border-primary/40 hover:bg-black/10"
+          className={creditsChipClass}
         >
           <CoinsIcon className="h-4 w-4" />
           <span className="font-mono text-sm">{credits.total}</span>
         </Link>
-      )}
+      ) : null}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -86,7 +102,7 @@ export function UserNav() {
             className="h-9 cursor-pointer gap-1 rounded-md border border-transparent px-1.5 text-muted-foreground hover:bg-card hover:text-primary focus-visible:ring-primary/40 data-[state=open]:border-primary/60 data-[state=open]:bg-card data-[state=open]:text-primary"
           >
             <Avatar className="size-8 border">
-              <AvatarImage src={avatar} alt={alt} />
+              {avatar ? <AvatarImage src={avatar} alt={alt} /> : null}
               <AvatarFallback className="bg-card font-bold text-primary text-xs uppercase">
                 {initials}
               </AvatarFallback>
@@ -101,18 +117,20 @@ export function UserNav() {
           <DropdownMenuLabel className="p-0 font-normal">
             <div className="flex items-center gap-3 rounded-md border bg-background px-3 py-3 text-left text-sm">
               <Avatar className="h-9 w-9 rounded-md border">
-                <AvatarImage src={avatar} alt={alt} />
+                {avatar ? <AvatarImage src={avatar} alt={alt} /> : null}
                 <AvatarFallback className="rounded-md bg-card text-primary">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold text-foreground">
-                  {user.name}
+                  {displayName}
                 </span>
-                <span className="truncate text-muted-foreground text-xs">
-                  {user.email}
-                </span>
+                {user.email && user.name?.trim() ? (
+                  <span className="truncate text-muted-foreground text-xs">
+                    {user.email}
+                  </span>
+                ) : null}
               </div>
             </div>
           </DropdownMenuLabel>

@@ -25,7 +25,8 @@
     "showcase": "Showcase",
     "startGenerating": "Start Now",
     "closeMobileMenu": "Close navigation menu",
-    "openMobileMenu": "Open navigation menu"
+    "openMobileMenu": "Open navigation menu",
+    "loadingAccount": "Loading account"
   },
   "userNav": {
     "myCreations": "My Creations",
@@ -36,7 +37,8 @@
     "accountMenu": "Open account menu",
     "avatarAlt": "User avatar",
     "viewCredits": "View credits",
-    "signOutFailed": "Sign out failed. Please try again."
+    "signOutFailed": "Sign out failed. Please try again.",
+    "account": "Account"
   },
   "footer": {
     "brandDescription": "VidRush AI — multi-modal AI video creation from images, video, audio, and text.",

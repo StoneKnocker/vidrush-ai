@@ -2,6 +2,7 @@ import { Menu, X } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router";
 import { Link } from "@/components/i18n-link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ const mobileNavLinkClass = cn(
 
 const Header: React.FC = () => {
   const { t } = useTranslation();
+  const location = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -35,6 +37,13 @@ const Header: React.FC = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Header lives in a persistent layout; close overlay on any client navigation
+  // (including UserNav links that do not call setIsMobileMenuOpen).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-run on route change only
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname, location.search, location.hash]);
 
   const showGuestCta = !isLoading && !isAuthenticated;
   const showUserNav = !isLoading && isAuthenticated;
@@ -63,12 +72,20 @@ const Header: React.FC = () => {
           </nav>
 
           {/* Right: auth actions + mobile menu button */}
-          <div className="flex items-center gap-2 md:gap-4">
+          <div
+            className="flex items-center gap-2 md:gap-4"
+            aria-busy={isLoading}
+          >
             {isLoading && (
-              <div
-                className="size-9 animate-pulse rounded-md border bg-card"
-                aria-hidden
-              />
+              <>
+                <span className="sr-only">
+                  {t("header.loadingAccount", "Loading account")}
+                </span>
+                <div className="flex items-center gap-2" aria-hidden>
+                  <div className="h-8 min-w-[4.5rem] animate-pulse rounded-md border bg-card" />
+                  <div className="size-9 animate-pulse rounded-md border bg-card" />
+                </div>
+              </>
             )}
             {showUserNav && <UserNav />}
             {showGuestCta && (
