@@ -55,7 +55,7 @@ export const emailOTPConfig = emailOTP({
         `,
       });
       if (error) {
-        console.error("error:", error);
+        throw error;
       }
 
       console.log("Email sent:", data?.id);

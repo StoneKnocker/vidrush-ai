@@ -1,5 +1,6 @@
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import { getServerSession } from "~/lib/auth/auth.server";
+import { getSessionFromAls } from "~/middlewares/auth-guard";
 
 /**
  * Parse guestId from cookie header.
@@ -35,7 +36,9 @@ export async function createContext({
   req,
   resHeaders,
 }: FetchCreateContextFnOptions) {
-  const session = await getServerSession(req);
+  // Prefer session already resolved by root setAuth middleware (one getSession per request)
+  const fromAls = getSessionFromAls();
+  const session = fromAls !== undefined ? fromAls : await getServerSession(req);
   const guestId = getGuestIdFromCookie(req.headers.get("cookie"));
   const guestIp = getClientIp(req);
 

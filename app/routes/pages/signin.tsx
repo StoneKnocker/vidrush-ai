@@ -10,8 +10,8 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth/auth.client";
 import { AppLogo } from "~/components/app-logo";
 import { Link } from "~/components/i18n-link";
-import { serverAuth } from "~/lib/auth/auth.server";
 import { getLocalizedPath, getSafeRedirectPath } from "~/lib/utils";
+import { getCurrentSession } from "~/middlewares/auth-guard";
 import { getLocale } from "~/middlewares/i18next";
 import type { Route } from "./+types/signin";
 
@@ -20,9 +20,8 @@ function getErrorMessage(error: unknown, fallback: string) {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  const session = await serverAuth.api.getSession({
-    headers: request.headers,
-  });
+  // Session already resolved by root setAuth middleware
+  const session = getCurrentSession();
 
   if (session?.user) {
     const url = new URL(request.url);

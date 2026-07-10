@@ -20,14 +20,21 @@ export default async function handleRequest(
   let shellRendered = false;
   const userAgent = request.headers.get("user-agent");
 
-  // Set a random nonce for CSP.
-  const nonce = crypto.randomUUID() ?? undefined;
+  // Random nonce for CSP + React SSR script tags (must match client hydration).
+  const nonce = crypto.randomUUID();
 
-  // Set CSP headers to prevent 'Prop nonce did not match' error
-  // Without this, browser security policy will clear the nonce attribute on the client side
+  // Partial CSP: nonce + strict-dynamic allows Analytics (and other) scripts that
+  // are themselves loaded with this nonce to pull in further script hosts.
+  // frame-ancestors / form-action harden clickjacking and form targets.
   responseHeaders.set(
     "Content-Security-Policy",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval'; object-src 'none'; base-uri 'none';`,
+    [
+      `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval'`,
+      "object-src 'none'",
+      "base-uri 'none'",
+      "frame-ancestors 'none'",
+      "form-action 'self'",
+    ].join("; "),
   );
 
   const body = await renderToReadableStream(

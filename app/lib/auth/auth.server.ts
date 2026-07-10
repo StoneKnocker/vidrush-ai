@@ -2,7 +2,6 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
 import { lastLoginMethod } from "better-auth/plugins";
-import { cache } from "react";
 import { db } from "~/lib/database/db.server";
 import { serverEnv } from "~/lib/env.server";
 import { deleteFromR2 } from "~/lib/r2/r2.server";
@@ -15,6 +14,8 @@ type BetterAuthNewUser = {
 };
 
 export const serverAuth = betterAuth({
+  // Explicit secret from validated env — do not rely on process.env alone on Workers
+  secret: serverEnv.BETTER_AUTH_SECRET,
   baseURL: serverEnv.APP_URL,
   trustedOrigins: [serverEnv.APP_URL],
   database: drizzleAdapter(db, {
@@ -110,12 +111,11 @@ export const serverAuth = betterAuth({
   },
 });
 
-export const getServerSession = cache(async (request: Request) => {
-  const session = await serverAuth.api.getSession({
+export async function getServerSession(request: Request) {
+  return serverAuth.api.getSession({
     headers: request.headers,
   });
-  return session;
-});
+}
 
 function getR2ObjectKeyFromImage(imageUrl: string): string | null {
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {

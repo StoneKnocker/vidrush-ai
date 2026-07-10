@@ -30,7 +30,7 @@ export default [
       route("privacy-policy", "routes/pages/privacy-policy.tsx"),
       route("cookie-policy", "routes/pages/cookie-policy.tsx"),
       route("terms-and-conditions", "routes/pages/terms-and-conditions.tsx"),
-      route("signin", "routes/pages/signin.tsx"),
+      route("sign-in", "routes/pages/signin.tsx"),
     ]),
   ]),
 

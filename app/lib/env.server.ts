@@ -21,6 +21,8 @@ const serverEnvSchema = z.object({
 
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
+  // better-auth session signing / encryption — must be ≥32 chars
+  BETTER_AUTH_SECRET: z.string().min(32),
   UNOSEND_API_KEY: z.string().min(1),
   CREEM_API_KEY: z.string().min(1),
   CREEM_WEBHOOK_SECRET: z.string().min(1),
