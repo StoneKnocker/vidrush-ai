@@ -6,15 +6,12 @@ const cookie = createCookie("__color-scheme", {
   sameSite: "lax",
 });
 
-export async function parseColorScheme(request: Request) {
+export async function parseColorScheme(request: Request): Promise<ColorScheme> {
   const header = request.headers.get("Cookie");
   const vals = await cookie.parse(header);
-  return vals ? vals.colorScheme : "light";
-}
-
-export function serializeColorScheme(colorScheme: ColorScheme) {
-  const eatCookie = colorScheme === "system";
-  return eatCookie
-    ? cookie.serialize({}, { expires: new Date(0), maxAge: 0 })
-    : cookie.serialize({ colorScheme });
+  const scheme = vals?.colorScheme as ColorScheme | undefined;
+  if (scheme === "light" || scheme === "dark" || scheme === "system") {
+    return scheme;
+  }
+  return "light";
 }

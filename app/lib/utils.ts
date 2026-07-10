@@ -3,7 +3,6 @@ import { format, parseISO } from "date-fns";
 import { nanoid } from "nanoid";
 import { twMerge } from "tailwind-merge";
 import { i18nConfig } from "~/lib/config";
-import { buildR2Url } from "~/lib/r2/r2.shared";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -80,42 +79,12 @@ export function getLocalizedPath(locale: string, path: string): string {
       : `/${normalizedLocale}${cleanPath}`;
 }
 
-export function callAll<Args extends Array<unknown>>(
-  ...fns: Array<((...args: Args) => unknown) | undefined>
-) {
-  return (...args: Args) => {
-    for (const fn of fns) {
-      fn?.(...args);
-    }
-  };
-}
-
 export function formatDate(
   date: Date | string,
   formatString = "yyyy-MM-dd",
 ): string {
   const dateObj = typeof date === "string" ? parseISO(date) : date;
   return format(dateObj, formatString);
-}
-
-export function getAvatarUrl(
-  userImage: string | null | undefined,
-  userName: string | null | undefined,
-  userEmail: string | null | undefined,
-  r2Domain?: string,
-) {
-  const seed = userName || userEmail || "Youarebrilliant";
-  const placeholderUrl = `https://api.dicebear.com/9.x/initials/svg?seed=${seed}`;
-  let avatarUrl = null;
-  if (userImage?.startsWith("http://") || userImage?.startsWith("https://")) {
-    avatarUrl = userImage;
-  } else if (userImage?.startsWith("user-avatar/")) {
-    avatarUrl = buildR2Url(userImage, r2Domain);
-  }
-  return {
-    avatarUrl,
-    placeholderUrl,
-  };
 }
 
 export function getGuestId(): string | null {

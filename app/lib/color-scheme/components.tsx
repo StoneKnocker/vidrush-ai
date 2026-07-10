@@ -2,44 +2,26 @@
  * Color scheme implementation based on React Router's official website solution
  * @see https://github.com/remix-run/react-router-website
  *
- * This component provides a complete color theme switching solution:
- * - Supports system/light/dark modes
- * - Includes client and server-side isomorphic rendering
- * - Uses Zod for type validation
- * - Responds to system theme changes
+ * System/light/dark via cookie + prefers-color-scheme.
+ * Theme is read-only from root loader (no UI switcher currently).
  */
 
 import { useLayoutEffect, useMemo } from "react";
-import { useNavigation, useRouteLoaderData } from "react-router";
-import { z } from "zod";
+import { useRouteLoaderData } from "react-router";
 import type { loader as rootLoader } from "~/root";
 
-export const ColorSchemeSchema = z.object({
-  colorScheme: z.enum(["light", "dark", "system"]),
-  returnTo: z.string().optional(),
-});
-
-export type ColorScheme = z.infer<typeof ColorSchemeSchema>["colorScheme"];
+export type ColorScheme = "light" | "dark" | "system";
 
 /**
- * This hook is used to get the color scheme from the fetcher or the root loader
- * @returns The color scheme
+ * Color scheme from the root loader (cookie / default).
  */
 export function useColorScheme(): ColorScheme {
   const rootLoaderData = useRouteLoaderData<typeof rootLoader>("root");
-  const rootColorScheme = rootLoaderData?.colorScheme ?? "system";
-
-  const { formData } = useNavigation();
-  const optimisticColorScheme = formData?.has("colorScheme")
-    ? (formData.get("colorScheme") as ColorScheme)
-    : null;
-  return optimisticColorScheme || rootColorScheme;
+  return rootLoaderData?.colorScheme ?? "system";
 }
 
 /**
- * This component is used to set the color scheme on the document element
- * @param nonce The nonce to use for the script
- * @returns The script element
+ * Applies color scheme on the document element and theme-color meta tags.
  */
 export function ColorSchemeScript({ nonce }: { nonce: string }) {
   const colorScheme = useColorScheme();

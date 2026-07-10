@@ -20,15 +20,6 @@
     "contentUnavailable": "Cookie policy content is unavailable",
     "lastModified": "Last modified: "
   },
-  "cookieBanner": {
-    "message": "We use cookies to improve your experience. By continuing to use this site, you consent to our use of cookies. Read our",
-    "accept": "I agree"
-  },
-  "affiliateBanner": {
-    "title": "Pollo AI",
-    "description": "Free All-in-One AI Image and Video Generator",
-    "buttonText": "Try for Free"
-  },
   "header": {
     "workspace": "Workspace",
     "showcase": "Showcase",
@@ -129,20 +120,9 @@
     "title": "{{appName}} Page Not Found",
     "description": "The page you requested doesn't exist or has been moved. Try going back to the homepage or check the URL."
   },
-  "workspace": {
-    "chooseStyle": "Choose Style"
-  },
   "pricing": {
     "processing": "Processing...",
     "genericError": "An error occurred. Please try again."
-  },
-  "userNav": {
-    "myCreations": "My Creations",
-    "myCredits": "My Credits",
-    "adminPanel": "Admin Panel",
-    "signingOut": "Signing out...",
-    "logOut": "Log out",
-    "accountMenu": "Open account menu"
   },
   "creations": {
     "title": "Your {{appName}} Creations",

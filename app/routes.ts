@@ -48,7 +48,6 @@ export default [
   ...prefix("api", [
     route("auth/error", "routes/api/better-error.tsx"),
     route("auth/*", "routes/api/better.tsx"),
-    route("color-scheme", "routes/api/color-scheme.ts"),
     route("locales/:lng/:ns", "routes/api/locales.ts"),
     route("trpc/*", "routes/api/trpc.ts"),
     route("payment/webhook/creem", "routes/api/payment/webhook/creem.ts"),

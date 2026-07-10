@@ -21,7 +21,6 @@ const serverEnvSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   UNOSEND_API_KEY: z.string().optional(),
-  RESEND_API_KEY: z.string().optional(),
   CREEM_API_KEY: z.string().min(1),
   CREEM_WEBHOOK_SECRET: z.string().optional(),
   KIE_API_KEY: z.string().optional(),
