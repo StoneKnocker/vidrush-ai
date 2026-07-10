@@ -72,7 +72,7 @@ export const serverAuth = betterAuth({
     accountLinking: {
       enabled: true,
       allowDifferentEmails: true,
-      trustedProviders: ["google", "github"],
+      trustedProviders: ["google"],
     },
   },
   user: {
