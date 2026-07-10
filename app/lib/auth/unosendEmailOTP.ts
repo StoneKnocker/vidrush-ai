@@ -2,7 +2,6 @@ import Unosend from "@unosend/node";
 import { emailOTP } from "better-auth/plugins";
 import { serverEnv } from "~/lib/env.server";
 
-const unosendApiKey = serverEnv.UNOSEND_API_KEY;
 const unosendFromEmail = serverEnv.SEND_FROM_EMAIL;
 
 export const emailOTPConfig = emailOTP({
@@ -15,11 +14,6 @@ export const emailOTPConfig = emailOTP({
     otp: string;
     type: string;
   }) => {
-    if (!unosendApiKey) {
-      console.error("UNOSEND_API_KEY not configured, OTP email not sent");
-      throw new Error("Email delivery is not configured");
-    }
-
     const subject =
       type === "sign-in"
         ? `Sign-In ${serverEnv.APP_NAME}`
@@ -27,7 +21,7 @@ export const emailOTPConfig = emailOTP({
           ? "Verify Your Email"
           : "Your OTP Code";
 
-    const unosend = new Unosend(unosendApiKey);
+    const unosend = new Unosend(serverEnv.UNOSEND_API_KEY);
 
     try {
       const { data, error } = await unosend.emails.send({

@@ -19,7 +19,7 @@ export default [
         route("feedback", "routes/pages/feedback.tsx"),
         route("showcase", "routes/pages/showcase.tsx"),
         route("guide", "routes/pages/guide.tsx"),
-        route("_test", "routes/_test.tsx"),
+        ...(import.meta.env.DEV ? [route("_test", "routes/_test.tsx")] : []),
         ...prefix("user", [
           layout("routes/pages/user/layout.tsx", [
             route("creations", "routes/pages/user/creations.tsx"),

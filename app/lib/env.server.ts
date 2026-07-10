@@ -19,13 +19,13 @@ const serverEnvSchema = z.object({
   R2_SECRET_ACCESS_KEY: z.string().min(1),
   SEND_FROM_EMAIL: z.string().min(1),
 
-  GOOGLE_CLIENT_ID: z.string().optional(),
-  GOOGLE_CLIENT_SECRET: z.string().optional(),
-  UNOSEND_API_KEY: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().min(1),
+  GOOGLE_CLIENT_SECRET: z.string().min(1),
+  UNOSEND_API_KEY: z.string().min(1),
   CREEM_API_KEY: z.string().min(1),
-  CREEM_WEBHOOK_SECRET: z.string().optional(),
-  KIE_API_KEY: z.string().optional(),
-  KIE_WEBHOOK_HMAC_KEY: z.string().optional(),
+  CREEM_WEBHOOK_SECRET: z.string().min(1),
+  KIE_API_KEY: z.string().min(1),
+  KIE_WEBHOOK_HMAC_KEY: z.string().min(1),
 
   // PayPal (optional — enable with PAYPAL_ENABLED=true + credentials)
   PAYPAL_ENABLED: z.string().optional().default("false"),
