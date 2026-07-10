@@ -63,7 +63,7 @@ const FAQ: React.FC<FAQProps> = ({ items, title, description }) => {
               <div
                 className={`overflow-hidden transition-all duration-500 ease-in-out ${
                   openIndex === index
-                    ? "max-h-96 opacity-100"
+                    ? "max-h-[2000px] opacity-100"
                     : "max-h-0 opacity-0"
                 }`}
               >
