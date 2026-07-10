@@ -3,7 +3,7 @@ import { Sparkles } from "lucide-react";
 const TESTIMONIALS = [
   {
     quote:
-      "Seedance 2.0's multi-modal input is a game-changer. I can finally reference a dance video and apply it to any character I want. The motion replication is incredibly accurate!",
+      "VidRush AI's multi-modal input is a game-changer. I can finally reference a dance video and apply it to any character I want. The motion replication is incredibly accurate!",
     name: "Sarah Chen",
     role: "Content Creator",
     avatar: "https://cdn.vidrushai.com/seedance2-assets/avatars/sarah-chen.jpg",
@@ -18,7 +18,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "Finally, character consistency that actually works! Faces, clothing, even small text - everything stays consistent throughout the video. Seedance 2.0 solved our biggest problem.",
+      "Finally, character consistency that actually works! Faces, clothing, even small text - everything stays consistent throughout the video. VidRush AI solved our biggest problem.",
     name: "Emily Watson",
     role: "Art Director",
     avatar:
@@ -49,7 +49,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "As an educator, Seedance 2.0 helps me create engaging visual explanations for complex topics. My students love the animated lessons.",
+      "As an educator, VidRush AI helps me create engaging visual explanations for complex topics. My students love the animated lessons.",
     name: "Jessica Liu",
     role: "Online Educator",
     avatar:
@@ -73,7 +73,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "I use Seedance 2.0 for pre-visualization on every project. It saves thousands in pre-production costs and helps me communicate ideas clearly.",
+      "I use VidRush AI for pre-visualization on every project. It saves thousands in pre-production costs and helps me communicate ideas clearly.",
     name: "Thomas Anderson",
     role: "Creative Director",
     avatar:
@@ -97,7 +97,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "The motion replication is scary good. I uploaded a choreography clip and Seedance applied the exact movements to my character on the first try.",
+      "The motion replication is scary good. I uploaded a choreography clip and VidRush AI applied the exact movements to my character on the first try.",
     name: "Aria Johnson",
     role: "Dance Choreographer",
     avatar:
@@ -105,7 +105,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "From concept to final video, Seedance 2.0 has become an essential part of my creative workflow. The quality keeps getting better.",
+      "From concept to final video, VidRush AI has become an essential part of my creative workflow. The quality keeps getting better.",
     name: "Jake Morrison",
     role: "YouTuber",
     avatar:
@@ -208,7 +208,7 @@ export function SeedanceTestimonials() {
             Loved by Creators Worldwide
           </h2>
           <p className="mt-6 max-w-3xl text-center text-lg leading-relaxed text-muted-foreground">
-            See what our customers have to say about Seedance 2.0 and how
+            See what our customers have to say about VidRush AI and how
             it&apos;s transforming their creative workflows.
           </p>
         </div>

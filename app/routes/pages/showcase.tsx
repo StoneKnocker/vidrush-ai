@@ -7,11 +7,11 @@ import type { Route } from "./+types/showcase";
 export const meta: Route.MetaFunction = ({ loaderData }) => {
   const locale = loaderData?.locale ?? "en";
   return [
-    { title: "Video Showcases | Vidrush AI" },
+    { title: "Video Showcases | VidRush AI" },
     {
       name: "description",
       content:
-        "Explore a curated collection of stunning AI-generated videos. Each clip demonstrates the creative power and versatility of Vidrush AI.",
+        "Explore a curated collection of stunning AI-generated videos. Each clip demonstrates the creative power and versatility of VidRush AI.",
     },
     {
       tagName: "link",
@@ -53,7 +53,7 @@ export default function ShowcaseRoute() {
             className="mt-5 text-balance text-lg leading-8 text-muted-foreground opacity-0"
             style={{ animation: "fade-in-up 0.6s ease-out 0.3s forwards" }}
           >
-            Explore stunning clips made with Vidrush AI — from cinematic scenes
+            Explore stunning clips made with VidRush AI — from cinematic scenes
             to artistic animations. Tap any thumbnail to play.
           </p>
         </section>

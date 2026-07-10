@@ -3,9 +3,14 @@ import { useState } from "react";
 
 const FAQS = [
   {
+    question: "What is VidRush AI?",
+    answer:
+      "VidRush AI is a multi-modal AI video creation platform powered by Seedance 2.0. It supports image, video, audio, and text inputs so you can reference motion, effects, camera movements, characters, scenes, and sounds with natural language — for truly controllable video creation.",
+  },
+  {
     question: "What is Seedance 2.0?",
     answer:
-      "Seedance 2.0 is a revolutionary multi-modal AI video generation model that supports image, video, audio, and text inputs. Unlike traditional AI video tools, Seedance 2.0 lets you reference any content - motion, effects, camera movements, characters, scenes, and sounds - using natural language descriptions. It's designed for truly controllable video creation.",
+      "Seedance 2.0 is the multi-modal AI video generation model that powers VidRush AI. It combines image, video, audio, and text inputs for production-ready video generation with strong consistency and precise motion control.",
   },
   {
     question: "Do you support API access?",
@@ -60,15 +65,15 @@ const FAQS = [
   {
     question: "How do you ensure privacy and security?",
     answer:
-      "We take privacy seriously. Your uploaded assets and generated content are processed securely and are not used to train our models without your consent. Private generation options are available on paid plans.",
+      "We take privacy seriously. Your uploaded assets and generated content are processed securely and are not used to train models without your consent. Private generation options are available on paid plans.",
   },
   {
-    question: "Does Seedance 2.0 support NSFW content?",
+    question: "Does VidRush AI support NSFW content?",
     answer:
-      "No. Seedance 2.0 does not allow the generation of adult, violent, or otherwise prohibited content. We have safety filters in place and actively monitor usage to ensure compliance with our content policies.",
+      "No. VidRush AI does not allow the generation of adult, violent, or otherwise prohibited content. We have safety filters in place and actively monitor usage to ensure compliance with our content policies.",
   },
   {
-    question: "How do I get started with Seedance 2.0?",
+    question: "How do I get started with VidRush AI?",
     answer:
       "Simply sign up for an account, choose a plan or credit pack, and start creating. You can upload your assets, describe your vision in natural language, and generate your first video in minutes.",
   },

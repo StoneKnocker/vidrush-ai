@@ -47,7 +47,7 @@ export function SeedanceSteps() {
       <div className="container relative z-10 mx-auto px-4">
         <div className="mb-20 text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
-            How to Create AI Videos with Seedance 2.0
+            How to Create AI Videos with VidRush AI
           </h2>
         </div>
 

@@ -8,9 +8,10 @@ import type { Route } from "./+types/guide";
 export const meta: Route.MetaFunction = ({ loaderData }) => {
   const locale = loaderData?.locale ?? "en";
   const appUrl = loaderData?.appUrl;
-  const title = "Seedance 2.0 Prompt Guide - Master AI Video Generation";
+  const title =
+    "VidRush AI Prompt Guide - Master Seedance 2.0 Video Generation";
   const description =
-    "Master the art of prompting to create stunning AI-generated videos. Prompt techniques, multimodal references, and real-world examples for Seedance 2.0.";
+    "Master the art of prompting to create stunning AI-generated videos on VidRush AI. Prompt techniques, multimodal references, and real-world examples for Seedance 2.0.";
   const canonicalUrl = getCanonicalUrl(locale, "/guide", appUrl);
 
   return [

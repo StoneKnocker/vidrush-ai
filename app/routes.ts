@@ -16,7 +16,6 @@ export default [
         route("pricing", "routes/pages/pricing.tsx"),
         route("blog", "routes/pages/blog.tsx"),
         route("blog/:slug", "routes/pages/blog-post.tsx"),
-        route("playground", "routes/pages/playground.tsx"),
         route("feedback", "routes/pages/feedback.tsx"),
         route("showcase", "routes/pages/showcase.tsx"),
         route("guide", "routes/pages/guide.tsx"),

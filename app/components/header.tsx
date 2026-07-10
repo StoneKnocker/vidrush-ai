@@ -63,7 +63,7 @@ const Header: React.FC = () => {
               asChild
               className="rounded-md border border-primary/60 bg-card font-semibold text-primary shadow-[0_0_20px_rgba(0,217,146,0.12)] hover:bg-black/20 hover:text-primary"
             >
-              <Link to="/playground">{t("header.startGenerating")}</Link>
+              <Link to="/#workspace">{t("header.startGenerating")}</Link>
             </Button>
           </div>
 
@@ -101,7 +101,7 @@ const Header: React.FC = () => {
               asChild
               className="rounded-md border border-primary/60 bg-card font-semibold text-primary hover:bg-black/20 hover:text-primary"
             >
-              <Link to="/playground">{t("header.startGenerating")}</Link>
+              <Link to="/#workspace">{t("header.startGenerating")}</Link>
             </Button>
           </div>
         </div>

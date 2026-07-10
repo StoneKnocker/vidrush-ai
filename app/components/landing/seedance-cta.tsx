@@ -20,7 +20,7 @@ export function SeedanceCTA() {
           </h2>
           <p className="mb-10 text-lg text-muted-foreground md:text-xl">
             Join thousands of creators who are already transforming their ideas
-            into stunning videos with Seedance 2.0.
+            into stunning videos with VidRush AI.
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Button

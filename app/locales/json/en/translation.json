@@ -30,8 +30,7 @@
     "buttonText": "Try for Free"
   },
   "header": {
-    "workspace": "Playground",
-    "playground": "Playground",
+    "workspace": "Workspace",
     "showcase": "Showcase",
     "startGenerating": "Start Now",
     "closeMobileMenu": "Close navigation menu",
@@ -133,14 +132,6 @@
   "workspace": {
     "chooseStyle": "Choose Style"
   },
-  "playground": {
-    "metaTitle": "CyberRealistic XL & CyberRealistic Pony Playground",
-    "metaDescription": "Experience CyberRealistic's photorealistic AI model directly in your browser. Try lifelike skin textures and cinematic lighting with simple natural language prompts — completely free.",
-    "title": "CyberRealistic Playground",
-    "description": "Try CyberRealistic directly in your browser. Generate high-fidelity photorealistic images with simple natural language prompts — fast, responsive, and free to explore.",
-    "tabXL": "CyberRealistic XL Playground",
-    "tabPony": "CyberRealistic Pony Playground"
-  },
   "pricing": {
     "processing": "Processing...",
     "genericError": "An error occurred. Please try again."
@@ -157,7 +148,7 @@
     "title": "Your {{appName}} Creations",
     "description": "Browse and manage your generated images and artwork.",
     "emptyTitle": "No creations yet",
-    "emptyDescription": "Your generated images will appear here. Start by creating your first image from the playground.",
+    "emptyDescription": "Your generated videos will appear here. Start by creating your first video from the homepage workspace.",
     "viewVideo": "View video",
     "viewFullSize": "View full size",
     "downloadVideo": "Download video",

@@ -126,9 +126,9 @@ export function SeedanceUseCases() {
             Endless Possibilities For Every Creator
           </h2>
           <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-muted-foreground">
-            From viral content to professional productions, Seedance 2.0
-            empowers creators across industries to bring their multi-modal
-            visions to life.
+            From viral content to professional productions, VidRush AI empowers
+            creators across industries to bring their multi-modal visions to
+            life.
           </p>
         </div>
 

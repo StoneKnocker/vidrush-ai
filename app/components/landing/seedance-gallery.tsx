@@ -11,85 +11,85 @@ const GALLERY_ITEMS = [
     id: 1,
     videoNum: 1,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-1.webp",
-    alt: "Seedance 2.0 Video 1",
+    alt: "VidRush AI Video 1",
   },
   {
     id: 2,
     videoNum: 2,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-2.webp",
-    alt: "Seedance 2.0 Video 2",
+    alt: "VidRush AI Video 2",
   },
   {
     id: 3,
     videoNum: 19,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-19.webp",
-    alt: "Seedance 2.0 Video 3",
+    alt: "VidRush AI Video 3",
   },
   {
     id: 4,
     videoNum: 4,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-4.webp",
-    alt: "Seedance 2.0 Video 4",
+    alt: "VidRush AI Video 4",
   },
   {
     id: 5,
     videoNum: 5,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-5.webp",
-    alt: "Seedance 2.0 Video 5",
+    alt: "VidRush AI Video 5",
   },
   {
     id: 6,
     videoNum: 17,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-17.webp",
-    alt: "Seedance 2.0 Video 6",
+    alt: "VidRush AI Video 6",
   },
   {
     id: 7,
     videoNum: 40,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-40.webp",
-    alt: "Seedance 2.0 Video 7",
+    alt: "VidRush AI Video 7",
   },
   {
     id: 8,
     videoNum: 8,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-8.webp",
-    alt: "Seedance 2.0 Video 8",
+    alt: "VidRush AI Video 8",
   },
   {
     id: 9,
     videoNum: 14,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-14.webp",
-    alt: "Seedance 2.0 Video 9",
+    alt: "VidRush AI Video 9",
   },
   {
     id: 10,
     videoNum: 10,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-10.webp",
-    alt: "Seedance 2.0 Video 10",
+    alt: "VidRush AI Video 10",
   },
   {
     id: 11,
     videoNum: 30,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-30.webp",
-    alt: "Seedance 2.0 Video 11",
+    alt: "VidRush AI Video 11",
   },
   {
     id: 12,
     videoNum: 38,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-38.webp",
-    alt: "Seedance 2.0 Video 12",
+    alt: "VidRush AI Video 12",
   },
   {
     id: 13,
     videoNum: 16,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-16.webp",
-    alt: "Seedance 2.0 Video 13",
+    alt: "VidRush AI Video 13",
   },
   {
     id: 14,
     videoNum: 45,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-45.webp",
-    alt: "Seedance 2.0 Video 14",
+    alt: "VidRush AI Video 14",
   },
 ];
 
@@ -140,7 +140,7 @@ export function SeedanceGallery() {
             Get Inspired
           </h2>
           <p className="mx-auto mt-6 max-w-4xl text-lg leading-relaxed text-muted-foreground">
-            Explore stunning video examples created with Seedance 2.0&apos;s
+            Explore stunning video examples created with VidRush AI&apos;s
             multi-modal capabilities.
           </p>
         </div>

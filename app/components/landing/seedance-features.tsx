@@ -58,11 +58,11 @@ export function SeedanceFeatures() {
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-16 text-center lg:mb-20">
           <h2 className="mb-6 text-3xl font-extrabold leading-tight text-foreground md:text-4xl">
-            Key Features of Seedance 2.0
+            Key Features of VidRush AI
           </h2>
           <p className="mx-auto max-w-3xl text-lg leading-relaxed text-muted-foreground lg:text-xl">
-            A truly controllable multi-modal AI video model. Reference anything,
-            edit anything, create anything.
+            Powered by Seedance 2.0 — a truly controllable multi-modal AI video
+            model. Reference anything, edit anything, create anything.
           </p>
         </div>
 

@@ -34,9 +34,9 @@ export type GuideSection = {
 };
 
 export const GUIDE_HERO = {
-  title: "Seedance 2.0 Prompt Guide",
+  title: "VidRush AI Prompt Guide",
   description:
-    "Master the art of prompting to create stunning AI-generated videos. This guide covers prompt techniques, multimodal references, and real-world examples for Seedance 2.0 (also applicable to Seedance 2.0 Fast).",
+    "Master the art of prompting to create stunning AI-generated videos on VidRush AI. This guide covers prompt techniques, multimodal references, and real-world examples for Seedance 2.0 (also applicable to Seedance 2.0 Fast).",
 } as const;
 
 export const FORMULA_CARDS = [
