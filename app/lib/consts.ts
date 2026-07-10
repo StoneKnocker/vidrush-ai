@@ -45,12 +45,3 @@ export const PAYMENT_PROVIDER = {
 
 export type PaymentProvider =
   (typeof PAYMENT_PROVIDER)[keyof typeof PAYMENT_PROVIDER];
-
-// Task error codes for frontend to display appropriate modals
-export const TASK_ERROR_CODE = {
-  INSUFFICIENT_CREDITS: "INSUFFICIENT_CREDITS",
-  GUEST_TASK_EXISTS: "GUEST_TASK_EXISTS",
-} as const;
-
-export type TaskErrorCode =
-  (typeof TASK_ERROR_CODE)[keyof typeof TASK_ERROR_CODE];

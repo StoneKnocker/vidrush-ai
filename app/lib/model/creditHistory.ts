@@ -9,16 +9,6 @@ export async function addCreditHistory(
   await db.insert(creditHistory).values(data);
 }
 
-export async function getCreditHistoryByUserId(userId: string) {
-  const result = await db
-    .select()
-    .from(creditHistory)
-    .where(eq(creditHistory.userId, userId))
-    .orderBy(desc(creditHistory.id));
-
-  return result;
-}
-
 export async function getCreditHistoryByUserIdPaginated(
   userId: string,
   page: number,

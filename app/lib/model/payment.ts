@@ -33,15 +33,6 @@ export async function getPaymentByPublicId(publicId: string) {
   return result[0] || null;
 }
 
-export async function getPaymentByUserId(userId: string) {
-  const result = await db
-    .select()
-    .from(payment)
-    .where(eq(payment.userId, userId));
-
-  return result;
-}
-
 export async function updatePaymentStatus(
   id: number,
   status: string,

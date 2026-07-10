@@ -136,15 +136,3 @@ export function getGuestId(): string | null {
 
   return guestId;
 }
-
-export function getExtensionFromUrl(url: string): string | null {
-  try {
-    const pathname = new URL(url).pathname;
-    const fileName = pathname.split("/").pop();
-    const extension = fileName?.split(".").pop()?.toLowerCase();
-    return extension || null;
-  } catch {
-    const extension = url.split(".").pop()?.split("?").at(0)?.toLowerCase();
-    return extension || null;
-  }
-}

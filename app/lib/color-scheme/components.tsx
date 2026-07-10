@@ -10,12 +10,7 @@
  */
 
 import { useLayoutEffect, useMemo } from "react";
-import {
-  useLocation,
-  useNavigation,
-  useRouteLoaderData,
-  useSubmit,
-} from "react-router";
+import { useNavigation, useRouteLoaderData } from "react-router";
 import { z } from "zod";
 import type { loader as rootLoader } from "~/root";
 
@@ -39,30 +34,6 @@ export function useColorScheme(): ColorScheme {
     ? (formData.get("colorScheme") as ColorScheme)
     : null;
   return optimisticColorScheme || rootColorScheme;
-}
-
-/**
- * This hook is used to set the color scheme on the document element
- * @returns The submit function
- */
-export function useSetColorScheme() {
-  const location = useLocation();
-  const submit = useSubmit();
-
-  return (colorScheme: ColorScheme) => {
-    submit(
-      {
-        colorScheme,
-        returnTo: location.pathname + location.search,
-      },
-      {
-        method: "post",
-        action: "/api/color-scheme",
-        preventScrollReset: true,
-        replace: true,
-      },
-    );
-  };
 }
 
 /**

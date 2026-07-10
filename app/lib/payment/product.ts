@@ -233,11 +233,6 @@ export function getProduct(planId: string): ProductInfo {
   };
 }
 
-/** @deprecated Use getProduct().creemProductId */
-export function getProductId(planId: string) {
-  return getCreemProductId(planId);
-}
-
 /**
  * Billing interval for subscription planIds.
  * One-time packs return null.

@@ -14,10 +14,6 @@ export function useSupportEmail() {
 export function useAppName() {
   return usePublicEnv()?.APP_NAME ?? DEFAULT_APP_NAME;
 }
-export function useAppUrl() {
-  return usePublicEnv()?.APP_URL ?? "";
-}
-
 export function useR2Domain() {
   return usePublicEnv()?.R2_DOMAIN ?? "";
 }

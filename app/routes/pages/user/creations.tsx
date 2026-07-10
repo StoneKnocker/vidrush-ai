@@ -13,14 +13,13 @@ import {
 import { getUserCompletedTasksPaginated } from "~/lib/model/userTask";
 import { useR2Domain } from "~/lib/public-env";
 import { buildR2Url } from "~/lib/r2/r2.shared";
-import type { TaskResultData } from "~/lib/service/taskResultMedia";
 import { cn } from "~/lib/utils";
 import { requireUser } from "~/middlewares/auth-guard";
 import type { Route } from "./+types/creations";
 
 const PAGE_SIZE = 12;
 
-type GalleryResultData = TaskResultData;
+type GalleryResultData = { images: string[]; videos: string[] };
 
 type GalleryItem = {
   taskId: string;

@@ -8,27 +8,6 @@ import {
 
 const KIE_BASE_URL = "https://api.kie.ai/api/v1";
 
-export interface KieCreateVideoTaskParams {
-  model: string;
-  callbackUrl: string;
-  prompt?: string;
-  imageUrls?: string[];
-  aspectRatio?: string;
-  duration?: string | number;
-  size?: string;
-}
-
-export interface KieCreateImageTaskParams {
-  model: string;
-  callbackUrl: string;
-  prompt: string;
-  inputUrls?: string[];
-  imageInput?: string[];
-  aspectRatio?: string;
-  resolution?: string;
-  outputFormat?: string;
-}
-
 export interface KieTaskResult {
   taskId: string;
   raw: unknown;
@@ -78,70 +57,6 @@ async function requestKieTask(payload: Record<string, unknown>) {
     taskId: body.data.taskId,
     raw: body.data,
   };
-}
-
-export async function createKieVideoTask({
-  model,
-  callbackUrl,
-  prompt,
-  imageUrls,
-  aspectRatio,
-  duration,
-  size,
-}: KieCreateVideoTaskParams): Promise<KieTaskResult> {
-  if (!model) {
-    throw new Error("video model is required");
-  }
-
-  const input: Record<string, unknown> = {
-    aspect_ratio: aspectRatio ?? "landscape",
-    n_frames: duration ? String(duration) : "10",
-    size: size ?? "standard",
-  };
-
-  if (prompt) {
-    input.prompt = prompt;
-  }
-  if (imageUrls?.length) {
-    input.image_urls = imageUrls;
-  }
-
-  return requestKieTask({
-    model,
-    callBackUrl: callbackUrl,
-    input,
-  });
-}
-
-export async function createKieImageTask({
-  model,
-  callbackUrl,
-  prompt,
-  inputUrls,
-  imageInput,
-  aspectRatio,
-  resolution,
-  outputFormat,
-}: KieCreateImageTaskParams): Promise<KieTaskResult> {
-  if (!model) {
-    throw new Error("KIE model is required");
-  }
-  if (!prompt) {
-    throw new Error("KIE prompt is required");
-  }
-
-  const input: Record<string, unknown> = { prompt };
-  if (inputUrls?.length) input.input_urls = inputUrls;
-  if (imageInput?.length) input.image_input = imageInput;
-  if (aspectRatio) input.aspect_ratio = aspectRatio;
-  if (resolution) input.resolution = resolution;
-  if (outputFormat) input.output_format = outputFormat;
-
-  return requestKieTask({
-    model,
-    callBackUrl: callbackUrl,
-    input,
-  });
 }
 
 export async function createKieSeedanceTask({

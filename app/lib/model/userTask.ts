@@ -1,13 +1,8 @@
-import { and, desc, eq, like, or, sql } from "drizzle-orm";
+import { and, desc, eq, like, sql } from "drizzle-orm";
 import { TASK_STATUS } from "@/lib/consts";
 import { db } from "@/lib/database/db.server";
-import type { InsertUserTask, SelectUserTask } from "@/lib/database/schema";
+import type { SelectUserTask } from "@/lib/database/schema";
 import { user, userTask } from "@/lib/database/schema";
-
-export async function addTask(data: InsertUserTask) {
-  await db.insert(userTask).values(data);
-  return data.id;
-}
 
 export async function getTaskById(id: string) {
   const result = await db.select().from(userTask).where(eq(userTask.id, id));
@@ -42,17 +37,6 @@ export async function markTaskProcessing(id: string) {
     .update(userTask)
     .set({
       status: TASK_STATUS.PROCESSING,
-    })
-    .where(eq(userTask.id, id));
-}
-
-export async function markTaskPending(id: string, errorMessage = "") {
-  await db
-    .update(userTask)
-    .set({
-      status: TASK_STATUS.PENDING,
-      errorMessage,
-      completedAt: null,
     })
     .where(eq(userTask.id, id));
 }
@@ -95,70 +79,6 @@ export async function getTaskByProviderTaskId(providerTaskId: string) {
     .from(userTask)
     .where(eq(userTask.providerTaskId, providerTaskId));
   return result[0] || null;
-}
-
-export async function getCompletedTasksForOwner({
-  userId,
-  guestId,
-  guestIp,
-  limit = 50,
-}: {
-  userId: string;
-  guestId: string;
-  guestIp: string;
-  limit?: number;
-}) {
-  const ownerConditions = [];
-
-  if (userId) {
-    ownerConditions.push(eq(userTask.userId, userId));
-  } else {
-    if (guestId) ownerConditions.push(eq(userTask.guestId, guestId));
-    if (guestIp) ownerConditions.push(eq(userTask.guestIp, guestIp));
-  }
-
-  if (ownerConditions.length === 0) {
-    return [];
-  }
-
-  return db
-    .select()
-    .from(userTask)
-    .where(
-      and(
-        eq(userTask.status, TASK_STATUS.COMPLETED),
-        ownerConditions.length === 1
-          ? ownerConditions[0]
-          : or(...ownerConditions),
-      ),
-    )
-    .orderBy(desc(userTask.createdAt))
-    .limit(limit);
-}
-
-/**
- * Check if a guest user has already created ANY task.
- * This is more permissive than hasGuestCompletedTask - checks all statuses.
- */
-export async function hasGuestCreatedTask(
-  guestId: string,
-  guestIp: string,
-): Promise<boolean> {
-  if (!guestId && !guestIp) return false;
-
-  const conditions = [];
-  if (guestId) conditions.push(eq(userTask.guestId, guestId));
-  if (guestIp) conditions.push(eq(userTask.guestIp, guestIp));
-
-  if (conditions.length === 0) return false;
-
-  const result = await db
-    .select({ id: userTask.id })
-    .from(userTask)
-    .where(or(...conditions))
-    .limit(1);
-
-  return result.length > 0;
 }
 
 export async function getAllUserTasksPaginated(
