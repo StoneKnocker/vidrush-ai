@@ -4,18 +4,6 @@
     "description": "Choose the {{appName}} plan that fits your AI video workflow. Subscribe for monthly credits or buy credit packs when you need more Seedance 2.0 generations."
   },
   "page": {
-    "title": "Simple pricing for AI video creation",
-    "description": "Subscribe for monthly credits to generate Seedance 2.0 videos, or buy credit packs whenever you need extra generations.",
-    "modeToggle": {
-      "subscriptions": "Subscriptions",
-      "payAsYouGo": "Credit Packs"
-    },
-    "billingToggle": {
-      "monthly": "Monthly",
-      "yearly": "Yearly",
-      "saveText": "Save 50%"
-    },
-    "trustText": "Transparent pricing for text-to-video, image-to-video, and multi-reference generation with {{appName}}",
     "unsureSection": {
       "title": "Not sure which {{appName}} plan fits you?",
       "description": "Choose Basic if you are just getting started, Standard for regular creators (most popular), Pro for power users, and Max for high-volume production.",
@@ -85,6 +73,8 @@
       "id": "basic",
       "name": "Basic",
       "description": "Ideal for hobbyists and beginners",
+      "perCredit": "$0.019 / credit",
+      "monthlyCredits": 800,
       "cycles": {
         "monthly": {
           "id": "basic-monthly",
@@ -107,13 +97,14 @@
         "Commercial Use License"
       ],
       "cta": "Subscribe",
-      "popular": false,
-      "enterprise": false
+      "popular": false
     },
     {
       "id": "standard",
       "name": "Standard",
       "description": "Perfect for most creators",
+      "perCredit": "$0.016 / credit",
+      "monthlyCredits": 1600,
       "cycles": {
         "monthly": {
           "id": "standard-monthly",
@@ -136,13 +127,14 @@
         "Commercial Use License"
       ],
       "cta": "Subscribe",
-      "popular": true,
-      "enterprise": false
+      "popular": true
     },
     {
       "id": "pro",
       "name": "Pro",
       "description": "Ideal for power users",
+      "perCredit": "$0.012 / credit",
+      "monthlyCredits": 4000,
       "cycles": {
         "monthly": {
           "id": "pro-monthly",
@@ -165,13 +157,14 @@
         "Commercial Use License"
       ],
       "cta": "Subscribe",
-      "popular": false,
-      "enterprise": false
+      "popular": false
     },
     {
       "id": "max",
       "name": "Max",
       "description": "Perfect for high-usage users",
+      "perCredit": "$0.010 / credit",
+      "monthlyCredits": 10000,
       "cycles": {
         "monthly": {
           "id": "max-monthly",
@@ -194,109 +187,63 @@
         "Commercial Use License"
       ],
       "cta": "Subscribe",
-      "popular": false,
-      "enterprise": false
+      "popular": false
     }
   ],
   "creditPacks": [
     {
       "id": "pack-starter",
       "name": "Starter Pack",
+      "description": "Great for occasional use",
       "credits": 1000,
       "price": 39.9,
       "perCredit": "$0.040 / credit",
-      "description": "Great for occasional use",
-      "features": [
-        "1000 credits",
-        "Includes all features",
-        "Credits never expire"
-      ],
-      "cta": "One-Time Payment",
-      "popular": false
+      "cta": "One-Time Payment"
     },
     {
       "id": "pack-creator",
       "name": "Creator Pack",
+      "description": "Perfect for most creators",
       "credits": 3000,
       "price": 89.9,
       "perCredit": "$0.030 / credit",
-      "description": "Perfect for most creators",
-      "features": [
-        "3000 credits",
-        "Includes all features",
-        "Credits never expire"
-      ],
-      "cta": "One-Time Payment",
-      "popular": true
+      "cta": "One-Time Payment"
     },
     {
       "id": "pack-professional",
       "name": "Professional Pack",
+      "description": "Ideal for power users",
       "credits": 8000,
       "price": 199.9,
       "perCredit": "$0.025 / credit",
-      "description": "Ideal for power users",
-      "features": [
-        "8000 credits",
-        "Includes all features",
-        "Credits never expire"
-      ],
-      "cta": "One-Time Payment",
-      "popular": false
+      "cta": "One-Time Payment"
     },
     {
       "id": "pack-advanced",
       "name": "Advanced Pack",
+      "description": "Best for high-volume usage",
       "credits": 30000,
       "price": 599.9,
       "perCredit": "$0.020 / credit",
-      "description": "Best for high-volume usage",
-      "features": [
-        "30000 credits",
-        "Includes all features",
-        "Credits never expire"
-      ],
-      "cta": "One-Time Payment",
-      "popular": false
+      "cta": "One-Time Payment"
     },
     {
       "id": "pack-ultra",
       "name": "Ultra Pack",
+      "description": "Best for high-volume usage",
       "credits": 100000,
       "price": 1899.9,
       "perCredit": "$0.019 / credit",
-      "description": "Best for high-volume usage",
-      "features": [
-        "100000 credits",
-        "Includes all features",
-        "Credits never expire"
-      ],
-      "cta": "One-Time Payment",
-      "popular": false
+      "cta": "One-Time Payment"
     },
     {
       "id": "pack-max",
       "name": "Max Pack",
+      "description": "Best for high-volume usage",
       "credits": 200000,
       "price": 3599.9,
       "perCredit": "$0.018 / credit",
-      "description": "Best for high-volume usage",
-      "features": [
-        "200000 credits",
-        "Includes all features",
-        "Credits never expire"
-      ],
-      "cta": "One-Time Payment",
-      "popular": false
+      "cta": "One-Time Payment"
     }
-  ],
-  "badges": {
-    "mostPopular": "MOST POPULAR",
-    "bestValue": "BEST VALUE"
-  },
-  "labels": {
-    "billedYearly": "Billed yearly",
-    "credits": "Credits",
-    "perMonth": "/mo"
-  }
+  ]
 }

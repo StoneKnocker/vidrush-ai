@@ -67,7 +67,7 @@ const Header: React.FC = () => {
               {t("header.showcase")}
             </Link>
             <Link to="/guide" className={desktopNavLinkClass}>
-              {t("header.guide", "Guide")}
+              {t("header.guide")}
             </Link>
           </nav>
 
@@ -129,7 +129,7 @@ const Header: React.FC = () => {
             className={mobileNavLinkClass}
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            {t("header.guide", "Guide")}
+            {t("header.guide")}
           </Link>
 
           {showGuestCta && (

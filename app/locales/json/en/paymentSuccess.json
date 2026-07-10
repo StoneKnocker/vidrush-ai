@@ -29,8 +29,7 @@
     "notFoundDescription": "We could not find a matching local order for this return URL.",
     "missingReference": "Missing payment reference. Please try again from the pricing page.",
     "refreshPage": "Refresh status",
-    "returnToPlans": "View Pricing Plans",
-    "missingSessionId": "Missing payment session ID. Please try again from the pricing page."
+    "returnToPlans": "View Pricing Plans"
   },
   "summary": {
     "eyebrow": "Order details",

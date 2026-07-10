@@ -187,9 +187,7 @@ function pricingOffers({
   const creditPackOffers = contentData.creditPacks.map((pack) => ({
     "@type": "Offer",
     name: `${appName} ${pack.name}`,
-    description: stripHtml(
-      pack.description || pack.features.join(". ") || `${pack.credits} credits`,
-    ),
+    description: stripHtml(pack.description || `${pack.credits} credits`),
     price: String(pack.price),
     priceCurrency: "USD",
     url: pricingUrl,

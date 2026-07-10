@@ -1,5 +1,5 @@
 import { Check, Gift, Zap } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -12,162 +12,26 @@ import { useLoginModal } from "~/hooks/use-login-modal";
 import { getTrpcErrorMessage } from "~/lib/trpc/error";
 import { trpc } from "~/lib/trpc/trpc-provider";
 import { cn } from "~/lib/utils";
+import type { CreditPack, SubscriptionPlan } from "~/types/pricing";
 
-/**
- * Prices aligned with seedance2.ai/pricing (getPublicPricingPlans).
- * Plan IDs must match `app/lib/payment/product.ts`.
- * perCredit uses annual effective monthly rate (Save 50%), same as seedance2.
- */
-const SUBSCRIPTION_PLANS = [
-  {
-    name: "Basic",
-    description: "Ideal for hobbyists and beginners",
-    perCredit: "$0.019 / credit",
-    monthlyPrice: "$29.90",
-    annualPrice: "$178.80/year",
-    /** Monthly-equivalent on annual: $14.90 */
-    originalAnnualPrice: "$358.80",
-    monthlyCredits: "800 credits/month",
-    annualCredits: "9,600 credits/year",
-    monthlyId: "basic-monthly",
-    yearlyId: "basic-yearly",
-    features: [
-      "800 credits/month",
-      "Seedance AI Video",
-      "Multiple AI video models",
-      "AI Image Generation",
-      "Standard generation speed",
-      "No watermark",
-      "Private generation",
-      "Customer support",
-      "Commercial Use License",
-    ],
-    popular: false,
-  },
-  {
-    name: "Standard",
-    description: "Perfect for most creators",
-    perCredit: "$0.016 / credit",
-    monthlyPrice: "$49.90",
-    annualPrice: "$298.80/year",
-    originalAnnualPrice: "$598.80",
-    monthlyCredits: "1,600 credits/month",
-    annualCredits: "19,200 credits/year",
-    monthlyId: "standard-monthly",
-    yearlyId: "standard-yearly",
-    features: [
-      "1600 credits/month",
-      "Seedance AI Video",
-      "Multiple AI video models",
-      "AI Image Generation",
-      "Priority generation",
-      "No watermark",
-      "Private generation",
-      "Priority customer support",
-      "Commercial Use License",
-    ],
-    popular: true,
-  },
-  {
-    name: "Pro",
-    description: "Ideal for power users",
-    perCredit: "$0.012 / credit",
-    monthlyPrice: "$99.90",
-    annualPrice: "$598.80/year",
-    originalAnnualPrice: "$1,198.80",
-    monthlyCredits: "4,000 credits/month",
-    annualCredits: "48,000 credits/year",
-    monthlyId: "pro-monthly",
-    yearlyId: "pro-yearly",
-    features: [
-      "4000 credits/month",
-      "Seedance AI Video",
-      "Multiple AI video models",
-      "AI Image Generation",
-      "Fastest generation speed",
-      "No watermark",
-      "Private generation",
-      "Expert team support",
-      "Commercial Use License",
-    ],
-    popular: false,
-  },
-  {
-    name: "Max",
-    description: "Perfect for high-usage users",
-    perCredit: "$0.010 / credit",
-    monthlyPrice: "$199.90",
-    annualPrice: "$1,198.80/year",
-    originalAnnualPrice: "$2,398.80",
-    monthlyCredits: "10,000 credits/month",
-    annualCredits: "120,000 credits/year",
-    monthlyId: "max-monthly",
-    yearlyId: "max-yearly",
-    features: [
-      "10000 credits/month",
-      "Seedance AI Video",
-      "Multiple AI video models",
-      "AI Image Generation",
-      "Fastest generation speed",
-      "No watermark",
-      "Private generation",
-      "Expert team support",
-      "Commercial Use License",
-    ],
-    popular: false,
-  },
-] as const;
+function formatUsd(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+}
 
-const ONE_TIME_PACKS = [
-  {
-    id: "pack-starter",
-    name: "Starter Pack",
-    description: "Great for occasional use",
-    price: "$39.90",
-    perCredit: "$0.040 / credit",
-    credits: "1,000 credits",
-  },
-  {
-    id: "pack-creator",
-    name: "Creator Pack",
-    description: "Perfect for most creators",
-    price: "$89.90",
-    perCredit: "$0.030 / credit",
-    credits: "3,000 credits",
-  },
-  {
-    id: "pack-professional",
-    name: "Professional Pack",
-    description: "Ideal for power users",
-    price: "$199.90",
-    perCredit: "$0.025 / credit",
-    credits: "8,000 credits",
-  },
-  {
-    id: "pack-advanced",
-    name: "Advanced Pack",
-    description: "Best for high-volume usage",
-    price: "$599.90",
-    perCredit: "$0.020 / credit",
-    credits: "30,000 credits",
-  },
-  {
-    id: "pack-ultra",
-    name: "Ultra Pack",
-    description: "Best for high-volume usage",
-    price: "$1,899.90",
-    perCredit: "$0.019 / credit",
-    credits: "100,000 credits",
-  },
-  {
-    id: "pack-max",
-    name: "Max Pack",
-    description: "Best for high-volume usage",
-    price: "$3,599.90",
-    perCredit: "$0.018 / credit",
-    credits: "200,000 credits",
-  },
-] as const;
+function formatCredits(amount: number): string {
+  return amount.toLocaleString("en-US");
+}
+
+function asPlanList(value: unknown): SubscriptionPlan[] {
+  return Array.isArray(value) ? (value as SubscriptionPlan[]) : [];
+}
+
+function asPackList(value: unknown): CreditPack[] {
+  return Array.isArray(value) ? (value as CreditPack[]) : [];
+}
 
 export interface SeedancePricingProps {
   /** Landing/page: show promo banner + title. Modal: hide to avoid duplicate headers. */
@@ -177,12 +41,18 @@ export interface SeedancePricingProps {
   compact?: boolean;
 }
 
+/**
+ * Plan catalog is loaded from the `pricing` locale namespace (subscriptionPlans /
+ * creditPacks) so UI and SEO structured data share one source of truth.
+ * Checkout plan IDs must still match `app/lib/payment/product.ts`.
+ */
 export function SeedancePricing({
   showHeader = true,
   className,
   compact = false,
 }: SeedancePricingProps) {
   const { t } = useTranslation();
+  const { t: tp } = useTranslation("pricing");
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annually">(
     "annually",
   );
@@ -192,6 +62,15 @@ export function SeedancePricing({
   const [planAwaitingProvider, setPlanAwaitingProvider] = useState<
     string | null
   >(null);
+
+  const subscriptionPlans = useMemo(
+    () => asPlanList(tp("subscriptionPlans", { returnObjects: true })),
+    [tp],
+  );
+  const creditPacks = useMemo(
+    () => asPackList(tp("creditPacks", { returnObjects: true })),
+    [tp],
+  );
 
   const { isAuthenticated } = useAuth();
   const { openLoginModal, closeLoginModal } = useLoginModal();
@@ -343,14 +222,20 @@ export function SeedancePricing({
         </div>
 
         <div className="mx-auto grid max-w-7xl grid-cols-1 justify-center gap-8 md:grid-cols-2 xl:grid-cols-4">
-          {SUBSCRIPTION_PLANS.map((plan) => {
+          {subscriptionPlans.map((plan) => {
+            const monthlyPrice = plan.cycles.monthly.price;
+            const yearlyPrice = plan.cycles.yearly.price;
             const planId =
-              billingCycle === "monthly" ? plan.monthlyId : plan.yearlyId;
+              billingCycle === "monthly"
+                ? plan.cycles.monthly.id
+                : plan.cycles.yearly.id;
             const loadingThis = isCheckingOut && activePlanId === planId;
+            const originalAnnualPrice = monthlyPrice * 12;
+            const annualCredits = plan.monthlyCredits * 12;
 
             return (
               <div
-                key={plan.name}
+                key={plan.id}
                 className={`relative rounded-xl border-t-4 bg-card p-8 shadow-sm transition-all hover:border-primary ${
                   plan.popular ? "border-primary" : "border-border"
                 }`}
@@ -369,8 +254,8 @@ export function SeedancePricing({
                 </div>
                 <div className="mb-4 text-4xl text-foreground">
                   {billingCycle === "monthly"
-                    ? plan.monthlyPrice
-                    : plan.annualPrice}
+                    ? formatUsd(monthlyPrice)
+                    : `${formatUsd(yearlyPrice)}/year`}
                   {billingCycle === "monthly" && (
                     <span className="text-muted-foreground text-sm">
                       /month
@@ -382,10 +267,10 @@ export function SeedancePricing({
                   {billingCycle === "annually" ? (
                     <div className="flex flex-wrap items-center justify-center gap-2">
                       <span className="text-muted-foreground text-sm line-through">
-                        {plan.originalAnnualPrice}
+                        {formatUsd(originalAnnualPrice)}
                       </span>
                       <span className="font-medium text-primary text-sm">
-                        {plan.annualPrice}
+                        {formatUsd(yearlyPrice)}/year
                       </span>
                       <span className="relative inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 font-bold text-[10px] text-primary">
                         <Gift className="h-3 w-3" />
@@ -395,14 +280,14 @@ export function SeedancePricing({
                   ) : (
                     <div className="flex items-center justify-center">
                       <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-medium text-primary text-xs">
-                        {plan.monthlyCredits}
+                        {formatCredits(plan.monthlyCredits)} credits/month
                       </span>
                     </div>
                   )}
                   {billingCycle === "annually" && (
                     <div className="mt-3 flex items-center justify-center">
                       <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-medium text-primary text-xs">
-                        {plan.annualCredits}
+                        {formatCredits(annualCredits)} credits/year
                       </span>
                     </div>
                   )}
@@ -435,7 +320,7 @@ export function SeedancePricing({
                   loadingText={t("pricing.processing")}
                   disabled={isCheckingOut && !loadingThis}
                 >
-                  {!loadingThis && "Subscribe"}
+                  {!loadingThis && plan.cta}
                 </LoadingButton>
               </div>
             );
@@ -447,7 +332,7 @@ export function SeedancePricing({
             One-Time Credit Packs
           </h3>
           <div className="mx-auto grid max-w-7xl grid-cols-1 justify-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            {ONE_TIME_PACKS.map((pack) => {
+            {creditPacks.map((pack) => {
               const loadingThis = isCheckingOut && activePlanId === pack.id;
 
               return (
@@ -465,11 +350,11 @@ export function SeedancePricing({
                     {pack.perCredit}
                   </div>
                   <div className="mb-4 text-3xl text-foreground">
-                    {pack.price}
+                    {formatUsd(pack.price)}
                   </div>
                   <div className="mb-6 text-center">
                     <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-medium text-primary text-xs">
-                      {pack.credits}
+                      {formatCredits(pack.credits)} credits
                     </span>
                   </div>
                   <LoadingButton
@@ -480,7 +365,7 @@ export function SeedancePricing({
                     loadingText={t("pricing.processing")}
                     disabled={isCheckingOut && !loadingThis}
                   >
-                    {!loadingThis && "One-Time Payment"}
+                    {!loadingThis && pack.cta}
                   </LoadingButton>
                 </div>
               );

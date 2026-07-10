@@ -21,8 +21,8 @@
     "lastModified": "Last modified: "
   },
   "header": {
-    "workspace": "Workspace",
     "showcase": "Showcase",
+    "guide": "Guide",
     "startGenerating": "Start Now",
     "closeMobileMenu": "Close navigation menu",
     "openMobileMenu": "Open navigation menu",
@@ -35,7 +35,6 @@
     "signingOut": "Signing out...",
     "logOut": "Log out",
     "accountMenu": "Open account menu",
-    "avatarAlt": "User avatar",
     "viewCredits": "View credits",
     "signOutFailed": "Sign out failed. Please try again.",
     "account": "Account"
@@ -84,14 +83,11 @@
   "auth": {
     "email": "Email",
     "verifyYourEmail": "Verify your email",
-    "createAnAccount": "Create an account",
     "signInToYourAccount": "Sign in to your account",
-    "enterEmailBelow": "Enter your email below to create your account",
     "enterEmailToSignIn": "Sign in or create an account to continue",
     "verificationCodeSentTo": "We've sent a verification code to",
     "sendVerificationCode": "Send Verification Code",
     "sendingCode": "Sending Code...",
-    "orContinueWith": "Or continue with",
     "orContinueWithEmail": "Or continue with email",
     "continueWithGoogle": "Continue with Google",
     "verificationCode": "Verification Code",
@@ -103,18 +99,13 @@
     "waitingForGoogle": "Waiting for Google…",
     "agreement": "By signing in, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
     "toast": {
-      "signedIn": "Successfully signed in!",
-      "loggedIn": "Logged in successfully"
+      "signedIn": "Successfully signed in!"
     },
     "errors": {
       "sendOtpFailed": "Failed to send OTP. Please try again.",
       "invalidOtp": "Invalid OTP. Please try again.",
       "googleLoginFailed": "Google login failed. Please try again.",
       "popupBlocked": "Pop-up was blocked. Please allow pop-ups for this site and try again."
-    },
-    "testimonial": {
-      "quote": "For pre-production, this is closer to what I need: a fast way to turn a character direction into a 3D draft I can keep refining.",
-      "author": "Sofia Davis"
     }
   },
   "errorBoundary": {

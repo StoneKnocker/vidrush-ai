@@ -1,12 +1,16 @@
 export interface SubscriptionPlanCycle {
   id: string;
-  price: number | string;
+  price: number;
 }
 
 export interface SubscriptionPlan {
   id: string;
   name: string;
   description: string;
+  /** Display string for annual-effective per-credit rate */
+  perCredit: string;
+  /** Monthly credit allocation (yearly = monthlyCredits * 12) */
+  monthlyCredits: number;
   cycles: {
     monthly: SubscriptionPlanCycle;
     yearly: SubscriptionPlanCycle;
@@ -14,19 +18,16 @@ export interface SubscriptionPlan {
   features: string[];
   cta: string;
   popular: boolean;
-  enterprise: boolean;
 }
 
 export interface CreditPack {
   id: string;
   name: string;
+  description: string;
   credits: number;
   price: number;
   perCredit: string;
-  description: string;
-  features: string[];
   cta: string;
-  popular: boolean;
 }
 
 export interface FAQItem {
@@ -40,18 +41,6 @@ export interface PricingPageContent {
     description: string;
   };
   page: {
-    title: string;
-    description: string;
-    modeToggle: {
-      subscriptions: string;
-      payAsYouGo: string;
-    };
-    billingToggle: {
-      monthly: string;
-      yearly: string;
-      saveText: string;
-    };
-    trustText: string;
     unsureSection: {
       title: string;
       description: string;
@@ -65,13 +54,4 @@ export interface PricingPageContent {
   };
   subscriptionPlans: SubscriptionPlan[];
   creditPacks: CreditPack[];
-  badges: {
-    mostPopular: string;
-    bestValue: string;
-  };
-  labels: {
-    billedYearly: string;
-    credits: string;
-    perMonth: string;
-  };
 }
