@@ -153,24 +153,14 @@ export function buildHomeStructuredData({
   contentData: LandingPageContent;
 }) {
   const context = { appName, appUrl, locale, path };
-  const homeUrl = getHomeUrl(context);
-  const faq =
-    contentData.faq?.enabled === false
-      ? null
-      : faqPageSchema({
-          id: `${homeUrl}#faq`,
-          items: contentData.faq?.items ?? [],
-        });
 
   return makeGraph([
     organizationSchema(context),
     websiteSchema(context),
     softwareApplicationSchema({
       context,
-      description:
-        contentData.hero?.description || contentData.meta.description,
+      description: contentData.meta.description,
     }),
-    faq,
   ]);
 }
 
