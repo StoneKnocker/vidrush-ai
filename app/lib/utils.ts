@@ -79,6 +79,38 @@ export function getLocalizedPath(locale: string, path: string): string {
       : `/${normalizedLocale}${cleanPath}`;
 }
 
+/**
+ * Resolve a post-login redirect target safely.
+ * Only same-origin relative paths are allowed (blocks open redirects).
+ */
+export function getSafeRedirectPath(
+  redirectTo: string | null | undefined,
+  fallback = "/user/creations",
+): string {
+  if (!redirectTo) return fallback;
+
+  let candidate = redirectTo.trim();
+  try {
+    candidate = decodeURIComponent(candidate);
+  } catch {
+    return fallback;
+  }
+
+  // Relative path only: /foo — reject //evil.com, https:, javascript:, etc.
+  if (
+    !candidate.startsWith("/") ||
+    candidate.startsWith("//") ||
+    candidate.startsWith("/\\") ||
+    candidate.includes("\\") ||
+    candidate.includes("\0") ||
+    /[\r\n]/.test(candidate)
+  ) {
+    return fallback;
+  }
+
+  return candidate;
+}
+
 export function formatDate(
   date: Date | string,
   formatString = "yyyy-MM-dd",

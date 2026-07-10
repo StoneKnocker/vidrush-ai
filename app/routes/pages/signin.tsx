@@ -2,7 +2,7 @@ import { ArrowLeft, CheckCircle2, Mail } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { redirect } from "react-router";
+import { redirect, useSearchParams } from "react-router";
 import { GoogleIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { authClient } from "@/lib/auth/auth.client";
 import { AppLogo } from "~/components/app-logo";
 import { Link } from "~/components/i18n-link";
 import { serverAuth } from "~/lib/auth/auth.server";
-import { getLocalizedPath } from "~/lib/utils";
+import { getLocalizedPath, getSafeRedirectPath } from "~/lib/utils";
 import { getLocale } from "~/middlewares/i18next";
 import type { Route } from "./+types/signin";
 
@@ -25,7 +25,11 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   });
 
   if (session?.user) {
-    throw redirect(getLocalizedPath(getLocale(context), "/user/creations"));
+    const url = new URL(request.url);
+    const fallback = getLocalizedPath(getLocale(context), "/user/creations");
+    throw redirect(
+      getSafeRedirectPath(url.searchParams.get("redirectTo"), fallback),
+    );
   }
 
   return null;
@@ -33,12 +37,18 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [otp, setOtp] = useState<string>("");
   const [isOtpSent, setIsOtpSent] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+
+  const postLoginPath = getSafeRedirectPath(
+    searchParams.get("redirectTo"),
+    getLocalizedPath(i18n.language, "/user/creations"),
+  );
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +84,7 @@ export default function LoginPage() {
         otp,
       });
       setIsLoading(false);
-      window.location.href = getLocalizedPath(i18n.language, "/user/creations");
+      window.location.href = postLoginPath;
     } catch (error) {
       console.error("OTP login failed:", error);
       setError(getErrorMessage(error, t("auth.errors.invalidOtp")));
@@ -88,7 +98,7 @@ export default function LoginPage() {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: getLocalizedPath(i18n.language, "/user/creations"),
+        callbackURL: postLoginPath,
       });
     } catch (error) {
       console.error("Google login failed:", error);

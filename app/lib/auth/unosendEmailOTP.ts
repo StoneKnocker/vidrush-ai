@@ -16,8 +16,8 @@ export const emailOTPConfig = emailOTP({
     type: string;
   }) => {
     if (!unosendApiKey) {
-      console.warn("UNOSEND_API_KEY not configured, OTP email not sent");
-      return;
+      console.error("UNOSEND_API_KEY not configured, OTP email not sent");
+      throw new Error("Email delivery is not configured");
     }
 
     const subject =

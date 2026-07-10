@@ -49,9 +49,17 @@ export const serverAuth = betterAuth({
     }),
   },
   secondaryStorage: {
-    get: async (key) => await serverEnv.APP_KV.get(`_auth:${key}`, "json"),
-    set: async (key, value) =>
-      await serverEnv.APP_KV.put(`_auth:${key}`, JSON.stringify(value)),
+    // better-auth stores pre-stringified JSON and passes TTL in seconds.
+    // Do not re-JSON.stringify; honor TTL so KV keys expire with sessions/rate limits.
+    get: async (key) => await serverEnv.APP_KV.get(`_auth:${key}`),
+    set: async (key, value, ttl) => {
+      // Cloudflare KV requires expirationTtl >= 60 when set.
+      const options =
+        typeof ttl === "number" && ttl > 0
+          ? { expirationTtl: Math.max(Math.floor(ttl), 60) }
+          : undefined;
+      await serverEnv.APP_KV.put(`_auth:${key}`, value, options);
+    },
     delete: async (key) => await serverEnv.APP_KV.delete(`_auth:${key}`),
   },
   socialProviders: {
