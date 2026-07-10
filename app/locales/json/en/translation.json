@@ -27,6 +27,17 @@
     "closeMobileMenu": "Close navigation menu",
     "openMobileMenu": "Open navigation menu"
   },
+  "userNav": {
+    "myCreations": "My Creations",
+    "myCredits": "My Credits",
+    "adminPanel": "Admin Panel",
+    "signingOut": "Signing out...",
+    "logOut": "Log out",
+    "accountMenu": "Open account menu",
+    "avatarAlt": "User avatar",
+    "viewCredits": "View credits",
+    "signOutFailed": "Sign out failed. Please try again."
+  },
   "footer": {
     "brandDescription": "VidRush AI — multi-modal AI video creation from images, video, audio, and text.",
     "service": "Service",
