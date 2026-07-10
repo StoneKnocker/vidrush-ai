@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./cube-loading.css";
 
 @plugin "tailwindcss-animate";
 
