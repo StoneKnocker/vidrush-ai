@@ -339,6 +339,9 @@ export default function Footer() {
                 </nav>
               </>
             ) : null}
+            <p className="text-muted-foreground text-sm">
+              {t("footer.poweredBy")}
+            </p>
             <div className="flex flex-col gap-1 text-left lg:text-right">
               <p className="text-balance text-muted-foreground">
                 © {currentYear} {appName}. {t("footer.allRightsReserved")}
