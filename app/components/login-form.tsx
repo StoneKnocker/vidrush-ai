@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle2, Mail } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { GoogleIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -322,21 +322,23 @@ export function LoginForm({
       </div>
 
       <p className="text-center text-muted-foreground text-xs leading-relaxed">
-        {t("auth.bySigningIn")}{" "}
-        <Link
-          to="/terms-and-conditions"
-          className="underline underline-offset-4 hover:text-primary"
-        >
-          {t("terms")}
-        </Link>{" "}
-        {t("auth.and")}{" "}
-        <Link
-          to="/privacy-policy"
-          className="underline underline-offset-4 hover:text-primary"
-        >
-          {t("privacyLabel")}
-        </Link>
-        .
+        <Trans
+          i18nKey="auth.agreement"
+          components={{
+            terms: (
+              <Link
+                to="/terms-and-conditions"
+                className="underline underline-offset-4 hover:text-primary"
+              />
+            ),
+            privacy: (
+              <Link
+                to="/privacy-policy"
+                className="underline underline-offset-4 hover:text-primary"
+              />
+            ),
+          }}
+        />
       </p>
     </div>
   );

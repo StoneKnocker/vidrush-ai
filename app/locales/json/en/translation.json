@@ -101,9 +101,7 @@
     "backToEmail": "Back to Email",
     "completeSignInInPopup": "Complete sign-in in the popup window…",
     "waitingForGoogle": "Waiting for Google…",
-    "byContinuing": "By clicking continue, you agree to our",
-    "bySigningIn": "By signing in, you agree to our",
-    "and": "and",
+    "agreement": "By signing in, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
     "toast": {
       "signedIn": "Successfully signed in!",
       "loggedIn": "Logged in successfully"
