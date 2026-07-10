@@ -27,11 +27,9 @@ import { getPublicEnv } from "./lib/env.server";
 import { requestMiddleware } from "./lib/http.server";
 import { TRPCProvider } from "./lib/trpc/trpc-provider";
 import { getGuestId } from "./lib/utils";
-import resources from "./locales";
 import { setAuth } from "./middlewares/auth-guard";
 import { getLocale, i18nextMiddleware } from "./middlewares/i18next";
 import stylesheet from "./styles/app.css?url";
-import type { PricingPageContent } from "./types/pricing";
 
 const LoginModal = lazy(() =>
   import("./components/login-modal").then((module) => ({
@@ -140,11 +138,6 @@ export default function App({ loaderData }: Route.ComponentProps) {
     if (i18n.language !== locale) i18n.changeLanguage(locale);
   }, [locale, i18n]);
 
-  // Get pricing content
-  const contentData = resources[locale]?.pricing as
-    | PricingPageContent
-    | undefined;
-
   return (
     <>
       <TRPCProvider>
@@ -152,7 +145,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
           <LoginModalProvider>
             <Outlet />
             <LazyLoginModalMount />
-            {contentData && <LazyPricingModalMount contentData={contentData} />}
+            <LazyPricingModalMount />
           </LoginModalProvider>
         </WorkspaceProvider>
       </TRPCProvider>
@@ -188,11 +181,7 @@ function LazyLoginModalMount() {
   );
 }
 
-function LazyPricingModalMount({
-  contentData,
-}: {
-  contentData: PricingPageContent;
-}) {
+function LazyPricingModalMount() {
   const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
@@ -207,7 +196,7 @@ function LazyPricingModalMount({
 
   return (
     <Suspense fallback={null}>
-      <PricingModal contentData={contentData} initialOpen />
+      <PricingModal initialOpen />
     </Suspense>
   );
 }

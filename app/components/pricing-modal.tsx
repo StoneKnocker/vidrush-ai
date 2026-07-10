@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import PricingGrid from "~/components/pricing-grid";
+import { SeedancePricing } from "~/components/landing/seedance-pricing";
 import {
   Dialog,
   DialogContent,
@@ -7,17 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import type { PricingPageContent } from "~/types/pricing";
 
 interface PricingModalProps {
-  contentData: PricingPageContent;
-  defaultMode?: "subscription" | "credits";
   initialOpen?: boolean;
 }
 
 export default function PricingModal({
-  contentData,
-  defaultMode = "subscription",
   initialOpen = false,
 }: PricingModalProps) {
   const [open, setOpen] = useState(initialOpen);
@@ -40,18 +35,15 @@ export default function PricingModal({
       <DialogContent className="max-h-[90vh] w-[95vw] overflow-y-auto bg-background text-foreground shadow-[0_0_60px_rgba(0,217,146,0.14)] sm:max-w-6xl lg:max-w-7xl xl:max-w-[80vw] [&>button:hover]:text-primary [&>button]:text-muted-foreground">
         <DialogHeader>
           <DialogTitle className="font-bold text-2xl text-foreground">
-            {contentData.page.title}
+            Pricing
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            {contentData.page.description}
+            Choose the plan that works best for you. All plans include access to
+            our core features.
           </DialogDescription>
         </DialogHeader>
-        <div className="mt-6">
-          <PricingGrid
-            contentData={contentData}
-            mode={defaultMode}
-            showFreePlan={false}
-          />
+        <div className="mt-2">
+          <SeedancePricing showHeader={false} compact />
         </div>
       </DialogContent>
     </Dialog>
