@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildSeedanceInput,
   calculateSeedanceCreditCost,
+  getTaskResultMedia,
   parseKieSeedanceResult,
 } from "./seedance.shared";
 
@@ -89,6 +90,37 @@ describe("Seedance shared helpers", () => {
       resultUrls: ["https://example.com/video.mp4"],
       firstFrameUrls: ["https://example.com/first.webp"],
       lastFrameUrls: ["https://example.com/last.webp"],
+    });
+  });
+
+  it("reads typed task resultData and legacy string arrays via schema", () => {
+    expect(
+      getTaskResultMedia({
+        videos: [{ key: "kie/results/a/1.mp4", contentType: "video/mp4" }],
+        frames: [{ key: "kie/results/a/2.webp", role: "first" }],
+        posterKey: "kie/results/a/2.webp",
+        persistAttempts: 2,
+      }),
+    ).toEqual({
+      videoKeys: ["kie/results/a/1.mp4"],
+      imageKeys: ["kie/results/a/2.webp"],
+      posterKey: "kie/results/a/2.webp",
+    });
+
+    expect(
+      getTaskResultMedia({
+        videos: ["legacy/video.mp4"],
+        images: ["legacy/frame.webp"],
+      }),
+    ).toEqual({
+      videoKeys: ["legacy/video.mp4"],
+      imageKeys: ["legacy/frame.webp"],
+      posterKey: "legacy/frame.webp",
+    });
+
+    expect(getTaskResultMedia(null)).toEqual({
+      videoKeys: [],
+      imageKeys: [],
     });
   });
 });

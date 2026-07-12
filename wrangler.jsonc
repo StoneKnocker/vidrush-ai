@@ -8,6 +8,10 @@
   "assets": {
     "directory": "./build/client/"
   },
+  // Recover stuck video tasks when callback/poll miss (see taskRecoveryService)
+  "triggers": {
+    "crons": ["*/2 * * * *"]
+  },
   // Required secrets — wrangler types generates typings from these names,
   // wrangler deploy validates they are set on the Worker before uploading.
   "env": {

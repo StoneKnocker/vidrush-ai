@@ -3,11 +3,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const completeTaskMock = vi.fn();
 const setTaskFailedMock = vi.fn();
 const downloadAndUploadMock = vi.fn();
+const markTaskProcessingMock = vi.fn();
+const touchTaskUpdatedAtMock = vi.fn();
+const getTaskByIdMock = vi.fn();
+const updateNonTerminalResultDataMock = vi.fn();
 
 vi.mock("~/lib/model/userTask", () => ({
   completeTask: completeTaskMock,
+  getTaskById: getTaskByIdMock,
   getTaskByProviderTaskId: vi.fn(),
-  markTaskProcessing: vi.fn(),
+  isTaskTerminal: (status: string) =>
+    status === "completed" || status === "failed" || status === "canceled",
+  markTaskProcessing: markTaskProcessingMock,
+  touchTaskUpdatedAt: touchTaskUpdatedAtMock,
+  updateNonTerminalResultData: updateNonTerminalResultDataMock,
 }));
 
 vi.mock("~/lib/r2/r2.server", () => ({
@@ -25,15 +34,50 @@ vi.mock("../env.server", () => ({
   },
 }));
 
+function nonTerminalTask(
+  overrides: { resultData?: unknown; status?: string } = {},
+) {
+  return {
+    id: "task-1",
+    status: overrides.status ?? "processing",
+    resultData: overrides.resultData ?? {},
+  };
+}
+
 describe("KIE callback service", () => {
   beforeEach(() => {
     completeTaskMock.mockReset();
     setTaskFailedMock.mockReset();
     downloadAndUploadMock.mockReset();
+    markTaskProcessingMock.mockReset();
+    touchTaskUpdatedAtMock.mockReset();
+    getTaskByIdMock.mockReset();
+    updateNonTerminalResultDataMock.mockReset();
     downloadAndUploadMock.mockResolvedValue(true);
+    completeTaskMock.mockResolvedValue(true);
+    updateNonTerminalResultDataMock.mockResolvedValue(true);
+    getTaskByIdMock.mockResolvedValue(nonTerminalTask());
   });
 
-  it("persists Seedance first and last frame URLs to R2 before completing task", async () => {
+  it("skips R2 work when task is already terminal", async () => {
+    getTaskByIdMock.mockResolvedValue(nonTerminalTask({ status: "completed" }));
+    const { completeKieTaskFromPayload } = await import("./kieCallbackService");
+
+    const outcome = await completeKieTaskFromPayload({
+      taskId: "task-done",
+      body: {
+        resultJson: JSON.stringify({
+          resultUrls: ["https://kie.example.com/result.mp4"],
+        }),
+      },
+    });
+
+    expect(outcome).toBe("skipped");
+    expect(downloadAndUploadMock).not.toHaveBeenCalled();
+    expect(completeTaskMock).not.toHaveBeenCalled();
+  });
+
+  it("persists Seedance videos and frames with typed resultData", async () => {
     const { completeKieTaskFromPayload } = await import("./kieCallbackService");
 
     await completeKieTaskFromPayload({
@@ -44,6 +88,7 @@ describe("KIE callback service", () => {
           firstFrameUrl: "https://kie.example.com/first.webp",
           lastFrameUrl: "https://kie.example.com/last.webp",
         }),
+        costTime: 12_000,
       },
     });
 
@@ -58,9 +103,91 @@ describe("KIE callback service", () => {
       "https://kie.example.com/last.webp",
       "kie/results/task-1/3.webp",
     );
-    expect(completeTaskMock).toHaveBeenCalledWith("task-1", {
-      videos: ["kie/results/task-1/1.mp4"],
-      images: ["kie/results/task-1/2.webp", "kie/results/task-1/3.webp"],
+    expect(completeTaskMock).toHaveBeenCalledWith(
+      "task-1",
+      {
+        videos: [{ key: "kie/results/task-1/1.mp4", contentType: "video/mp4" }],
+        frames: [
+          { key: "kie/results/task-1/2.webp", role: "first" },
+          { key: "kie/results/task-1/3.webp", role: "last" },
+        ],
+        posterKey: "kie/results/task-1/2.webp",
+      },
+      { processingDurationMs: 12_000 },
+    );
+  });
+
+  it("fails when result has no video files", async () => {
+    const { completeKieTaskFromPayload } = await import("./kieCallbackService");
+
+    await completeKieTaskFromPayload({
+      taskId: "task-2",
+      body: {
+        resultJson: JSON.stringify({
+          resultUrls: ["https://kie.example.com/frame.webp"],
+        }),
+      },
     });
+
+    expect(setTaskFailedMock).toHaveBeenCalledWith(
+      "task-2",
+      "KIE result did not include any video files",
+    );
+    expect(completeTaskMock).not.toHaveBeenCalled();
+  });
+
+  it("leaves task non-terminal when R2 upload fails under retry cap", async () => {
+    downloadAndUploadMock.mockResolvedValue(false);
+    getTaskByIdMock.mockResolvedValue(
+      nonTerminalTask({ resultData: { videos: [], persistAttempts: 1 } }),
+    );
+    const { completeKieTaskFromPayload } = await import("./kieCallbackService");
+
+    const outcome = await completeKieTaskFromPayload({
+      taskId: "task-3",
+      body: {
+        resultJson: JSON.stringify({
+          resultUrls: ["https://kie.example.com/result.mp4"],
+        }),
+      },
+    });
+
+    expect(outcome).toBe("processing");
+    expect(setTaskFailedMock).not.toHaveBeenCalled();
+    expect(completeTaskMock).not.toHaveBeenCalled();
+    expect(updateNonTerminalResultDataMock).toHaveBeenCalledWith("task-3", {
+      videos: [],
+      persistAttempts: 2,
+    });
+  });
+
+  it("fails after max R2 persist attempts", async () => {
+    downloadAndUploadMock.mockResolvedValue(false);
+    getTaskByIdMock.mockResolvedValue(
+      nonTerminalTask({
+        resultData: { videos: [], persistAttempts: 4 },
+      }),
+    );
+    const { completeKieTaskFromPayload, MAX_R2_PERSIST_ATTEMPTS } =
+      await import("./kieCallbackService");
+
+    expect(MAX_R2_PERSIST_ATTEMPTS).toBe(5);
+
+    const outcome = await completeKieTaskFromPayload({
+      taskId: "task-4",
+      body: {
+        resultJson: JSON.stringify({
+          resultUrls: ["https://kie.example.com/result.mp4"],
+        }),
+      },
+    });
+
+    expect(outcome).toBe("failed");
+    expect(setTaskFailedMock).toHaveBeenCalledWith(
+      "task-4",
+      "Failed to persist video results after retries",
+      "r2_persist_exhausted",
+    );
+    expect(completeTaskMock).not.toHaveBeenCalled();
   });
 });

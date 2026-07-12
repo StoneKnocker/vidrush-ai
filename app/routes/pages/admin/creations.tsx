@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { getTaskResultMedia } from "~/lib/ai/seedance.shared";
 import { TASK_STATUS } from "~/lib/consts";
 import {
   getAllUserTasksPaginated,
@@ -73,8 +74,10 @@ const statusConfig: Record<
   [TASK_STATUS.CANCELED]: { label: "Canceled", variant: "outline" },
 };
 
-const assetTypeLabels: Record<string, string> = {
-  "text-to-image": "Text to Image",
+const modeLabels: Record<string, string> = {
+  "multi-reference": "Multi Reference",
+  "image-to-video": "Image to Video",
+  "text-to-video": "Text to Video",
 };
 
 function formatDate(date: Date) {
@@ -89,88 +92,35 @@ function formatDate(date: Date) {
 
 type MediaItem = {
   key: string;
-  type: "image" | "video" | "model";
+  type: "image" | "video";
   thumbnailKey?: string;
 };
 
 function extractMediaItems(resultData: unknown): MediaItem[] {
-  if (!resultData) return [];
-  const data = resultData as Record<string, unknown>;
-  const items: MediaItem[] = [];
-  const seen = new Set<string>();
-
-  const add = (
-    key: string | undefined,
-    type: MediaItem["type"],
-    thumbnailKey?: string,
-  ) => {
-    if (key && !seen.has(key)) {
-      seen.add(key);
-      items.push({ key, type, thumbnailKey });
-    }
-  };
-
-  // Compute a model thumbnail from first image
-  const images = data.images as string[] | undefined;
-  const modelThumbnail = Array.isArray(images) ? images[0] : undefined;
-
-  // Legacy fields
-  add(data.modelUrl as string | undefined, "model", modelThumbnail);
-  add(data.imageUrl as string | undefined, "image");
-  add(data.renderUrl as string | undefined, "image");
-
-  // Current TaskResultData: images / videos arrays
-  if (Array.isArray(images)) {
-    for (const key of images) add(key, "image");
-  }
-  const videos = data.videos as string[] | undefined;
-  if (Array.isArray(videos)) {
-    for (const key of videos) add(key, "video");
-  }
-
-  return items;
-}
-
-function AssetType({ parameters }: { parameters: unknown }) {
-  const mode = (parameters as { mode?: string } | null)?.mode;
-  if (!mode) return <span className="text-muted-foreground">-</span>;
-  return <span>{assetTypeLabels[mode] || mode}</span>;
+  const media = getTaskResultMedia(resultData);
+  return media.videoKeys.map((key) => ({
+    key,
+    type: "video" as const,
+    thumbnailKey: media.posterKey,
+  }));
 }
 
 function OwnerInfo({
   item,
 }: {
   item: {
-    userId: string | null;
+    userId: string;
     userName: string | null;
     userEmail: string | null;
-    guestId: string;
-    guestIp: string;
   };
 }) {
-  if (item.userId) {
-    return (
-      <div>
-        <div className="text-sm">
-          {item.userName || item.userEmail || item.userId}
-        </div>
-        {item.userEmail && (
-          <div className="text-muted-foreground text-xs">{item.userEmail}</div>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div>
-      <Badge variant="secondary" className="mb-1">
-        Guest
-      </Badge>
-      {item.guestId && (
-        <div className="text-muted-foreground text-xs">ID: {item.guestId}</div>
-      )}
-      {item.guestIp && (
-        <div className="text-muted-foreground text-xs">IP: {item.guestIp}</div>
+      <div className="text-sm">
+        {item.userName || item.userEmail || item.userId}
+      </div>
+      {item.userEmail && (
+        <div className="text-muted-foreground text-xs">{item.userEmail}</div>
       )}
     </div>
   );
@@ -190,23 +140,19 @@ function Actions({
 }) {
   if (item.status === TASK_STATUS.COMPLETED) {
     const mediaItems = extractMediaItems(item.resultData);
-
-    if (mediaItems.length > 0) {
-      const modelItem = mediaItems.find((m) => m.type === "model");
-      const bestItem = modelItem ?? mediaItems[0];
-      if (!bestItem)
-        return <span className="text-muted-foreground text-sm">No asset</span>;
-      return (
-        <button
-          type="button"
-          onClick={() => onPreview(bestItem)}
-          className="cursor-pointer text-indigo-600 text-sm hover:underline"
-        >
-          Preview
-        </button>
-      );
+    const bestItem = mediaItems[0];
+    if (!bestItem) {
+      return <span className="text-muted-foreground text-sm">No asset</span>;
     }
-    return <span className="text-muted-foreground text-sm">No asset</span>;
+    return (
+      <button
+        type="button"
+        onClick={() => onPreview(bestItem)}
+        className="cursor-pointer text-indigo-600 text-sm hover:underline"
+      >
+        Preview
+      </button>
+    );
   }
 
   if (item.status === TASK_STATUS.FAILED) {
@@ -353,10 +299,10 @@ export default function AdminCreationsPage({
                       Status
                     </TableHead>
                     <TableHead className="font-semibold text-slate-700">
-                      Template
+                      Mode
                     </TableHead>
                     <TableHead className="font-semibold text-slate-700">
-                      Asset Type
+                      Model
                     </TableHead>
                     <TableHead className="font-semibold text-slate-700">
                       Task ID
@@ -389,11 +335,11 @@ export default function AdminCreationsPage({
                         <TableCell>
                           <Badge variant={st.variant}>{st.label}</Badge>
                         </TableCell>
-                        <TableCell className="max-w-[120px] truncate text-sm">
-                          {item.template || "-"}
+                        <TableCell className="max-w-[140px] truncate text-sm">
+                          {modeLabels[item.mode] ?? item.mode}
                         </TableCell>
-                        <TableCell>
-                          <AssetType parameters={item.parameters} />
+                        <TableCell className="max-w-[140px] truncate text-sm">
+                          {item.model || "-"}
                         </TableCell>
                         <TableCell className="max-w-[120px] truncate font-mono text-xs">
                           {item.id}

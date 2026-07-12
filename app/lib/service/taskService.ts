@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { SeedanceCreateTaskInput } from "@/lib/ai/seedance.shared";
 import { TASK_STATUS } from "@/lib/consts";
 import { db } from "@/lib/database/db.server";
 import type { InsertUserTask } from "@/lib/database/schema";
@@ -11,58 +12,47 @@ import {
 
 export interface CreateTaskParams {
   userId: string;
-  guestId: string;
-  guestIp: string;
+  mode: SeedanceCreateTaskInput["mode"];
+  model: string;
+  provider?: string;
   prompt: string;
-  sourceImages: string[];
-  template: string;
-  parameters: Record<string, unknown>;
-  providerTaskId: string;
+  input: SeedanceCreateTaskInput;
   creditCost: number;
 }
 
 /**
- * Create a new task and deduct credits.
+ * Create a new video task and deduct credits.
  *
- * @param params - Task creation parameters
  * @returns Created task ID
  * @throws Error if credit deduction fails or task creation fails
- *
- * Note: Credits are only deducted for logged-in users (when userId is non-empty).
- * Guest users can create tasks without credit deduction.
  */
 export async function createTask(params: CreateTaskParams): Promise<string> {
   const {
     userId,
-    guestId,
-    guestIp,
+    mode,
+    model,
+    provider = "kie",
     prompt,
-    sourceImages,
-    template,
-    parameters,
-    providerTaskId,
+    input,
     creditCost,
   } = params;
 
   const taskId = randomUUID();
 
-  // Only deduct credits for logged-in users
-  if (userId && creditCost > 0) {
-    await consumeCredits(userId, creditCost, template, taskId);
+  if (creditCost > 0) {
+    await consumeCredits(userId, creditCost, `${mode}:${model}`, taskId);
   }
 
-  // Create task record
   const taskData: InsertUserTask = {
     id: taskId,
-    userId: userId || undefined,
-    guestId: guestId || undefined,
-    guestIp: guestIp || undefined,
+    userId,
     status: TASK_STATUS.PENDING,
+    mode,
+    model,
+    provider,
     prompt,
-    sourceImages,
-    template,
-    parameters,
-    providerTaskId,
+    input,
+    providerTaskId: null,
     creditCost,
   };
 
@@ -72,23 +62,22 @@ export async function createTask(params: CreateTaskParams): Promise<string> {
 }
 
 /**
- * Set task as failed and refund credits.
- *
- * @param taskId - Task ID to fail
- * @param errorMessage - Error message describing why the task failed
- * @throws Error if task not found or refund fails
+ * Set task as failed (idempotent) and refund credits once.
  */
 export async function setTaskFailed(
   taskId: string,
   errorMessage: string,
+  errorCode = "",
 ): Promise<void> {
   const task = await getTaskById(taskId);
+  if (!task) {
+    return;
+  }
 
-  // Update task status to failed
-  await failTask(taskId, errorMessage);
+  const updated = await failTask(taskId, errorMessage, errorCode);
 
-  if (task?.userId && task.creditCost > 0) {
-    // Refund credits for paid tasks only.
+  // Only refund when we actually transitioned to failed
+  if (updated && task.userId && task.creditCost > 0) {
     await refundCreditsByTaskId(taskId, `Task failed: ${errorMessage}`);
   }
 }

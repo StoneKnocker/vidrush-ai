@@ -1,9 +1,18 @@
 import { extname } from "node:path";
+import type { TaskResultData } from "~/lib/ai/seedance.shared";
+import {
+  getPersistAttempts,
+  parseKieSeedanceResult,
+} from "~/lib/ai/seedance.shared";
 import { TASK_STATUS } from "~/lib/consts";
 import {
   completeTask,
+  getTaskById,
   getTaskByProviderTaskId,
+  isTaskTerminal,
   markTaskProcessing,
+  touchTaskUpdatedAt,
+  updateNonTerminalResultData,
 } from "~/lib/model/userTask";
 import { downloadAndUpload, getServerR2Url } from "~/lib/r2/r2.server";
 import { setTaskFailed } from "~/lib/service/taskService";
@@ -12,8 +21,12 @@ import {
   mapKieJobState,
   verifyKieWebhookSignature,
 } from "../ai/kie.shared";
-import { parseKieSeedanceResult } from "../ai/seedance.shared";
 import { serverEnv } from "../env.server";
+
+/** Max R2 upload attempts before failing the task (callback + poll + cron). */
+export const MAX_R2_PERSIST_ATTEMPTS = 5;
+
+export type KieApplyOutcome = "completed" | "failed" | "processing" | "skipped";
 
 export interface HandleKieCallbackParams {
   body: unknown;
@@ -24,14 +37,6 @@ export interface HandleKieCallbackParams {
 export interface HandleKieCallbackResult {
   status: number;
   message: string;
-}
-
-function isTerminalStatus(status: string) {
-  return (
-    status === TASK_STATUS.COMPLETED ||
-    status === TASK_STATUS.FAILED ||
-    status === TASK_STATUS.CANCELED
-  );
 }
 
 function getExtensionFromUrl(url: string) {
@@ -63,7 +68,12 @@ function getContentTypeFromExtension(extension: string) {
 }
 
 async function persistKieResults(taskId: string, urls: string[], offset = 0) {
-  const results = [];
+  const results: Array<{
+    url: string;
+    sourceUrl: string;
+    key?: string;
+    contentType: string;
+  }> = [];
 
   for (const [index, url] of urls.entries()) {
     const extension = getExtensionFromUrl(url);
@@ -80,20 +90,53 @@ async function persistKieResults(taskId: string, urls: string[], offset = 0) {
   return results;
 }
 
-function buildResultData(media: Awaited<ReturnType<typeof persistKieResults>>) {
-  const videos: string[] = [];
-  const images: string[] = [];
-
+function buildTaskResultData(
+  media: Awaited<ReturnType<typeof persistKieResults>>,
+  frameMedia: Awaited<ReturnType<typeof persistKieResults>>,
+  frameRoles: Array<"first" | "last" | "unknown">,
+): TaskResultData {
+  const videos: TaskResultData["videos"] = [];
   for (const item of media) {
-    const keyOrUrl = item.key ?? item.url;
+    const key = item.key;
+    if (!key) continue;
     if (item.contentType.startsWith("video/")) {
-      videos.push(keyOrUrl);
-    } else if (item.contentType.startsWith("image/")) {
-      images.push(keyOrUrl);
+      videos.push({ key, contentType: item.contentType });
     }
   }
 
-  return { images, videos };
+  // If provider returned non-video URLs in resultUrls, store as unknown frames
+  const unexpectedImages = media
+    .filter((item) => item.key && item.contentType.startsWith("image/"))
+    .map((item) => ({
+      key: item.key as string,
+      role: "unknown" as const,
+    }));
+
+  const frames: NonNullable<TaskResultData["frames"]> = [
+    ...frameMedia
+      .map((item, index) =>
+        item.key
+          ? {
+              key: item.key,
+              role: frameRoles[index] ?? ("unknown" as const),
+            }
+          : null,
+      )
+      .filter(
+        (item): item is { key: string; role: "first" | "last" | "unknown" } =>
+          Boolean(item),
+      ),
+    ...unexpectedImages,
+  ];
+
+  const firstFrame = frames.find((f) => f.role === "first");
+  const posterKey = firstFrame?.key ?? frames[0]?.key;
+
+  return {
+    videos,
+    ...(frames.length > 0 ? { frames } : {}),
+    ...(posterKey ? { posterKey } : {}),
+  };
 }
 
 function getSeedanceResultPayload(body: unknown): Record<string, unknown> {
@@ -108,6 +151,20 @@ function getSeedanceResultPayload(body: unknown): Record<string, unknown> {
   return body as Record<string, unknown>;
 }
 
+function getProcessingDurationMs(body: unknown): number | undefined {
+  const payload = getSeedanceResultPayload(body);
+  const costTime = payload.costTime;
+  return typeof costTime === "number" && Number.isFinite(costTime)
+    ? costTime
+    : undefined;
+}
+
+function getFailCode(body: unknown): string {
+  const payload = getSeedanceResultPayload(body);
+  const code = payload.failCode;
+  return typeof code === "string" ? code : "";
+}
+
 export async function completeKieTaskFromPayload({
   taskId,
   body,
@@ -116,7 +173,13 @@ export async function completeKieTaskFromPayload({
   taskId: string;
   body: unknown;
   fallbackResultUrls?: string[];
-}) {
+}): Promise<KieApplyOutcome> {
+  // Gate before expensive R2 IO — concurrent callback/poll/cron may already win.
+  const task = await getTaskById(taskId);
+  if (!task || isTaskTerminal(task.status)) {
+    return "skipped";
+  }
+
   const seedanceResult = parseKieSeedanceResult(getSeedanceResultPayload(body));
   const resultUrls =
     seedanceResult.resultUrls.length > 0
@@ -125,19 +188,146 @@ export async function completeKieTaskFromPayload({
 
   if (resultUrls.length === 0) {
     await setTaskFailed(taskId, "KIE callback did not include result URLs");
-    return;
+    return "failed";
   }
 
   const results = await persistKieResults(taskId, resultUrls);
-  const frames = [
-    ...seedanceResult.firstFrameUrls,
-    ...seedanceResult.lastFrameUrls,
-  ];
+
+  const frameUrls: string[] = [];
+  const frameRoles: Array<"first" | "last" | "unknown"> = [];
+  for (const url of seedanceResult.firstFrameUrls) {
+    frameUrls.push(url);
+    frameRoles.push("first");
+  }
+  for (const url of seedanceResult.lastFrameUrls) {
+    frameUrls.push(url);
+    frameRoles.push("last");
+  }
+
   const persistedFrames =
-    frames.length > 0
-      ? await persistKieResults(taskId, frames, results.length)
+    frameUrls.length > 0
+      ? await persistKieResults(taskId, frameUrls, results.length)
       : [];
-  await completeTask(taskId, buildResultData([...results, ...persistedFrames]));
+
+  const resultData = buildTaskResultData(results, persistedFrames, frameRoles);
+
+  if (resultData.videos.length === 0) {
+    // R2/fetch may fail while KIE already succeeded. Retry until cap, then fail.
+    const r2FailedForVideoLike = results.some(
+      (item) =>
+        !item.key &&
+        (item.contentType.startsWith("video/") ||
+          !item.contentType.startsWith("image/")),
+    );
+    if (r2FailedForVideoLike) {
+      const attempts = getPersistAttempts(task.resultData) + 1;
+      if (attempts >= MAX_R2_PERSIST_ATTEMPTS) {
+        await setTaskFailed(
+          taskId,
+          "Failed to persist video results after retries",
+          "r2_persist_exhausted",
+        );
+        return "failed";
+      }
+
+      console.warn(
+        "[kie] R2 upload failed for video result; leaving task non-terminal for retry",
+        {
+          taskId,
+          attempts,
+          maxAttempts: MAX_R2_PERSIST_ATTEMPTS,
+          sourceUrls: results
+            .filter((item) => !item.key)
+            .map((item) => item.sourceUrl),
+        },
+      );
+      await updateNonTerminalResultData(taskId, {
+        videos: [],
+        persistAttempts: attempts,
+      });
+      return "processing";
+    }
+
+    await setTaskFailed(taskId, "KIE result did not include any video files");
+    return "failed";
+  }
+
+  // Re-check terminal before write: another path may have finished during R2 IO
+  const latest = await getTaskById(taskId);
+  if (!latest || isTaskTerminal(latest.status)) {
+    return "skipped";
+  }
+
+  const updated = await completeTask(taskId, resultData, {
+    processingDurationMs: getProcessingDurationMs(body),
+  });
+  return updated ? "completed" : "skipped";
+}
+
+/**
+ * Apply a KIE job payload (from callback, poll, or cron) to a local task.
+ * Idempotent for terminal states.
+ */
+export async function applyKieJobToTask({
+  taskId,
+  body,
+  fallbackResultUrls,
+  failMessage,
+}: {
+  taskId: string;
+  body: unknown;
+  fallbackResultUrls?: string[];
+  failMessage?: string;
+}): Promise<KieApplyOutcome> {
+  const existing = await getTaskById(taskId);
+  if (!existing || isTaskTerminal(existing.status)) {
+    return "skipped";
+  }
+
+  const payload = getSeedanceResultPayload(body);
+  const state =
+    typeof payload.state === "string"
+      ? payload.state
+      : typeof (body as { state?: string })?.state === "string"
+        ? (body as { state: string }).state
+        : undefined;
+
+  if (!state) {
+    return "skipped";
+  }
+
+  const localStatus = mapKieJobState(state);
+
+  if (
+    localStatus === TASK_STATUS.PROCESSING ||
+    localStatus === TASK_STATUS.PENDING
+  ) {
+    await markTaskProcessing(taskId);
+    await touchTaskUpdatedAt(taskId);
+    return "processing";
+  }
+
+  if (localStatus === TASK_STATUS.FAILED) {
+    await setTaskFailed(
+      taskId,
+      failMessage ??
+        (typeof payload.failMsg === "string" && payload.failMsg
+          ? payload.failMsg
+          : "video task processing failed"),
+      getFailCode(body),
+    );
+    return "failed";
+  }
+
+  if (localStatus === TASK_STATUS.COMPLETED) {
+    return completeKieTaskFromPayload({
+      taskId,
+      body,
+      fallbackResultUrls,
+    });
+  }
+
+  return "skipped";
 }
 
 export async function handleKieCallback({
@@ -156,7 +346,14 @@ export async function handleKieCallback({
     return { status: 401, message: "Unauthorized" };
   }
 
-  const payload = extractKieCallbackPayload(body);
+  let payload: ReturnType<typeof extractKieCallbackPayload>;
+  try {
+    payload = extractKieCallbackPayload(body);
+  } catch (error) {
+    console.warn("[kie-callback] Invalid payload", error);
+    return { status: 200, message: "OK" };
+  }
+
   const task = await getTaskByProviderTaskId(payload.taskId);
 
   if (!task) {
@@ -166,31 +363,16 @@ export async function handleKieCallback({
     return { status: 200, message: "OK" };
   }
 
-  if (isTerminalStatus(task.status)) {
+  if (isTaskTerminal(task.status)) {
     return { status: 200, message: "OK" };
   }
 
-  const localStatus = mapKieJobState(payload.state);
-  if (localStatus === TASK_STATUS.PROCESSING) {
-    await markTaskProcessing(task.id);
-    return { status: 200, message: "OK" };
-  }
-
-  if (localStatus === TASK_STATUS.FAILED) {
-    await setTaskFailed(
-      task.id,
-      payload.failMessage ?? "video task processing failed",
-    );
-    return { status: 200, message: "OK" };
-  }
-
-  if (localStatus === TASK_STATUS.COMPLETED) {
-    await completeKieTaskFromPayload({
-      taskId: task.id,
-      body,
-      fallbackResultUrls: payload.resultUrls,
-    });
-  }
+  await applyKieJobToTask({
+    taskId: task.id,
+    body,
+    fallbackResultUrls: payload.resultUrls,
+    failMessage: payload.failMessage,
+  });
 
   return { status: 200, message: "OK" };
 }

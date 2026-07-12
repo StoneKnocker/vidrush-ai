@@ -22,6 +22,9 @@ import { generateUploadFilePath, uploadToR2 } from "~/lib/r2/r2.client";
 import { getTrpcErrorMessage } from "~/lib/trpc/error";
 import { trpc } from "~/lib/trpc/trpc-provider";
 import { cn } from "~/lib/utils";
+import { getTaskResultMedia } from "~/lib/ai/seedance.shared";
+import { useR2Domain } from "~/lib/public-env";
+import { buildR2Url } from "~/lib/r2/r2.shared";
 import {
   addPortraitAsset as addPortraitAssetToState,
   type FrameSlot,
@@ -102,22 +105,6 @@ function getSuccessfulUrls(assets: UploadedAsset[], kind: MediaKind) {
     .map((asset) => asset.url);
 }
 
-function getResultUrls(resultData: unknown) {
-  if (!resultData || typeof resultData !== "object") {
-    return { videos: [], images: [] };
-  }
-
-  const data = resultData as { videos?: unknown; images?: unknown };
-  return {
-    videos: Array.isArray(data.videos)
-      ? data.videos.filter((url): url is string => typeof url === "string")
-      : [],
-    images: Array.isArray(data.images)
-      ? data.images.filter((url): url is string => typeof url === "string")
-      : [],
-  };
-}
-
 export function GenerationForm({
   activeTab: controlledActiveTab,
   onTabChange,
@@ -130,6 +117,17 @@ export function GenerationForm({
   const { openLoginModal } = useLoginModal();
   const { openPricingModal } = usePricingModal();
   const utils = trpc.useUtils();
+  const r2Domain = useR2Domain();
+
+  const toMediaUrl = React.useCallback(
+    (keyOrUrl: string) => {
+      if (keyOrUrl.startsWith("http://") || keyOrUrl.startsWith("https://")) {
+        return keyOrUrl;
+      }
+      return buildR2Url(keyOrUrl, r2Domain);
+    },
+    [r2Domain],
+  );
 
   const [prompt, setPrompt] = React.useState("");
   const [resolution, setResolution] = React.useState<Resolution>("1080p");
@@ -173,7 +171,9 @@ export function GenerationForm({
     const data = taskStatusQuery.data;
     if (!data) return;
 
-    const urls = getResultUrls(data.resultData);
+    const media = getTaskResultMedia(data.resultData);
+    const videoKeys =
+      data.videoKeys?.length > 0 ? data.videoKeys : media.videoKeys;
     onTaskStateChange?.({
       taskId: data.taskId,
       status:
@@ -184,15 +184,20 @@ export function GenerationForm({
             : data.status === "pending"
               ? "pending"
               : "processing",
-      videoUrls: urls.videos,
-      imageUrls: urls.images,
+      videoUrls: videoKeys.map(toMediaUrl),
+      imageUrls: media.imageKeys.map(toMediaUrl),
       errorMessage: data.errorMessage,
     });
 
     if (data.status === "completed" || data.status === "failed") {
       utils.user.getCredits.invalidate();
     }
-  }, [taskStatusQuery.data, onTaskStateChange, utils.user.getCredits]);
+  }, [
+    taskStatusQuery.data,
+    onTaskStateChange,
+    toMediaUrl,
+    utils.user.getCredits,
+  ]);
 
   const handleTabChange = (tab: GenerationTab) => {
     setFormError("");

@@ -3,31 +3,57 @@ import { z } from "zod";
 import { createKieSeedanceTask, queryKieJob } from "~/lib/ai/kie.server";
 import {
   calculateSeedanceCreditCost,
+  getTaskResultMedia,
   SEEDANCE_MODEL,
   seedanceCreateTaskInputSchema,
   seedanceResolutionSchema,
 } from "~/lib/ai/seedance.shared";
 import { TASK_STATUS } from "~/lib/consts";
+import { getPublicEnv } from "~/lib/env.server";
 import {
   getTaskByIdForUser,
-  updateTaskProviderState,
+  isTaskTerminal,
+  markTaskSubmitted,
+  touchTaskUpdatedAt,
 } from "~/lib/model/userTask";
 import { getTotalAvailableCredits } from "~/lib/model/userBalance";
-import { completeKieTaskFromPayload } from "~/lib/service/kieCallbackService";
-import { getPublicEnv } from "~/lib/env.server";
+import { applyKieJobToTask } from "~/lib/service/kieCallbackService";
 import { createTask, setTaskFailed } from "~/lib/service/taskService";
 import { authedProcedure, router } from "./init";
+
+/** Provider accepted the job but local task was already terminalized (recovery race). */
+class TaskSubmissionAbortedError extends Error {
+  readonly providerTaskId: string;
+
+  constructor(taskId: string, providerTaskId: string) {
+    super("video task submission aborted");
+    this.name = "TaskSubmissionAbortedError";
+    this.providerTaskId = providerTaskId;
+    this.cause = { taskId, providerTaskId };
+  }
+}
 
 function getKieCallbackUrl() {
   return new URL("/api/ai/kie/callback", getPublicEnv().APP_URL).toString();
 }
 
-function isTerminalStatus(status: string) {
-  return (
-    status === TASK_STATUS.COMPLETED ||
-    status === TASK_STATUS.FAILED ||
-    status === TASK_STATUS.CANCELED
-  );
+function toTaskStatusResponse(task: {
+  id: string;
+  status: string;
+  mode: string;
+  resultData: unknown;
+  errorMessage: string;
+}) {
+  const media = getTaskResultMedia(task.resultData);
+  return {
+    taskId: task.id,
+    status: task.status,
+    mode: task.mode,
+    resultData: task.resultData,
+    videoKeys: media.videoKeys,
+    posterKey: media.posterKey,
+    errorMessage: task.errorMessage,
+  };
 }
 
 export const videoRouter = router({
@@ -70,45 +96,40 @@ export const videoRouter = router({
 
       const taskId = await createTask({
         userId: ctx.user.id,
-        guestId: ctx.guestId,
-        guestIp: ctx.guestIp,
+        mode: input.mode,
+        model: SEEDANCE_MODEL,
+        provider: "kie",
         prompt: input.prompt,
-        sourceImages:
-          input.mode === "image-to-video"
-            ? [input.firstFrameUrl, input.lastFrameUrl].filter(
-                (url): url is string => Boolean(url),
-              )
-            : input.mode === "multi-reference"
-              ? (input.referenceImageUrls ?? [])
-              : [],
-        template: "Seedance 2",
-        parameters: {
-          provider: "kie",
-          model: SEEDANCE_MODEL,
-          ...input,
-          creditCost,
-        },
-        providerTaskId: `pending:${crypto.randomUUID()}`,
+        input,
         creditCost,
       });
 
       try {
+        // Lease: refresh updatedAt so recovery won't fail+refund mid-create.
+        const leased = await touchTaskUpdatedAt(taskId);
+        if (!leased) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "video task is no longer active",
+          });
+        }
+
         const providerTask = await createKieSeedanceTask({
           callbackUrl: getKieCallbackUrl(),
           input,
         });
 
-        await updateTaskProviderState(taskId, {
-          providerTaskId: providerTask.taskId,
-          parameters: {
-            provider: "kie",
-            model: SEEDANCE_MODEL,
-            providerTaskId: providerTask.taskId,
-            ...input,
-            creditCost,
-          },
-          creditCost,
-        });
+        const submitted = await markTaskSubmitted(taskId, providerTask.taskId);
+        if (!submitted) {
+          // Recovery (or another path) already terminalized the task while
+          // provider create was in flight — do not resurrect a refunded task.
+          // Provider job may be orphaned; lease keeps this path rare.
+          console.error(
+            "[video.createSeedanceTask] markTaskSubmitted aborted (task already terminal or submitted)",
+            { taskId, providerTaskId: providerTask.taskId },
+          );
+          throw new TaskSubmissionAbortedError(taskId, providerTask.taskId);
+        }
 
         return {
           taskId,
@@ -117,9 +138,19 @@ export const videoRouter = router({
           creditCost,
         };
       } catch (error) {
+        if (error instanceof TaskSubmissionAbortedError) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: error.message,
+          });
+        }
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         await setTaskFailed(
           taskId,
           error instanceof Error ? error.message : "video task creation failed",
+          "provider_create_failed",
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -140,52 +171,22 @@ export const videoRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Task not found" });
       }
 
-      if (!isTerminalStatus(task.status) && task.providerTaskId) {
+      if (!isTaskTerminal(task.status) && task.providerTaskId) {
         try {
           const providerState = await queryKieJob(task.providerTaskId);
-          if (providerState.status === TASK_STATUS.PROCESSING) {
-            return {
-              taskId: task.id,
-              status: TASK_STATUS.PROCESSING,
-              resultData: task.resultData,
-              errorMessage: task.errorMessage,
-            };
-          }
-          if (providerState.status === TASK_STATUS.COMPLETED) {
-            await completeKieTaskFromPayload({
-              taskId: task.id,
-              body: providerState.raw,
-            });
-            const completedTask = await getTaskByIdForUser(
-              input.taskId,
-              ctx.user.id,
-            );
-            return {
-              taskId: task.id,
-              status: completedTask?.status ?? TASK_STATUS.COMPLETED,
-              resultData: completedTask?.resultData ?? task.resultData,
-              errorMessage: completedTask?.errorMessage ?? task.errorMessage,
-            };
-          }
-          if (providerState.status === TASK_STATUS.FAILED) {
-            await setTaskFailed(task.id, "video task processing failed");
-            return {
-              taskId: task.id,
-              status: TASK_STATUS.FAILED,
-              resultData: task.resultData,
-              errorMessage: "video task processing failed",
-            };
+          await applyKieJobToTask({
+            taskId: task.id,
+            body: providerState.raw,
+          });
+          const refreshed = await getTaskByIdForUser(input.taskId, ctx.user.id);
+          if (refreshed) {
+            return toTaskStatusResponse(refreshed);
           }
         } catch (error) {
           console.warn("[video.getTaskStatus] KIE sync failed", error);
         }
       }
 
-      return {
-        taskId: task.id,
-        status: task.status,
-        resultData: task.resultData,
-        errorMessage: task.errorMessage,
-      };
+      return toTaskStatusResponse(task);
     }),
 });

@@ -20,7 +20,10 @@ export default {
   },
   async scheduled(_controller, env, ctx) {
     await runWithCloudflareContext({ env, ctx }, async () => {
-      // scheduled tasks can access getCloudflareContext() here if needed
+      const { recoverStaleVideoTasks } = await import(
+        "@/lib/service/taskRecoveryService"
+      );
+      await recoverStaleVideoTasks();
     });
   },
 } satisfies ExportedHandler<Env>;

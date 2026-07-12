@@ -227,28 +227,31 @@ export const userSource = sqliteTable(
   (table) => [index("user_sources_userId_idx").on(table.userId)],
 );
 
-// User tasks table
+// Video generation tasks (Seedance / KIE)
 export const userTask = sqliteTable(
   "user_task",
   {
     id: text("id").primaryKey(),
-    userId: text("userId").references(() => user.id, { onDelete: "cascade" }),
-    guestId: text("guestId").notNull().default(""),
-    guestIp: text("guestIp").notNull().default(""),
-    status: text("status").notNull().default("pending"),
-    prompt: text("prompt").notNull().default(""),
-    sourceImages: text("sourceImages", { mode: "json" })
+    userId: text("userId")
       .notNull()
-      .$defaultFn(() => []),
-    template: text("template").notNull().default(""),
-    parameters: text("parameters", { mode: "json" })
+      .references(() => user.id, { onDelete: "cascade" }),
+    status: text("status").notNull().default("pending"),
+    mode: text("mode").notNull(),
+    model: text("model").notNull(),
+    provider: text("provider").notNull().default("kie"),
+    prompt: text("prompt").notNull().default(""),
+    // Full SeedanceCreateTaskInput (mode + refs + settings)
+    input: text("input", { mode: "json" })
       .notNull()
       .$defaultFn(() => ({})),
+    // Null until the provider accepts the job (no fake pending IDs)
+    providerTaskId: text("providerTaskId"),
+    // TaskResultData: videos + optional frames/posterKey
     resultData: text("resultData", { mode: "json" })
       .notNull()
       .$defaultFn(() => ({})),
     errorMessage: text("errorMessage").notNull().default(""),
-    providerTaskId: text("providerTaskId").notNull(),
+    errorCode: text("errorCode").notNull().default(""),
     creditCost: integer("creditCost").notNull().default(0),
     processingDurationMs: integer("processingDurationMs"),
     createdAt: integer("createdAt", { mode: "timestamp" })
@@ -261,8 +264,9 @@ export const userTask = sqliteTable(
     completedAt: integer("completedAt", { mode: "timestamp" }),
   },
   (table) => [
-    index("user_tasks_userId_idx").on(table.userId),
+    index("user_tasks_userId_createdAt_idx").on(table.userId, table.createdAt),
     index("user_tasks_providerTaskId_idx").on(table.providerTaskId),
+    index("user_tasks_status_updatedAt_idx").on(table.status, table.updatedAt),
   ],
 );
 

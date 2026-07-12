@@ -75,6 +75,72 @@ export interface ParsedSeedanceResult {
   lastFrameUrls: string[];
 }
 
+/** Persisted generation result (R2 keys), used by user_task.resultData */
+export const taskResultVideoSchema = z.object({
+  key: z.string().min(1),
+  contentType: z.string().optional(),
+});
+
+export const taskResultFrameSchema = z.object({
+  key: z.string().min(1),
+  role: z.enum(["first", "last", "unknown"]),
+});
+
+export const taskResultDataSchema = z.object({
+  videos: z.array(taskResultVideoSchema).default([]),
+  frames: z.array(taskResultFrameSchema).optional(),
+  posterKey: z.string().optional(),
+  /** Transient while non-terminal: R2 persist retry counter */
+  persistAttempts: z.number().int().nonnegative().optional(),
+});
+
+/** Pre-redesign shape: string URL/key arrays */
+const legacyTaskResultDataSchema = z.object({
+  videos: z.array(z.string()),
+  images: z.array(z.string()).optional(),
+});
+
+export type TaskResultData = z.infer<typeof taskResultDataSchema>;
+
+export function emptyTaskResultData(): TaskResultData {
+  return { videos: [] };
+}
+
+export function getPersistAttempts(resultData: unknown): number {
+  const parsed = taskResultDataSchema.safeParse(resultData);
+  return parsed.success ? (parsed.data.persistAttempts ?? 0) : 0;
+}
+
+/** Extract video/image keys for UI consumers (typed + legacy). */
+export function getTaskResultMedia(resultData: unknown): {
+  videoKeys: string[];
+  posterKey?: string;
+  imageKeys: string[];
+} {
+  const typed = taskResultDataSchema.safeParse(resultData);
+  if (typed.success) {
+    const videoKeys = typed.data.videos.map((item) => item.key);
+    const imageKeys = (typed.data.frames ?? []).map((item) => item.key);
+    return {
+      videoKeys,
+      imageKeys,
+      posterKey: typed.data.posterKey ?? imageKeys[0],
+    };
+  }
+
+  const legacy = legacyTaskResultDataSchema.safeParse(resultData);
+  if (legacy.success) {
+    const imageKeys = legacy.data.images ?? [];
+    return {
+      videoKeys: legacy.data.videos,
+      imageKeys,
+      posterKey: imageKeys[0],
+    };
+  }
+
+  return { videoKeys: [], imageKeys: [] };
+}
+
 const CREDIT_COST_BY_RESOLUTION: Record<
   SeedanceCreateTaskInput["resolution"],
   number

@@ -136,13 +136,21 @@
   },
   "creations": {
     "title": "Your {{appName}} Creations",
-    "description": "Browse and manage your generated images and artwork.",
+    "description": "Browse your generated videos, prompts, and reference materials.",
     "emptyTitle": "No creations yet",
     "emptyDescription": "Your generated videos will appear here. Start by creating your first video from the homepage workspace.",
     "viewVideo": "View video",
-    "viewFullSize": "View full size",
-    "downloadVideo": "Download video",
-    "downloadImage": "Download image"
+    "downloadVideo": "Download",
+    "detailsTitle": "Generation details",
+    "noPrompt": "No prompt",
+    "resolution": "Resolution",
+    "duration": "Duration",
+    "aspectRatio": "Aspect ratio",
+    "audio": "Audio",
+    "audioOn": "With audio",
+    "audioOff": "Silent",
+    "created": "Created",
+    "references": "References"
   },
   "credits": {
     "title": "Your {{appName}} Credits",
