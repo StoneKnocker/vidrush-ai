@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "93286b2d-139c-4d36-b60a-9de449f6d4d6",
+  "id": "f419830f-cfd5-4e82-8e5d-5415782ca80c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -225,6 +225,80 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "feedback": {
+      "name": "feedback",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "feedback_userId_idx": {
+          "name": "feedback_userId_idx",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "feedback_userId_user_id_fk": {
+          "name": "feedback_userId_user_id_fk",
+          "tableFrom": "feedback",
+          "tableTo": "user",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "payment": {
       "name": "payment",
       "columns": {
@@ -234,6 +308,13 @@
           "primaryKey": true,
           "notNull": true,
           "autoincrement": true
+        },
+        "publicId": {
+          "name": "publicId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         },
         "userId": {
           "name": "userId",
@@ -322,6 +403,27 @@
         }
       },
       "indexes": {
+        "payment_publicId_unique": {
+          "name": "payment_publicId_unique",
+          "columns": [
+            "publicId"
+          ],
+          "isUnique": true
+        },
+        "payment_publicId_idx": {
+          "name": "payment_publicId_idx",
+          "columns": [
+            "publicId"
+          ],
+          "isUnique": false
+        },
+        "payment_providerSessionId_idx": {
+          "name": "payment_providerSessionId_idx",
+          "columns": [
+            "providerSessionId"
+          ],
+          "isUnique": false
+        },
         "payment_userId_idx": {
           "name": "payment_userId_idx",
           "columns": [
@@ -956,24 +1058,8 @@
           "name": "userId",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
-        },
-        "guestId": {
-          "name": "guestId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "''"
-        },
-        "guestIp": {
-          "name": "guestIp",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "''"
         },
         "status": {
           "name": "status",
@@ -983,6 +1069,28 @@
           "autoincrement": false,
           "default": "'pending'"
         },
+        "mode": {
+          "name": "mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'kie'"
+        },
         "prompt": {
           "name": "prompt",
           "type": "text",
@@ -991,26 +1099,18 @@
           "autoincrement": false,
           "default": "''"
         },
-        "sourceImages": {
-          "name": "sourceImages",
+        "input": {
+          "name": "input",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "template": {
-          "name": "template",
+        "providerTaskId": {
+          "name": "providerTaskId",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "''"
-        },
-        "parameters": {
-          "name": "parameters",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "resultData": {
@@ -1028,12 +1128,13 @@
           "autoincrement": false,
           "default": "''"
         },
-        "providerTaskId": {
-          "name": "providerTaskId",
+        "errorCode": {
+          "name": "errorCode",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "''"
         },
         "creditCost": {
           "name": "creditCost",
@@ -1073,10 +1174,11 @@
         }
       },
       "indexes": {
-        "user_tasks_userId_idx": {
-          "name": "user_tasks_userId_idx",
+        "user_tasks_userId_createdAt_idx": {
+          "name": "user_tasks_userId_createdAt_idx",
           "columns": [
-            "userId"
+            "userId",
+            "createdAt"
           ],
           "isUnique": false
         },
@@ -1084,6 +1186,14 @@
           "name": "user_tasks_providerTaskId_idx",
           "columns": [
             "providerTaskId"
+          ],
+          "isUnique": false
+        },
+        "user_tasks_status_updatedAt_idx": {
+          "name": "user_tasks_status_updatedAt_idx",
+          "columns": [
+            "status",
+            "updatedAt"
           ],
           "isUnique": false
         }

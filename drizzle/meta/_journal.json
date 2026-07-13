@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1773992069512,
-      "tag": "0000_regular_blade",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1774856911875,
-      "tag": "0001_glorious_hardball",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1774857121942,
-      "tag": "0002_optimal_pride",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1776245610658,
-      "tag": "0003_daffy_gorgon",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1776249000000,
-      "tag": "0004_user_task_redesign",
+      "when": 1783907083636,
+      "tag": "0000_old_lord_hawal",
       "breakpoints": true
     }
   ]

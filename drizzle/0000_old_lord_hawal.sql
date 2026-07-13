@@ -30,8 +30,20 @@ CREATE TABLE `credit_history` (
 );
 --> statement-breakpoint
 CREATE INDEX `credit_history_userId_idx` ON `credit_history` (`userId`);--> statement-breakpoint
+CREATE TABLE `feedback` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`userId` text,
+	`email` text NOT NULL,
+	`category` text NOT NULL,
+	`message` text NOT NULL,
+	`createdAt` integer NOT NULL,
+	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
+);
+--> statement-breakpoint
+CREATE INDEX `feedback_userId_idx` ON `feedback` (`userId`);--> statement-breakpoint
 CREATE TABLE `payment` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`publicId` text NOT NULL,
 	`userId` text NOT NULL,
 	`amount` integer NOT NULL,
 	`currency` text DEFAULT 'USD' NOT NULL,
@@ -47,6 +59,9 @@ CREATE TABLE `payment` (
 	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `payment_publicId_unique` ON `payment` (`publicId`);--> statement-breakpoint
+CREATE INDEX `payment_publicId_idx` ON `payment` (`publicId`);--> statement-breakpoint
+CREATE INDEX `payment_providerSessionId_idx` ON `payment` (`providerSessionId`);--> statement-breakpoint
 CREATE INDEX `payment_userId_idx` ON `payment` (`userId`);--> statement-breakpoint
 CREATE TABLE `rateLimit` (
 	`id` text PRIMARY KEY NOT NULL,
@@ -137,17 +152,17 @@ CREATE TABLE `user_source` (
 CREATE INDEX `user_sources_userId_idx` ON `user_source` (`userId`);--> statement-breakpoint
 CREATE TABLE `user_task` (
 	`id` text PRIMARY KEY NOT NULL,
-	`userId` text,
-	`guestId` text DEFAULT '' NOT NULL,
-	`guestIp` text DEFAULT '' NOT NULL,
+	`userId` text NOT NULL,
 	`status` text DEFAULT 'pending' NOT NULL,
+	`mode` text NOT NULL,
+	`model` text NOT NULL,
+	`provider` text DEFAULT 'kie' NOT NULL,
 	`prompt` text DEFAULT '' NOT NULL,
-	`sourceImages` text NOT NULL,
-	`template` text DEFAULT '' NOT NULL,
-	`parameters` text NOT NULL,
+	`input` text NOT NULL,
+	`providerTaskId` text,
 	`resultData` text NOT NULL,
 	`errorMessage` text DEFAULT '' NOT NULL,
-	`providerTaskId` text NOT NULL,
+	`errorCode` text DEFAULT '' NOT NULL,
 	`creditCost` integer DEFAULT 0 NOT NULL,
 	`processingDurationMs` integer,
 	`createdAt` integer NOT NULL,
@@ -156,8 +171,9 @@ CREATE TABLE `user_task` (
 	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE INDEX `user_tasks_userId_idx` ON `user_task` (`userId`);--> statement-breakpoint
+CREATE INDEX `user_tasks_userId_createdAt_idx` ON `user_task` (`userId`,`createdAt`);--> statement-breakpoint
 CREATE INDEX `user_tasks_providerTaskId_idx` ON `user_task` (`providerTaskId`);--> statement-breakpoint
+CREATE INDEX `user_tasks_status_updatedAt_idx` ON `user_task` (`status`,`updatedAt`);--> statement-breakpoint
 CREATE TABLE `verification` (
 	`id` text PRIMARY KEY NOT NULL,
 	`identifier` text NOT NULL,
