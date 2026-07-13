@@ -33,7 +33,7 @@ const seedanceBaseInputSchema = z.object({
   nsfwChecker: z.boolean().optional(),
 });
 
-export const seedanceCreateTaskInputSchema = z.discriminatedUnion("mode", [
+const seedanceCreateTaskInputUnion = z.discriminatedUnion("mode", [
   seedanceBaseInputSchema.extend({
     mode: z.literal("text-to-video"),
   }),
@@ -50,8 +50,24 @@ export const seedanceCreateTaskInputSchema = z.discriminatedUnion("mode", [
   }),
 ]);
 
+/** Multi-reference requires at least one image or video (audio alone is invalid). */
+export const seedanceCreateTaskInputSchema =
+  seedanceCreateTaskInputUnion.superRefine((input, ctx) => {
+    if (input.mode !== "multi-reference") return;
+
+    const imageCount = input.referenceImageUrls?.length ?? 0;
+    const videoCount = input.referenceVideoUrls?.length ?? 0;
+    if (imageCount + videoCount === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "At least one reference image or video is required",
+        path: ["referenceImageUrls"],
+      });
+    }
+  });
+
 export type SeedanceCreateTaskInput = z.infer<
-  typeof seedanceCreateTaskInputSchema
+  typeof seedanceCreateTaskInputUnion
 >;
 
 export interface SeedanceKieInput {

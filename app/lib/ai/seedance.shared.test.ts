@@ -4,6 +4,7 @@ import {
   calculateSeedanceCreditCost,
   getTaskResultMedia,
   parseKieSeedanceResult,
+  seedanceCreateTaskInputSchema,
 } from "./seedance.shared";
 
 describe("Seedance shared helpers", () => {
@@ -75,6 +76,40 @@ describe("Seedance shared helpers", () => {
     });
     expect(input).not.toHaveProperty("first_frame_url");
     expect(input).not.toHaveProperty("last_frame_url");
+  });
+
+  it("rejects multi-reference without image or video references", () => {
+    const empty = seedanceCreateTaskInputSchema.safeParse({
+      mode: "multi-reference",
+      prompt: "Only audio is not enough",
+      resolution: "480p",
+      aspectRatio: "9:16",
+      duration: 5,
+      generateAudio: false,
+      referenceAudioUrls: ["https://cdn.example.com/a.mp3"],
+    });
+    expect(empty.success).toBe(false);
+
+    const none = seedanceCreateTaskInputSchema.safeParse({
+      mode: "multi-reference",
+      prompt: "No media at all",
+      resolution: "480p",
+      aspectRatio: "9:16",
+      duration: 5,
+      generateAudio: false,
+    });
+    expect(none.success).toBe(false);
+
+    const withImage = seedanceCreateTaskInputSchema.safeParse({
+      mode: "multi-reference",
+      prompt: "Use this image",
+      resolution: "480p",
+      aspectRatio: "9:16",
+      duration: 5,
+      generateAudio: false,
+      referenceImageUrls: ["https://cdn.example.com/a.png"],
+    });
+    expect(withImage.success).toBe(true);
   });
 
   it("parses Seedance result URLs and optional frame URLs", () => {

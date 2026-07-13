@@ -32,12 +32,15 @@ import {
   getI2vFrameUrls,
   getImageAssets,
   getPendingAssetsForGeneration,
-  type MediaKind,
+  getSuccessfulUrls,
   mapAssetsForEndFrameToggle,
+  type MediaKind,
+  mergeUploadedUrls,
   removeAssetById,
   replaceFrameAsset,
   type UploadedAsset,
 } from "./asset-state";
+import { ASSET_LIMITS, validateMediaFile } from "./media-validation";
 import type { PortraitItem } from "./portrait-library";
 import { PortraitLibrary } from "./portrait-library";
 import { SettingsPanel } from "./settings-panel";
@@ -84,12 +87,6 @@ const PROMPT_PLACEHOLDERS: Record<GenerationTab, string> = {
   "text-to-video": "Describe the video you want to generate...",
 };
 
-const ASSET_LIMITS = {
-  image: { maxFiles: 9, maxSize: 30 * 1024 * 1024, accept: "image/*" },
-  video: { maxFiles: 3, maxSize: 50 * 1024 * 1024, accept: "video/*" },
-  audio: { maxFiles: 3, maxSize: 15 * 1024 * 1024, accept: "audio/*" },
-} as const;
-
 function toApiResolution(resolution: Resolution): ApiResolution {
   return resolution === "4K" ? "4k" : resolution;
 }
@@ -97,12 +94,6 @@ function toApiResolution(resolution: Resolution): ApiResolution {
 function toApiAspectRatio(aspectRatio: string): ApiAspectRatio {
   if (aspectRatio === "Auto") return "adaptive";
   return aspectRatio as ApiAspectRatio;
-}
-
-function getSuccessfulUrls(assets: UploadedAsset[], kind: MediaKind) {
-  return assets
-    .filter((asset) => asset.kind === kind && asset.status === "success")
-    .map((asset) => asset.url);
 }
 
 export function GenerationForm({
@@ -238,8 +229,9 @@ export function GenerationForm({
     }
 
     selectedFiles.forEach((file) => {
-      if (file.size > limit.maxSize) {
-        setFormError(`${file.name} is too large.`);
+      const formatError = validateMediaFile(file, kind);
+      if (formatError) {
+        setFormError(formatError);
         return;
       }
 
@@ -262,15 +254,27 @@ export function GenerationForm({
     });
   };
 
-  const uploadPendingAssets = async (pendingAssets: UploadedAsset[]) => {
-    if (pendingAssets.length === 0) return true;
+  /**
+   * Upload pending files and return id→url map so callers can build the
+   * task input without waiting for React state to re-render.
+   */
+  const uploadPendingAssets = async (
+    pendingAssets: UploadedAsset[],
+  ): Promise<{ ok: boolean; uploadedUrls: Map<string, string> }> => {
+    const uploadedUrls = new Map<string, string>();
+    if (pendingAssets.length === 0) {
+      return { ok: true, uploadedUrls };
+    }
 
     let hasError = false;
 
     await Promise.all(
       pendingAssets.map(async (asset) => {
         const file = pendingFilesRef.current.get(asset.id);
-        if (!file || !user?.id) return;
+        if (!file || !user?.id) {
+          hasError = true;
+          return;
+        }
 
         setAssets((current) =>
           current.map((a) =>
@@ -300,6 +304,7 @@ export function GenerationForm({
             },
           });
           pendingFilesRef.current.delete(asset.id);
+          uploadedUrls.set(asset.id, url);
           setAssets((current) =>
             current.map((a) =>
               a.id === asset.id
@@ -325,7 +330,7 @@ export function GenerationForm({
       }),
     );
 
-    return !hasError;
+    return { ok: !hasError, uploadedUrls };
   };
 
   const addPortraitAsset = (portrait: PortraitItem) => {
@@ -373,7 +378,7 @@ export function GenerationForm({
     });
   };
 
-  const validateAndBuildInput = () => {
+  const validateAndBuildInput = (resolvedAssets: UploadedAsset[]) => {
     const trimmedPrompt = prompt.trim();
     if (trimmedPrompt.length < 3) {
       throw new Error("Prompt must be at least 3 characters.");
@@ -393,7 +398,7 @@ export function GenerationForm({
 
     if (activeTab === "image-to-video") {
       const { firstFrameUrl, lastFrameUrl } = getI2vFrameUrls(
-        assets,
+        resolvedAssets,
         addEndFrame,
       );
       if (!firstFrameUrl) {
@@ -407,9 +412,9 @@ export function GenerationForm({
       };
     }
 
-    const referenceImageUrls = getSuccessfulUrls(assets, "image");
-    const referenceVideoUrls = getSuccessfulUrls(assets, "video");
-    const referenceAudioUrls = getSuccessfulUrls(assets, "audio");
+    const referenceImageUrls = getSuccessfulUrls(resolvedAssets, "image");
+    const referenceVideoUrls = getSuccessfulUrls(resolvedAssets, "video");
+    const referenceAudioUrls = getSuccessfulUrls(resolvedAssets, "audio");
     if (referenceImageUrls.length + referenceVideoUrls.length === 0) {
       throw new Error("Upload at least one image or video reference.");
     }
@@ -417,9 +422,9 @@ export function GenerationForm({
     return {
       ...base,
       mode: "multi-reference" as const,
-      referenceImageUrls,
-      referenceVideoUrls,
-      referenceAudioUrls,
+      ...(referenceImageUrls.length > 0 ? { referenceImageUrls } : {}),
+      ...(referenceVideoUrls.length > 0 ? { referenceVideoUrls } : {}),
+      ...(referenceAudioUrls.length > 0 ? { referenceAudioUrls } : {}),
     };
   };
 
@@ -438,18 +443,20 @@ export function GenerationForm({
     }
 
     try {
-      const uploadSuccess = await uploadPendingAssets(
+      const { ok, uploadedUrls } = await uploadPendingAssets(
         getPendingAssetsForGeneration({
           assets,
           activeTab,
           addEndFrame,
         }),
       );
-      if (!uploadSuccess) {
+      if (!ok) {
         throw new Error("Some files failed to upload.");
       }
 
-      const input = validateAndBuildInput();
+      // Use merge of current assets + just-uploaded URLs (not stale React state).
+      const resolvedAssets = mergeUploadedUrls(assets, uploadedUrls);
+      const input = validateAndBuildInput(resolvedAssets);
       onTaskStateChange?.({
         status: "pending",
         videoUrls: [],
@@ -487,9 +494,9 @@ export function GenerationForm({
     const file = files?.[0];
     if (!file) return;
 
-    const limit = ASSET_LIMITS.image;
-    if (file.size > limit.maxSize) {
-      setFormError(`${file.name} is too large.`);
+    const formatError = validateMediaFile(file, "image");
+    if (formatError) {
+      setFormError(formatError);
       return;
     }
 
@@ -604,7 +611,7 @@ export function GenerationForm({
             icon={<Upload className="h-6 w-6 text-primary" />}
             kind="image"
             label="Reference Images"
-            limitText="max 9, 30MB each"
+            limitText="jpeg/png/webp/bmp/tiff/gif · max 9 · 30MB"
             disabled={isProcessing}
             secondaryAction={{
               label: "Select Virtual Portrait",
@@ -619,7 +626,7 @@ export function GenerationForm({
             icon={<Upload className="h-6 w-6 text-primary" />}
             kind="video"
             label="Reference Videos"
-            limitText="max 3, 50MB each"
+            limitText="mp4/mov · max 3 · 50MB · 2–15s each"
             disabled={isProcessing}
             onFilesSelected={selectFiles}
             onRemove={removeAsset}
@@ -629,7 +636,7 @@ export function GenerationForm({
             icon={<Upload className="h-6 w-6 text-primary" />}
             kind="audio"
             label="Reference Audios"
-            limitText="max 3, 15MB each"
+            limitText="wav/mp3 · max 3 · 15MB · 2–15s each"
             disabled={isProcessing}
             onFilesSelected={selectFiles}
             onRemove={removeAsset}

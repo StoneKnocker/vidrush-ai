@@ -213,3 +213,39 @@ export function getPendingAssetsForGeneration({
         asset.kind === "audio"),
   );
 }
+
+/**
+ * Apply just-uploaded URLs onto assets so generation can proceed without
+ * waiting for a React re-render (avoids stale-state after await upload).
+ */
+export function mergeUploadedUrls(
+  assets: UploadedAsset[],
+  uploadedUrls: ReadonlyMap<string, string>,
+): UploadedAsset[] {
+  if (uploadedUrls.size === 0) return assets;
+
+  return assets.map((asset) => {
+    const url = uploadedUrls.get(asset.id);
+    if (!url) return asset;
+    return {
+      ...asset,
+      url,
+      status: "success" as const,
+      progress: 100,
+    };
+  });
+}
+
+export function getSuccessfulUrls(
+  assets: UploadedAsset[],
+  kind: MediaKind,
+): string[] {
+  return assets
+    .filter(
+      (asset) =>
+        asset.kind === kind &&
+        asset.status === "success" &&
+        asset.url.length > 0,
+    )
+    .map((asset) => asset.url);
+}

@@ -2,9 +2,12 @@ import { describe, expect, test } from "vitest";
 import {
   addPortraitAsset,
   getPendingAssetsForGeneration,
+  getSuccessfulUrls,
+  mergeUploadedUrls,
   removeAssetById,
   type UploadedAsset,
 } from "./asset-state";
+import { validateMediaFile } from "./media-validation";
 
 const portrait = {
   id: "p1",
@@ -152,5 +155,68 @@ describe("video workspace asset state", () => {
         addEndFrame: true,
       }),
     ).toEqual([endFrame]);
+  });
+
+  test("mergeUploadedUrls applies just-uploaded urls without waiting for React state", () => {
+    const portrait: UploadedAsset = {
+      id: "portrait:p1",
+      name: "portrait",
+      url: "https://cdn.example.com/portrait.webp",
+      kind: "image",
+      progress: 100,
+      status: "success",
+    };
+    const pending: UploadedAsset = {
+      id: "pending-1",
+      name: "ref.png",
+      url: "",
+      kind: "image",
+      progress: 0,
+      status: "pending",
+    };
+
+    const merged = mergeUploadedUrls(
+      [portrait, pending],
+      new Map([["pending-1", "https://cdn.example.com/ref.png"]]),
+    );
+
+    expect(getSuccessfulUrls(merged, "image")).toEqual([
+      "https://cdn.example.com/portrait.webp",
+      "https://cdn.example.com/ref.png",
+    ]);
+    // Stale pre-merge assets would only return the portrait
+    expect(getSuccessfulUrls([portrait, pending], "image")).toEqual([
+      "https://cdn.example.com/portrait.webp",
+    ]);
+  });
+});
+
+describe("media validation", () => {
+  test("accepts KIE-supported extensions and rejects others", () => {
+    const png = new File([new Uint8Array([1])], "a.png", {
+      type: "image/png",
+    });
+    const webm = new File([new Uint8Array([1])], "a.webm", {
+      type: "video/webm",
+    });
+    const mp4 = new File([new Uint8Array([1])], "a.mp4", {
+      type: "video/mp4",
+    });
+    const m4a = new File([new Uint8Array([1])], "a.m4a", {
+      type: "audio/mp4",
+    });
+
+    expect(validateMediaFile(png, "image")).toBeNull();
+    expect(validateMediaFile(mp4, "video")).toBeNull();
+    expect(validateMediaFile(webm, "video")).toMatch(/unsupported format/i);
+    expect(validateMediaFile(m4a, "audio")).toMatch(/unsupported format/i);
+  });
+
+  test("rejects oversized files", () => {
+    const big = new File([new Uint8Array([1])], "big.png", {
+      type: "image/png",
+    });
+    Object.defineProperty(big, "size", { value: 31 * 1024 * 1024 });
+    expect(validateMediaFile(big, "image")).toMatch(/too large/i);
   });
 });
