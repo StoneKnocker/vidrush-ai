@@ -1,4 +1,10 @@
-import { CREDIT_TYPE, PAYMENT_PROVIDER, PAYMENT_STATUS } from "@/lib/consts";
+import {
+  CREDIT_TYPE,
+  PAYMENT_KIND,
+  PAYMENT_PROVIDER,
+  PAYMENT_STATUS,
+  SUBSCRIPTION_STATUS,
+} from "@/lib/consts";
 import {
   createPayment,
   getPaymentById,
@@ -7,6 +13,11 @@ import {
   updatePaymentSessionId,
 } from "@/lib/model/payment";
 import { getSubscriptionByProviderId } from "@/lib/model/subscription";
+import {
+  markWebhookFailed,
+  markWebhookProcessed,
+  tryClaimWebhookEvent,
+} from "@/lib/model/webhookEvent";
 import { serverEnv } from "~/lib/env.server";
 import {
   fulfillNewSubscription,
@@ -21,6 +32,8 @@ import {
   getProduct,
   priceToCents,
 } from "~/lib/payment/product";
+
+const PROVIDER = PAYMENT_PROVIDER.PAYPAL;
 
 type PaypalEnvironment = "sandbox" | "production";
 
@@ -209,7 +222,7 @@ async function resolveLocalPayment(options: {
     if (byId) return byId;
   }
   if (options.sessionId) {
-    return getPaymentBySessionId(options.sessionId);
+    return getPaymentBySessionId(PROVIDER, options.sessionId);
   }
   return null;
 }
@@ -222,15 +235,22 @@ export async function createPaypalCheckout(planId: string, userId: string) {
   const amountCents = priceToCents(product.price);
   const amountValue = centsToPayPalAmount(amountCents);
 
+  const kind =
+    product.creditType === CREDIT_TYPE.SUBSCRIPTION
+      ? PAYMENT_KIND.SUBSCRIPTION_INITIAL
+      : PAYMENT_KIND.ONE_TIME;
+
   const payment = await createPayment({
     userId,
-    amount: amountCents,
+    kind,
+    amountCents,
     currency: "USD",
     planId,
-    provider: PAYMENT_PROVIDER.PAYPAL,
+    provider: PROVIDER,
     creditType: product.creditType,
     creditsAmount: product.creditsAmount,
     status: PAYMENT_STATUS.PENDING,
+    metadata: {},
   });
 
   const successUrl = new URL("/payment/success", serverEnv.APP_URL);
@@ -436,11 +456,12 @@ export async function confirmPaypalPayment(publicId: string, userId: string) {
         : periodEnd;
 
       await fulfillNewSubscription(payment, {
-        provider: PAYMENT_PROVIDER.PAYPAL,
+        provider: PROVIDER,
         providerSubscriptionId: subscription.id,
         periodStart,
         periodEnd: nextBilling,
-        providerSessionId: payment.providerSessionId,
+        providerSessionId: payment.providerSessionId ?? undefined,
+        providerTransactionId: subscription.id,
       });
     }
 
@@ -462,8 +483,11 @@ export async function confirmPaypalPayment(publicId: string, userId: string) {
   }
 
   if (order.status === "COMPLETED") {
+    const captureId =
+      order.purchase_units?.[0]?.payments?.captures?.[0]?.id ?? order.id;
     await fulfillOneTimePurchase(payment, {
-      providerSessionId: payment.providerSessionId,
+      providerSessionId: payment.providerSessionId ?? undefined,
+      providerTransactionId: captureId,
     });
   }
 
@@ -473,7 +497,7 @@ export async function confirmPaypalPayment(publicId: string, userId: string) {
 
 function toStatusResult(payment: {
   status: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   creditsAmount: number;
   creditType: string;
@@ -482,13 +506,15 @@ function toStatusResult(payment: {
 }) {
   const status =
     payment.status === PAYMENT_STATUS.PAID ||
-    payment.status === PAYMENT_STATUS.CANCELED
+    payment.status === PAYMENT_STATUS.CANCELED ||
+    payment.status === PAYMENT_STATUS.REFUNDED ||
+    payment.status === PAYMENT_STATUS.FAILED
       ? payment.status
       : PAYMENT_STATUS.PENDING;
 
   return {
-    status: status as "pending" | "paid" | "canceled",
-    amount: payment.amount,
+    status: status as "pending" | "paid" | "canceled" | "failed" | "refunded",
+    amount: payment.amountCents,
     currency: payment.currency,
     creditsAmount: payment.creditsAmount,
     creditType: payment.creditType,
@@ -517,6 +543,7 @@ export async function handlePaypalWebhook(request: Request): Promise<void> {
 
   const rawBody = await request.text();
   const event = JSON.parse(rawBody) as {
+    id?: string;
     event_type?: string;
     resource?: Record<string, unknown>;
   };
@@ -555,67 +582,123 @@ export async function handlePaypalWebhook(request: Request): Promise<void> {
     );
   }
 
+  const eventId = event.id || transmissionId;
+  const claim = await tryClaimWebhookEvent({
+    provider: PROVIDER,
+    eventId,
+    eventType: event.event_type,
+    payload: rawBody.slice(0, 4000),
+  });
+
+  if (!claim.claimed) {
+    console.log("PayPal webhook already processed, skipping", { eventId });
+    return;
+  }
+
   const eventType = event.event_type;
   const resource = (event.resource ?? {}) as Record<string, unknown>;
 
   console.log("PayPal webhook event:", eventType);
 
-  switch (eventType) {
-    case "CHECKOUT.ORDER.APPROVED": {
-      const orderId = resource.id as string | undefined;
-      if (!orderId) return;
-      // Auto-capture if still approved
-      try {
-        await paypalRequest(`/v2/checkout/orders/${orderId}/capture`, "POST");
-      } catch (err) {
-        console.warn("PayPal auto-capture on APPROVED failed:", err);
+  try {
+    switch (eventType) {
+      case "CHECKOUT.ORDER.APPROVED": {
+        const orderId = resource.id as string | undefined;
+        if (!orderId) break;
+        try {
+          await paypalRequest(`/v2/checkout/orders/${orderId}/capture`, "POST");
+        } catch (err) {
+          console.warn("PayPal auto-capture on APPROVED failed:", err);
+        }
+        break;
       }
-      // fall through handling after capture via COMPLETED or confirm path
-      break;
-    }
 
-    case "CHECKOUT.ORDER.COMPLETED": {
-      await handleOrderCompleted(resource as unknown as PaypalOrderResource);
-      break;
-    }
-
-    case "PAYMENT.CAPTURE.COMPLETED": {
-      await handleCaptureCompleted(resource);
-      break;
-    }
-
-    case "BILLING.SUBSCRIPTION.ACTIVATED":
-    case "BILLING.SUBSCRIPTION.RE-ACTIVATED": {
-      await handleSubscriptionActivated(
-        resource as unknown as PaypalSubscriptionResource,
-      );
-      break;
-    }
-
-    case "BILLING.SUBSCRIPTION.UPDATED": {
-      await handleSubscriptionUpdated(
-        resource as unknown as PaypalSubscriptionResource,
-      );
-      break;
-    }
-
-    case "BILLING.SUBSCRIPTION.CANCELLED":
-    case "BILLING.SUBSCRIPTION.SUSPENDED":
-    case "BILLING.SUBSCRIPTION.EXPIRED": {
-      const subId = resource.id as string | undefined;
-      if (subId) {
-        await markSubscriptionCanceled(subId);
+      case "CHECKOUT.ORDER.COMPLETED": {
+        await handleOrderCompleted(resource as unknown as PaypalOrderResource);
+        break;
       }
-      break;
+
+      case "PAYMENT.CAPTURE.COMPLETED": {
+        await handleCaptureCompleted(resource);
+        break;
+      }
+
+      case "BILLING.SUBSCRIPTION.ACTIVATED":
+      case "BILLING.SUBSCRIPTION.RE-ACTIVATED": {
+        await handleSubscriptionActivated(
+          resource as unknown as PaypalSubscriptionResource,
+        );
+        break;
+      }
+
+      case "BILLING.SUBSCRIPTION.UPDATED": {
+        await handleSubscriptionUpdated(
+          resource as unknown as PaypalSubscriptionResource,
+        );
+        break;
+      }
+
+      case "BILLING.SUBSCRIPTION.CANCELLED": {
+        const subId = resource.id as string | undefined;
+        if (subId) {
+          await markSubscriptionCanceled(PROVIDER, subId, {
+            cancelAtPeriodEnd: true,
+          });
+        }
+        break;
+      }
+
+      case "BILLING.SUBSCRIPTION.SUSPENDED": {
+        const subId = resource.id as string | undefined;
+        if (subId) {
+          const existing = await getSubscriptionByProviderId(PROVIDER, subId);
+          if (existing) {
+            await syncSubscriptionState(
+              PROVIDER,
+              subId,
+              SUBSCRIPTION_STATUS.PAUSED,
+              existing.periodStart,
+              existing.periodEnd,
+            );
+          }
+        }
+        break;
+      }
+
+      case "BILLING.SUBSCRIPTION.EXPIRED": {
+        const subId = resource.id as string | undefined;
+        if (subId) {
+          const existing = await getSubscriptionByProviderId(PROVIDER, subId);
+          if (existing) {
+            await syncSubscriptionState(
+              PROVIDER,
+              subId,
+              SUBSCRIPTION_STATUS.EXPIRED,
+              existing.periodStart,
+              existing.periodEnd,
+              { canceledAt: new Date() },
+            );
+          }
+        }
+        break;
+      }
+
+      case "PAYMENT.SALE.COMPLETED": {
+        await handleSaleCompleted(resource);
+        break;
+      }
+
+      default:
+        console.log("Unhandled PayPal event type:", eventType);
     }
 
-    case "PAYMENT.SALE.COMPLETED": {
-      await handleSaleCompleted(resource);
-      break;
-    }
-
-    default:
-      console.log("Unhandled PayPal event type:", eventType);
+    await markWebhookProcessed(claim.id);
+  } catch (err) {
+    await markWebhookFailed(
+      claim.id,
+      err instanceof Error ? err.message : String(err),
+    );
+    throw err;
   }
 }
 
@@ -637,8 +720,12 @@ async function handleOrderCompleted(order: PaypalOrderResource) {
 
   if (payment.status === PAYMENT_STATUS.PAID) return;
 
+  const captureId =
+    order.purchase_units?.[0]?.payments?.captures?.[0]?.id ?? order.id;
+
   await fulfillOneTimePurchase(payment, {
     providerSessionId: order.id,
+    providerTransactionId: captureId,
   });
 }
 
@@ -648,6 +735,7 @@ async function handleCaptureCompleted(resource: Record<string, unknown>) {
     | undefined;
   const orderId = supplementary?.related_ids?.order_id;
   const customId = resource.custom_id as string | undefined;
+  const captureId = resource.id as string | undefined;
   const paymentId = parsePaymentIdFromCustomId(customId);
 
   const payment = await resolveLocalPayment({
@@ -656,7 +744,6 @@ async function handleCaptureCompleted(resource: Record<string, unknown>) {
   });
 
   if (!payment) {
-    // Try fetch order if we have order id
     if (orderId) {
       try {
         const order = await paypalRequest<PaypalOrderResource>(
@@ -680,6 +767,7 @@ async function handleCaptureCompleted(resource: Record<string, unknown>) {
 
   await fulfillOneTimePurchase(payment, {
     providerSessionId: orderId ?? payment.providerSessionId ?? undefined,
+    providerTransactionId: captureId ?? orderId,
   });
 }
 
@@ -699,8 +787,7 @@ async function handleSubscriptionActivated(sub: PaypalSubscriptionResource) {
   }
 
   if (payment.status === PAYMENT_STATUS.PAID) {
-    // Ensure subscription row exists
-    const existing = await getSubscriptionByProviderId(sub.id);
+    const existing = await getSubscriptionByProviderId(PROVIDER, sub.id);
     if (existing) return;
   }
 
@@ -711,18 +798,18 @@ async function handleSubscriptionActivated(sub: PaypalSubscriptionResource) {
     : periodEnd;
 
   await fulfillNewSubscription(payment, {
-    provider: PAYMENT_PROVIDER.PAYPAL,
+    provider: PROVIDER,
     providerSubscriptionId: sub.id,
     periodStart,
     periodEnd: nextBilling,
     providerSessionId: sub.id,
+    providerTransactionId: sub.id,
   });
 }
 
 async function handleSubscriptionUpdated(sub: PaypalSubscriptionResource) {
-  const existing = await getSubscriptionByProviderId(sub.id);
+  const existing = await getSubscriptionByProviderId(PROVIDER, sub.id);
   if (!existing) {
-    // First-time activation may come as UPDATED
     if (sub.status === "ACTIVE" || sub.status === "APPROVED") {
       await handleSubscriptionActivated(sub);
     }
@@ -736,14 +823,19 @@ async function handleSubscriptionUpdated(sub: PaypalSubscriptionResource) {
     ? new Date(sub.billing_info.next_billing_time)
     : existing.periodEnd;
 
-  const status =
-    sub.status === "CANCELLED" ||
-    sub.status === "SUSPENDED" ||
-    sub.status === "EXPIRED"
-      ? "canceled"
-      : "active";
+  let status: string = SUBSCRIPTION_STATUS.ACTIVE;
+  if (sub.status === "CANCELLED") status = SUBSCRIPTION_STATUS.CANCELED;
+  else if (sub.status === "SUSPENDED") status = SUBSCRIPTION_STATUS.PAUSED;
+  else if (sub.status === "EXPIRED") status = SUBSCRIPTION_STATUS.EXPIRED;
 
-  await syncSubscriptionState(sub.id, status, start, nextBilling);
+  await syncSubscriptionState(PROVIDER, sub.id, status, start, nextBilling, {
+    cancelAtPeriodEnd: status === SUBSCRIPTION_STATUS.CANCELED,
+    canceledAt:
+      status === SUBSCRIPTION_STATUS.CANCELED ||
+      status === SUBSCRIPTION_STATUS.EXPIRED
+        ? new Date()
+        : null,
+  });
 }
 
 async function handleSaleCompleted(resource: Record<string, unknown>) {
@@ -752,13 +844,14 @@ async function handleSaleCompleted(resource: Record<string, unknown>) {
     (resource.subscription_id as string | undefined);
 
   if (!subscriptionId) {
-    // One-time sale without agreement — usually covered by capture/order events
     return;
   }
 
-  const localSubscription = await getSubscriptionByProviderId(subscriptionId);
+  const localSubscription = await getSubscriptionByProviderId(
+    PROVIDER,
+    subscriptionId,
+  );
   if (!localSubscription) {
-    // First payment may arrive before ACTIVATED is processed
     try {
       const sub = await paypalRequest<PaypalSubscriptionResource>(
         `/v1/billing/subscriptions/${subscriptionId}`,
@@ -771,7 +864,6 @@ async function handleSaleCompleted(resource: Record<string, unknown>) {
     return;
   }
 
-  // Renewal
   const amountValue =
     (resource.amount as { total?: string; value?: string } | undefined)
       ?.total ??
@@ -782,13 +874,13 @@ async function handleSaleCompleted(resource: Record<string, unknown>) {
     amountCents = Math.round(Number.parseFloat(amountValue) * 100);
   }
 
+  const saleId = resource.id as string | undefined;
   const now = new Date();
   const { periodStart, periodEnd } = periodFromPlanId(
     localSubscription.planId,
     now,
   );
 
-  // Prefer next_billing_time from subscription if available
   let end = periodEnd;
   try {
     const sub = await paypalRequest<PaypalSubscriptionResource>(
@@ -806,5 +898,6 @@ async function handleSaleCompleted(resource: Record<string, unknown>) {
     periodStart,
     periodEnd: end,
     amountCents,
+    providerTransactionId: saleId,
   });
 }

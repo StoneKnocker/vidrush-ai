@@ -1,4 +1,10 @@
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  integer,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 import { ulid } from "ulid";
 
 // Better auth tables
@@ -101,13 +107,14 @@ export const rateLimit = sqliteTable(
   (table) => [index("rateLimit_key_idx").on(table.key)],
 );
 
-// User balance table
+// User balance table (subscription pocket resets per cycle; permanent accumulates)
 export const userBalance = sqliteTable("user_balance", {
   userId: text("userId")
     .primaryKey()
     .references(() => user.id, { onDelete: "cascade" }),
   subscriptionCredits: integer("subscriptionCredits").notNull().default(0),
   permanentCredits: integer("permanentCredits").notNull().default(0),
+  /** Cache of active subscription.periodEnd; consumeCredits must honor expiry */
   subscriptionCycleEnd: integer("subscriptionCycleEnd", { mode: "timestamp" }),
   updatedAt: integer("updatedAt", { mode: "timestamp" })
     .notNull()
@@ -115,20 +122,16 @@ export const userBalance = sqliteTable("user_balance", {
     .$onUpdateFn(() => new Date()),
 });
 
-// Subscription table
-export const subscription = sqliteTable(
-  "subscription",
+// Provider customer mapping (Stripe Customer / PayPal Payer / Creem customer)
+export const billingCustomer = sqliteTable(
+  "billing_customer",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     provider: text("provider").notNull(),
-    providerSubscriptionId: text("providerSubscriptionId").notNull(),
-    status: text("status").notNull(),
-    planId: text("planId").notNull(),
-    periodStart: integer("periodStart", { mode: "timestamp" }).notNull(),
-    periodEnd: integer("periodEnd", { mode: "timestamp" }).notNull(),
+    providerCustomerId: text("providerCustomerId").notNull(),
     createdAt: integer("createdAt", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
@@ -137,10 +140,67 @@ export const subscription = sqliteTable(
       .$defaultFn(() => new Date())
       .$onUpdateFn(() => new Date()),
   },
-  (table) => [index("subscription_userId_idx").on(table.userId)],
+  (table) => [
+    uniqueIndex("billing_customer_user_provider_uidx").on(
+      table.userId,
+      table.provider,
+    ),
+    uniqueIndex("billing_customer_provider_customer_uidx").on(
+      table.provider,
+      table.providerCustomerId,
+    ),
+  ],
 );
 
-// Payment table
+// Subscription — provider-agnostic local source of truth
+export const subscription = sqliteTable(
+  "subscription",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    publicId: text("publicId")
+      .notNull()
+      .unique()
+      .$defaultFn(() => `sub_${ulid()}`),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),
+    providerSubscriptionId: text("providerSubscriptionId").notNull(),
+    providerCustomerId: text("providerCustomerId"),
+    status: text("status").notNull(),
+    planId: text("planId").notNull(),
+    periodStart: integer("periodStart", { mode: "timestamp" }).notNull(),
+    periodEnd: integer("periodEnd", { mode: "timestamp" }).notNull(),
+    cancelAtPeriodEnd: integer("cancelAtPeriodEnd", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    canceledAt: integer("canceledAt", { mode: "timestamp" }),
+    metadata: text("metadata", { mode: "json" })
+      .$defaultFn(() => ({}))
+      .notNull(),
+    createdAt: integer("createdAt", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    updatedAt: integer("updatedAt", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date())
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex("subscription_provider_providerSubscriptionId_uidx").on(
+      table.provider,
+      table.providerSubscriptionId,
+    ),
+    index("subscription_userId_status_idx").on(table.userId, table.status),
+    index("subscription_periodEnd_idx").on(table.periodEnd),
+  ],
+);
+
+/**
+ * Payment — one money event (checkout pending, one-time, sub initial, renewal, refund).
+ * amountCents is always minor units (e.g. USD cents).
+ * SQLite UNIQUE allows multiple NULLs on providerSessionId / providerTransactionId.
+ */
 export const payment = sqliteTable(
   "payment",
   {
@@ -152,15 +212,26 @@ export const payment = sqliteTable(
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    amount: integer("amount").notNull(),
+    subscriptionId: integer("subscriptionId").references(
+      () => subscription.id,
+      { onDelete: "set null" },
+    ),
+    kind: text("kind").notNull(),
+    amountCents: integer("amountCents").notNull(),
     currency: text("currency").notNull().default("USD"),
     planId: text("planId").notNull(),
     provider: text("provider").notNull(),
-    providerTransactionId: text("providerTransactionId"),
+    /** Checkout/order/session id at provider */
     providerSessionId: text("providerSessionId"),
-    creditType: text("type").notNull(),
+    /** Settled charge/capture/invoice/sale id — primary fulfillment idempotency key */
+    providerTransactionId: text("providerTransactionId"),
+    creditType: text("creditType").notNull(),
     creditsAmount: integer("creditsAmount").notNull(),
     status: text("status").notNull(),
+    paidAt: integer("paidAt", { mode: "timestamp" }),
+    metadata: text("metadata", { mode: "json" })
+      .$defaultFn(() => ({}))
+      .notNull(),
     createdAt: integer("createdAt", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
@@ -170,9 +241,16 @@ export const payment = sqliteTable(
       .$onUpdateFn(() => new Date()),
   },
   (table) => [
-    index("payment_publicId_idx").on(table.publicId),
-    index("payment_providerSessionId_idx").on(table.providerSessionId),
-    index("payment_userId_idx").on(table.userId),
+    uniqueIndex("payment_provider_session_uidx").on(
+      table.provider,
+      table.providerSessionId,
+    ),
+    uniqueIndex("payment_provider_transaction_uidx").on(
+      table.provider,
+      table.providerTransactionId,
+    ),
+    index("payment_userId_createdAt_idx").on(table.userId, table.createdAt),
+    index("payment_subscriptionId_idx").on(table.subscriptionId),
   ],
 );
 
@@ -188,12 +266,49 @@ export const creditHistory = sqliteTable(
     creditType: text("creditType").notNull(),
     creditEvent: text("creditEvent").notNull(),
     description: text("description").notNull().default(""),
+    /** Free-form link (task id, etc.); prefer paymentId/subscriptionId when set */
     referenceId: text("referenceId").notNull().default(""),
+    paymentId: integer("paymentId").references(() => payment.id, {
+      onDelete: "set null",
+    }),
+    subscriptionId: integer("subscriptionId").references(
+      () => subscription.id,
+      { onDelete: "set null" },
+    ),
     createdAt: integer("createdAt", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
   },
-  (table) => [index("credit_history_userId_idx").on(table.userId)],
+  (table) => [
+    index("credit_history_userId_idx").on(table.userId),
+    index("credit_history_paymentId_idx").on(table.paymentId),
+    index("credit_history_subscriptionId_idx").on(table.subscriptionId),
+  ],
+);
+
+/** Webhook delivery log — UNIQUE(provider, eventId) for cross-channel idempotency */
+export const webhookEvent = sqliteTable(
+  "webhook_event",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    provider: text("provider").notNull(),
+    eventId: text("eventId").notNull(),
+    eventType: text("eventType").notNull(),
+    status: text("status").notNull(),
+    errorMessage: text("errorMessage").notNull().default(""),
+    /** Optional raw payload for debug; keep small */
+    payload: text("payload"),
+    createdAt: integer("createdAt", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    processedAt: integer("processedAt", { mode: "timestamp" }),
+  },
+  (table) => [
+    uniqueIndex("webhook_event_provider_eventId_uidx").on(
+      table.provider,
+      table.eventId,
+    ),
+  ],
 );
 
 // User sources tracking table
@@ -291,12 +406,16 @@ export type SelectUser = typeof user.$inferSelect;
 export type InsertUser = typeof user.$inferInsert;
 export type SelectUserBalance = typeof userBalance.$inferSelect;
 export type InsertUserBalance = typeof userBalance.$inferSelect;
+export type SelectBillingCustomer = typeof billingCustomer.$inferSelect;
+export type InsertBillingCustomer = typeof billingCustomer.$inferInsert;
 export type SelectSubscription = typeof subscription.$inferSelect;
 export type InsertSubscription = typeof subscription.$inferInsert;
 export type SelectPayment = typeof payment.$inferSelect;
 export type InsertPayment = typeof payment.$inferInsert;
 export type SelectCreditHistory = typeof creditHistory.$inferSelect;
 export type InsertCreditHistory = typeof creditHistory.$inferInsert;
+export type SelectWebhookEvent = typeof webhookEvent.$inferSelect;
+export type InsertWebhookEvent = typeof webhookEvent.$inferInsert;
 export type SelectUserSource = typeof userSource.$inferSelect;
 export type InsertUserSource = typeof userSource.$inferInsert;
 export type SelectUserTask = typeof userTask.$inferSelect;

@@ -43,10 +43,21 @@ export async function consumeCredits(
     throw new Error("User balance not found");
   }
 
+  // Expire subscription pocket when cycle has ended (keep consistent with getTotalAvailableCredits)
+  const now = new Date();
+  const cycleValid =
+    balance.subscriptionCycleEnd != null && balance.subscriptionCycleEnd > now;
+  if (!cycleValid && (balance.subscriptionCredits || 0) > 0) {
+    await db
+      .update(userBalance)
+      .set({ subscriptionCredits: 0 })
+      .where(eq(userBalance.userId, userId));
+  }
+
   // Calculate deduction path
   let deductSub = 0;
   let deductPerm = 0;
-  const availableSub = balance.subscriptionCredits || 0;
+  const availableSub = cycleValid ? balance.subscriptionCredits || 0 : 0;
   const availablePerm = balance.permanentCredits || 0;
 
   if (availableSub >= amount) {

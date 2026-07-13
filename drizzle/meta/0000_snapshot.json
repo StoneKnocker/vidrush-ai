@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f419830f-cfd5-4e82-8e5d-5415782ca80c",
+  "id": "d71e089b-d976-4f73-9e52-fc850f26a06b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -135,6 +135,89 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "billing_customer": {
+      "name": "billing_customer",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "providerCustomerId": {
+          "name": "providerCustomerId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "billing_customer_user_provider_uidx": {
+          "name": "billing_customer_user_provider_uidx",
+          "columns": [
+            "userId",
+            "provider"
+          ],
+          "isUnique": true
+        },
+        "billing_customer_provider_customer_uidx": {
+          "name": "billing_customer_provider_customer_uidx",
+          "columns": [
+            "provider",
+            "providerCustomerId"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "billing_customer_userId_user_id_fk": {
+          "name": "billing_customer_userId_user_id_fk",
+          "tableFrom": "billing_customer",
+          "tableTo": "user",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "credit_history": {
       "name": "credit_history",
       "columns": {
@@ -189,6 +272,20 @@
           "autoincrement": false,
           "default": "''"
         },
+        "paymentId": {
+          "name": "paymentId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "subscriptionId": {
+          "name": "subscriptionId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "integer",
@@ -202,6 +299,20 @@
           "name": "credit_history_userId_idx",
           "columns": [
             "userId"
+          ],
+          "isUnique": false
+        },
+        "credit_history_paymentId_idx": {
+          "name": "credit_history_paymentId_idx",
+          "columns": [
+            "paymentId"
+          ],
+          "isUnique": false
+        },
+        "credit_history_subscriptionId_idx": {
+          "name": "credit_history_subscriptionId_idx",
+          "columns": [
+            "subscriptionId"
           ],
           "isUnique": false
         }
@@ -218,6 +329,32 @@
             "id"
           ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "credit_history_paymentId_payment_id_fk": {
+          "name": "credit_history_paymentId_payment_id_fk",
+          "tableFrom": "credit_history",
+          "tableTo": "payment",
+          "columnsFrom": [
+            "paymentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "credit_history_subscriptionId_subscription_id_fk": {
+          "name": "credit_history_subscriptionId_subscription_id_fk",
+          "tableFrom": "credit_history",
+          "tableTo": "subscription",
+          "columnsFrom": [
+            "subscriptionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -323,8 +460,22 @@
           "notNull": true,
           "autoincrement": false
         },
-        "amount": {
-          "name": "amount",
+        "subscriptionId": {
+          "name": "subscriptionId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "amountCents": {
+          "name": "amountCents",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -352,13 +503,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "providerTransactionId": {
-          "name": "providerTransactionId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "providerSessionId": {
           "name": "providerSessionId",
           "type": "text",
@@ -366,8 +510,15 @@
           "notNull": false,
           "autoincrement": false
         },
-        "type": {
-          "name": "type",
+        "providerTransactionId": {
+          "name": "providerTransactionId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "creditType": {
+          "name": "creditType",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -382,6 +533,20 @@
         },
         "status": {
           "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "paidAt": {
+          "name": "paidAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "metadata": {
+          "name": "metadata",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -410,24 +575,34 @@
           ],
           "isUnique": true
         },
-        "payment_publicId_idx": {
-          "name": "payment_publicId_idx",
+        "payment_provider_session_uidx": {
+          "name": "payment_provider_session_uidx",
           "columns": [
-            "publicId"
-          ],
-          "isUnique": false
-        },
-        "payment_providerSessionId_idx": {
-          "name": "payment_providerSessionId_idx",
-          "columns": [
+            "provider",
             "providerSessionId"
           ],
+          "isUnique": true
+        },
+        "payment_provider_transaction_uidx": {
+          "name": "payment_provider_transaction_uidx",
+          "columns": [
+            "provider",
+            "providerTransactionId"
+          ],
+          "isUnique": true
+        },
+        "payment_userId_createdAt_idx": {
+          "name": "payment_userId_createdAt_idx",
+          "columns": [
+            "userId",
+            "createdAt"
+          ],
           "isUnique": false
         },
-        "payment_userId_idx": {
-          "name": "payment_userId_idx",
+        "payment_subscriptionId_idx": {
+          "name": "payment_subscriptionId_idx",
           "columns": [
-            "userId"
+            "subscriptionId"
           ],
           "isUnique": false
         }
@@ -444,6 +619,19 @@
             "id"
           ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payment_subscriptionId_subscription_id_fk": {
+          "name": "payment_subscriptionId_subscription_id_fk",
+          "tableFrom": "payment",
+          "tableTo": "subscription",
+          "columnsFrom": [
+            "subscriptionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -616,6 +804,13 @@
           "notNull": true,
           "autoincrement": true
         },
+        "publicId": {
+          "name": "publicId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "userId": {
           "name": "userId",
           "type": "text",
@@ -635,6 +830,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "providerCustomerId": {
+          "name": "providerCustomerId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "status": {
@@ -665,6 +867,28 @@
           "notNull": true,
           "autoincrement": false
         },
+        "cancelAtPeriodEnd": {
+          "name": "cancelAtPeriodEnd",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "canceledAt": {
+          "name": "canceledAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "integer",
@@ -681,10 +905,33 @@
         }
       },
       "indexes": {
-        "subscription_userId_idx": {
-          "name": "subscription_userId_idx",
+        "subscription_publicId_unique": {
+          "name": "subscription_publicId_unique",
           "columns": [
-            "userId"
+            "publicId"
+          ],
+          "isUnique": true
+        },
+        "subscription_provider_providerSubscriptionId_uidx": {
+          "name": "subscription_provider_providerSubscriptionId_uidx",
+          "columns": [
+            "provider",
+            "providerSubscriptionId"
+          ],
+          "isUnique": true
+        },
+        "subscription_userId_status_idx": {
+          "name": "subscription_userId_status_idx",
+          "columns": [
+            "userId",
+            "status"
+          ],
+          "isUnique": false
+        },
+        "subscription_periodEnd_idx": {
+          "name": "subscription_periodEnd_idx",
+          "columns": [
+            "periodEnd"
           ],
           "isUnique": false
         }
@@ -1270,6 +1517,89 @@
             "identifier"
           ],
           "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "webhook_event": {
+      "name": "webhook_event",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "eventId": {
+          "name": "eventId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "eventType": {
+          "name": "eventType",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "errorMessage": {
+          "name": "errorMessage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "payload": {
+          "name": "payload",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "processedAt": {
+          "name": "processedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "webhook_event_provider_eventId_uidx": {
+          "name": "webhook_event_provider_eventId_uidx",
+          "columns": [
+            "provider",
+            "eventId"
+          ],
+          "isUnique": true
         }
       },
       "foreignKeys": {},

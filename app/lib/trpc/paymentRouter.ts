@@ -39,7 +39,7 @@ const confirmCheckoutSchema = z.object({
 
 function mapPaymentToStatusResult(payment: {
   status: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   creditsAmount: number;
   creditType: string;
@@ -48,13 +48,15 @@ function mapPaymentToStatusResult(payment: {
 }): PaymentStatusResult {
   const status =
     payment.status === PAYMENT_STATUS.PAID ||
-    payment.status === PAYMENT_STATUS.CANCELED
+    payment.status === PAYMENT_STATUS.CANCELED ||
+    payment.status === PAYMENT_STATUS.FAILED ||
+    payment.status === PAYMENT_STATUS.REFUNDED
       ? payment.status
       : PAYMENT_STATUS.PENDING;
 
   return {
-    status,
-    amount: payment.amount,
+    status: status as PaymentStatusResult["status"],
+    amount: payment.amountCents,
     currency: payment.currency,
     creditsAmount: payment.creditsAmount,
     creditType: payment.creditType,
@@ -126,9 +128,21 @@ export const paymentRouter = router({
   checkStatus: authedProcedure
     .input(checkStatusSchema)
     .query(async ({ ctx, input }): Promise<PaymentStatusResult> => {
-      const payment = input.publicId
+      let payment = input.publicId
         ? await getPaymentByPublicId(input.publicId)
-        : await getPaymentBySessionId(input.sessionId ?? "");
+        : null;
+
+      // sessionId lookup needs provider; try known providers when only session is given
+      if (!payment && input.sessionId) {
+        for (const provider of [
+          PAYMENT_PROVIDER.CREEM,
+          PAYMENT_PROVIDER.PAYPAL,
+          PAYMENT_PROVIDER.STRIPE,
+        ]) {
+          payment = await getPaymentBySessionId(provider, input.sessionId);
+          if (payment) break;
+        }
+      }
 
       if (!payment || payment.userId !== ctx.user.id) {
         return {

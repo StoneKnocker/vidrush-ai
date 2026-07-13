@@ -1,13 +1,19 @@
 import {
   CREDIT_EVENT,
   CREDIT_TYPE,
+  PAYMENT_KIND,
   PAYMENT_STATUS,
   type PaymentProvider,
   SUBSCRIPTION_STATUS,
 } from "@/lib/consts";
 import type { SelectPayment } from "@/lib/database/schema";
 import { addCreditHistory } from "@/lib/model/creditHistory";
-import { createPayment, updatePaymentStatus } from "@/lib/model/payment";
+import {
+  createPayment,
+  getPaymentByTransactionId,
+  linkPaymentToSubscription,
+  updatePaymentStatus,
+} from "@/lib/model/payment";
 import {
   createSubscription,
   getSubscriptionByProviderId,
@@ -24,11 +30,14 @@ type PaymentRow = SelectPayment;
 
 /**
  * Grant permanent credits for a one-time purchase.
- * Idempotent when payment is already paid.
+ * Idempotent when payment is already paid or providerTransactionId already fulfilled.
  */
 export async function fulfillOneTimePurchase(
   payment: PaymentRow,
-  options: { providerSessionId?: string } = {},
+  options: {
+    providerSessionId?: string;
+    providerTransactionId?: string;
+  } = {},
 ): Promise<{ granted: boolean }> {
   if (payment.status === PAYMENT_STATUS.PAID) {
     console.log("Payment already PAID, skipping one-time fulfillment", {
@@ -38,12 +47,28 @@ export async function fulfillOneTimePurchase(
   }
 
   const sessionId = options.providerSessionId ?? payment.providerSessionId;
+  const transactionId =
+    options.providerTransactionId ?? payment.providerTransactionId;
 
-  await updatePaymentStatus(
-    payment.id,
-    PAYMENT_STATUS.PAID,
-    sessionId ?? undefined,
-  );
+  if (transactionId) {
+    const existingTx = await getPaymentByTransactionId(
+      payment.provider,
+      transactionId,
+    );
+    if (existingTx && existingTx.id !== payment.id) {
+      console.log("Transaction already fulfilled on another payment", {
+        transactionId,
+        existingPaymentId: existingTx.id,
+      });
+      return { granted: false };
+    }
+  }
+
+  await updatePaymentStatus(payment.id, PAYMENT_STATUS.PAID, {
+    providerSessionId: sessionId ?? undefined,
+    providerTransactionId: transactionId ?? undefined,
+    paidAt: new Date(),
+  });
 
   await addPermanentCredits(payment.userId, Number(payment.creditsAmount));
 
@@ -53,7 +78,8 @@ export async function fulfillOneTimePurchase(
     creditType: CREDIT_TYPE.PERMANENT,
     creditEvent: CREDIT_EVENT.PURCHASE,
     description: "One-time purchase credits",
-    referenceId: sessionId ?? String(payment.id),
+    referenceId: transactionId ?? sessionId ?? String(payment.id),
+    paymentId: payment.id,
   });
 
   return { granted: true };
@@ -71,46 +97,73 @@ export async function fulfillNewSubscription(
     periodStart: Date;
     periodEnd: Date;
     providerSessionId?: string;
+    providerTransactionId?: string;
+    providerCustomerId?: string;
   },
-): Promise<{ granted: boolean }> {
+): Promise<{ granted: boolean; subscriptionId?: number }> {
   const sessionId =
     options.providerSessionId ??
     payment.providerSessionId ??
     options.providerSubscriptionId;
-
-  if (payment.status !== PAYMENT_STATUS.PAID) {
-    await updatePaymentStatus(payment.id, PAYMENT_STATUS.PAID, sessionId);
-  }
+  const transactionId =
+    options.providerTransactionId ?? payment.providerTransactionId;
 
   const existing = await getSubscriptionByProviderId(
+    options.provider,
     options.providerSubscriptionId,
   );
 
   if (existing) {
     console.log("Subscription already exists, skipping credit grant", {
+      provider: options.provider,
       subscriptionId: options.providerSubscriptionId,
     });
     await updateSubscriptionStatus(
+      options.provider,
       options.providerSubscriptionId,
       SUBSCRIPTION_STATUS.ACTIVE,
     );
     await updateSubscriptionPeriod(
+      options.provider,
       options.providerSubscriptionId,
       options.periodStart,
       options.periodEnd,
     );
-    return { granted: false };
+    if (payment.status !== PAYMENT_STATUS.PAID) {
+      await updatePaymentStatus(payment.id, PAYMENT_STATUS.PAID, {
+        providerSessionId: sessionId,
+        providerTransactionId: transactionId ?? undefined,
+        subscriptionId: existing.id,
+        paidAt: new Date(),
+      });
+    } else {
+      await linkPaymentToSubscription(payment.id, existing.id);
+    }
+    return { granted: false, subscriptionId: existing.id };
   }
 
-  await createSubscription({
+  if (payment.status !== PAYMENT_STATUS.PAID) {
+    await updatePaymentStatus(payment.id, PAYMENT_STATUS.PAID, {
+      providerSessionId: sessionId,
+      providerTransactionId: transactionId ?? undefined,
+      paidAt: new Date(),
+    });
+  }
+
+  const subscriptionId = await createSubscription({
     userId: payment.userId,
     provider: options.provider,
     providerSubscriptionId: options.providerSubscriptionId,
+    providerCustomerId: options.providerCustomerId,
     status: SUBSCRIPTION_STATUS.ACTIVE,
     planId: payment.planId,
     periodStart: options.periodStart,
     periodEnd: options.periodEnd,
+    cancelAtPeriodEnd: false,
+    metadata: {},
   });
+
+  await linkPaymentToSubscription(payment.id, subscriptionId);
 
   await addSubscriptionCredits(
     payment.userId,
@@ -125,17 +178,20 @@ export async function fulfillNewSubscription(
     creditEvent: CREDIT_EVENT.SUBSCRIPTION_GRANT,
     description: "Subscription credits granted",
     referenceId: options.providerSubscriptionId,
+    paymentId: payment.id,
+    subscriptionId,
   });
 
-  return { granted: true };
+  return { granted: true, subscriptionId };
 }
 
 /**
  * Renew an existing subscription: update period, write paid payment row, re-grant credits.
- * Idempotent when periodEnd is unchanged.
+ * Idempotent via providerTransactionId when provided, else periodEnd change.
  */
 export async function fulfillSubscriptionRenewal(
   localSubscription: {
+    id: number;
     userId: string;
     planId: string;
     provider: string;
@@ -145,20 +201,39 @@ export async function fulfillSubscriptionRenewal(
     periodStart: Date;
     periodEnd: Date;
     amountCents?: number;
+    providerTransactionId?: string;
+    providerSessionId?: string;
   },
 ): Promise<{ granted: boolean }> {
+  if (options.providerTransactionId) {
+    const existingTx = await getPaymentByTransactionId(
+      localSubscription.provider,
+      options.providerTransactionId,
+    );
+    if (existingTx) {
+      console.log("Subscription renewal already handled by transaction id", {
+        provider: localSubscription.provider,
+        transactionId: options.providerTransactionId,
+      });
+      return { granted: false };
+    }
+  }
+
   await updateSubscriptionStatus(
+    localSubscription.provider,
     localSubscription.providerSubscriptionId,
     SUBSCRIPTION_STATUS.ACTIVE,
   );
 
   const isChanged = await updateSubscriptionPeriod(
+    localSubscription.provider,
     localSubscription.providerSubscriptionId,
     options.periodStart,
     options.periodEnd,
   );
 
-  if (!isChanged) {
+  // Without transaction id, fall back to periodEnd change for idempotency
+  if (!options.providerTransactionId && !isChanged) {
     console.log("Subscription renewal already handled, skipping", {
       subscriptionId: localSubscription.providerSubscriptionId,
     });
@@ -168,14 +243,20 @@ export async function fulfillSubscriptionRenewal(
   const product = getProduct(localSubscription.planId);
   const amountCents = options.amountCents ?? Math.round(product.price * 100);
 
-  await createPayment({
+  const renewalPayment = await createPayment({
     userId: localSubscription.userId,
-    amount: amountCents,
+    subscriptionId: localSubscription.id,
+    kind: PAYMENT_KIND.SUBSCRIPTION_RENEWAL,
+    amountCents,
     planId: localSubscription.planId,
     provider: localSubscription.provider,
+    providerSessionId: options.providerSessionId,
+    providerTransactionId: options.providerTransactionId,
     creditType: CREDIT_TYPE.SUBSCRIPTION,
     creditsAmount: product.creditsAmount,
     status: PAYMENT_STATUS.PAID,
+    paidAt: new Date(),
+    metadata: {},
   });
 
   await addSubscriptionCredits(
@@ -190,29 +271,51 @@ export async function fulfillSubscriptionRenewal(
     creditType: CREDIT_TYPE.SUBSCRIPTION,
     creditEvent: CREDIT_EVENT.SUBSCRIPTION_GRANT,
     description: "Subscription renewal credits",
-    referenceId: localSubscription.providerSubscriptionId,
+    referenceId:
+      options.providerTransactionId ?? localSubscription.providerSubscriptionId,
+    paymentId: renewalPayment.id,
+    subscriptionId: localSubscription.id,
   });
 
   return { granted: true };
 }
 
 export async function markSubscriptionCanceled(
+  provider: string,
   providerSubscriptionId: string,
+  options: { cancelAtPeriodEnd?: boolean; immediate?: boolean } = {},
 ): Promise<void> {
+  const cancelAtPeriodEnd = options.cancelAtPeriodEnd ?? !options.immediate;
   await updateSubscriptionStatus(
+    provider,
     providerSubscriptionId,
     SUBSCRIPTION_STATUS.CANCELED,
+    {
+      cancelAtPeriodEnd,
+      canceledAt: new Date(),
+    },
   );
 }
 
 export async function syncSubscriptionState(
+  provider: string,
   providerSubscriptionId: string,
   status: string,
   periodStart: Date,
   periodEnd: Date,
+  options: {
+    cancelAtPeriodEnd?: boolean;
+    canceledAt?: Date | null;
+  } = {},
 ): Promise<void> {
-  await updateSubscriptionStatus(providerSubscriptionId, status);
+  await updateSubscriptionStatus(
+    provider,
+    providerSubscriptionId,
+    status,
+    options,
+  );
   await updateSubscriptionPeriod(
+    provider,
     providerSubscriptionId,
     periodStart,
     periodEnd,

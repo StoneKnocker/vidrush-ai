@@ -1,5 +1,10 @@
 import { createCreem } from "creem_io";
-import { PAYMENT_STATUS } from "@/lib/consts";
+import {
+  CREDIT_TYPE,
+  PAYMENT_KIND,
+  PAYMENT_PROVIDER,
+  PAYMENT_STATUS,
+} from "@/lib/consts";
 import { createPayment, updatePaymentSessionId } from "@/lib/model/payment";
 import { isDevelopment, serverEnv } from "~/lib/env.server";
 import { getProduct, priceToCents } from "~/lib/payment/product";
@@ -17,17 +22,24 @@ export async function createCheckout(planId: string, userId: string) {
     throw new Error(`Missing Creem product ID for planId: ${planId}`);
   }
 
+  const kind =
+    product.creditType === CREDIT_TYPE.SUBSCRIPTION
+      ? PAYMENT_KIND.SUBSCRIPTION_INITIAL
+      : PAYMENT_KIND.ONE_TIME;
+
   try {
     // Create payment record first
     const payment = await createPayment({
       userId,
-      amount: priceToCents(product.price),
+      kind,
+      amountCents: priceToCents(product.price),
       currency: "USD",
       planId,
-      provider: "creem",
+      provider: PAYMENT_PROVIDER.CREEM,
       creditType: product.creditType,
       creditsAmount: product.creditsAmount,
       status: PAYMENT_STATUS.PENDING,
+      metadata: {},
     });
 
     const successUrl = new URL("/payment/success", serverEnv.APP_URL);

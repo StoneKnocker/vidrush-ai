@@ -4,7 +4,13 @@ export interface CheckoutCreateResult {
   publicId?: string;
 }
 
-export type PaymentStatusState = "pending" | "paid" | "canceled" | "not_found";
+export type PaymentStatusState =
+  | "pending"
+  | "paid"
+  | "canceled"
+  | "failed"
+  | "refunded"
+  | "not_found";
 
 export interface PaymentStatusResult {
   status: PaymentStatusState;
