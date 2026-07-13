@@ -651,19 +651,6 @@ export function GenerationForm({
             onOpenChange={setPortraitLibraryOpen}
             onSelect={addPortraitAsset}
           />
-          <button
-            type="button"
-            disabled={isProcessing}
-            onClick={() => setPortraitLibraryOpen(true)}
-            className={cn(
-              "inline-flex h-8 w-fit items-center gap-1.5 rounded-md px-2 text-xs",
-              "bg-primary/10 text-primary transition-colors hover:bg-primary/15",
-              isProcessing && "pointer-events-none opacity-60",
-            )}
-          >
-            <UserRound className="h-3.5 w-3.5" />
-            Select Virtual Portrait
-          </button>
 
           <div className={addEndFrame ? "space-y-4" : "space-y-3"}>
             <div className="flex items-center justify-between">
@@ -697,6 +684,20 @@ export function GenerationForm({
                 )}
               </div>
             </div>
+
+            <button
+              type="button"
+              disabled={isProcessing}
+              onClick={() => setPortraitLibraryOpen(true)}
+              className={cn(
+                "inline-flex h-8 w-fit items-center gap-1.5 rounded-md px-2 text-xs",
+                "bg-primary/10 text-primary transition-colors hover:bg-primary/15",
+                isProcessing && "pointer-events-none opacity-60",
+              )}
+            >
+              <UserRound className="h-3.5 w-3.5" />
+              Select Virtual Portrait
+            </button>
 
             {addEndFrame ? (
               <div className="flex items-center gap-3">
