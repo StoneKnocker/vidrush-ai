@@ -70,6 +70,19 @@ export default function HomeRoute({ loaderData }: Route.ComponentProps) {
   return (
     <div className="landing-theme relative flex w-full flex-col overflow-hidden bg-background text-foreground">
       <StructuredData data={structuredData} />
+
+      <section className="relative px-4 pt-8 pb-2 text-center sm:px-6 lg:px-8">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,_rgba(0,217,146,0.12),transparent_60%)]" />
+        <div className="relative mx-auto max-w-3xl">
+          <h1 className="text-balance font-display font-normal text-3xl text-foreground tracking-[-0.02em] sm:text-4xl md:text-5xl">
+            {contentData.hero.title}
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-balance text-base text-muted-foreground leading-7 sm:text-lg sm:leading-8">
+            {contentData.hero.description}
+          </p>
+        </div>
+      </section>
+
       <VideoWorkspace />
       <SeedanceLandingSections />
     </div>

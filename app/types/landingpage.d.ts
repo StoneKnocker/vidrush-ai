@@ -3,4 +3,8 @@ export interface LandingPageContent {
     title: string;
     description: string;
   };
+  hero: {
+    title: string;
+    description: string;
+  };
 }

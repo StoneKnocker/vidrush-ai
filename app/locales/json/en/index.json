@@ -2,5 +2,9 @@
   "meta": {
     "title": "{{appName}} — AI Video Generator Powered by Seedance 2.0",
     "description": "Create multi-modal AI videos with {{appName}}. Powered by Seedance 2.0 — combine images, video, audio, and text for controllable, production-ready video generation."
+  },
+  "hero": {
+    "title": "VidRush AI Video Generator",
+    "description": "Combine images, clips, audio, and text in one workspace. {{appName}} keeps characters, motion, and style consistent so you can ship production-ready video faster."
   }
 }
