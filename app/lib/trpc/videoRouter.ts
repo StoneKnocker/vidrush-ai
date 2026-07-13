@@ -9,7 +9,7 @@ import {
   seedanceResolutionSchema,
 } from "~/lib/ai/seedance.shared";
 import { TASK_STATUS } from "~/lib/consts";
-import { getPublicEnv } from "~/lib/env.server";
+import { serverEnv } from "~/lib/env.server";
 import {
   getTaskByIdForUser,
   isTaskTerminal,
@@ -33,8 +33,10 @@ class TaskSubmissionAbortedError extends Error {
   }
 }
 
+/** Dev may set KIE_CALLBACK_BASE_URL (ngrok); prod leaves it unset → APP_URL. */
 function getKieCallbackUrl() {
-  return new URL("/api/ai/kie/callback", getPublicEnv().APP_URL).toString();
+  const baseUrl = serverEnv.KIE_CALLBACK_BASE_URL ?? serverEnv.APP_URL;
+  return new URL("/api/ai/kie/callback", baseUrl).toString();
 }
 
 function toTaskStatusResponse(task: {

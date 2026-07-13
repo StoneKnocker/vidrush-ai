@@ -29,7 +29,9 @@
         "R2_BUCKET_NAME": "vidrush-ai",
         "PAYMENT_PROVIDER": "creem",
         "PAYPAL_ENABLED": "false",
-        "PAYPAL_ENVIRONMENT": "sandbox"
+        "PAYPAL_ENVIRONMENT": "sandbox",
+        // Fixed ngrok domain so KIE can POST callbacks to local dev
+        "KIE_CALLBACK_BASE_URL": "https://wholehearted-eleanor-nocturnal.ngrok-free.dev"
       },
       // KV namespaces configuration.
       "kv_namespaces": [

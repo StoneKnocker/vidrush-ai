@@ -28,6 +28,8 @@ const serverEnvSchema = z.object({
   CREEM_WEBHOOK_SECRET: z.string().min(1),
   KIE_API_KEY: z.string().min(1),
   KIE_WEBHOOK_HMAC_KEY: z.string().min(1),
+  /** Optional public base for KIE webhooks (e.g. ngrok in local dev). Falls back to APP_URL. */
+  KIE_CALLBACK_BASE_URL: z.string().url().optional(),
 
   // PayPal (optional — enable with PAYPAL_ENABLED=true + credentials)
   PAYPAL_ENABLED: z.string().optional().default("false"),
