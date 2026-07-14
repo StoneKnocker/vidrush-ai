@@ -82,7 +82,8 @@ const TABS: { id: GenerationTab; label: string; icon: React.ReactNode }[] = [
 ];
 
 const PROMPT_PLACEHOLDERS: Record<GenerationTab, string> = {
-  "multi-reference": "Describe how the references should move together...",
+  "multi-reference":
+    "Type @ to reference uploaded materials, e.g. @Image1 as first frame...",
   "image-to-video": "Describe how you want your image to animate...",
   "text-to-video": "Describe the video you want to generate...",
 };
