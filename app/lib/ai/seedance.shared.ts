@@ -47,6 +47,11 @@ const seedanceCreateTaskInputUnion = z.discriminatedUnion("mode", [
     referenceImageUrls: z.array(urlSchema).max(9).optional(),
     referenceVideoUrls: z.array(urlSchema).max(3).optional(),
     referenceAudioUrls: z.array(urlSchema).max(3).optional(),
+    /**
+     * Total duration (seconds) of all reference videos. Billing-only — not sent to KIE.
+     * Required for accurate with-video pricing: cost = rate × (input + output).
+     */
+    referenceVideoDurationSeconds: z.number().nonnegative().max(15).optional(),
   }),
 ]);
 
@@ -157,14 +162,39 @@ export function getTaskResultMedia(resultData: unknown): {
   return { videoKeys: [], imageKeys: [] };
 }
 
-const CREDIT_COST_BY_RESOLUTION: Record<
+/**
+ * KIE Seedance 2.0 per-second credit rates.
+ *
+ * Formula (KIE docs):
+ * - No video input:  rate_no_video × output_seconds
+ * - With video input: rate_with_video × (input_seconds + output_seconds)
+ *
+ * generate_audio does not change the rate.
+ */
+const CREDIT_RATE_PER_SECOND: Record<
   SeedanceCreateTaskInput["resolution"],
-  number
+  { withVideo: number; noVideo: number }
 > = {
-  "480p": 10,
-  "720p": 20,
-  "1080p": 40,
-  "4k": 80,
+  "480p": { withVideo: 11.5, noVideo: 19 },
+  "720p": { withVideo: 25, noVideo: 41 },
+  "1080p": { withVideo: 62, noVideo: 102 },
+  "4k": { withVideo: 128, noVideo: 208 },
+};
+
+/** KIE max total reference video duration (seconds). Used as conservative fallback. */
+export const MAX_REFERENCE_VIDEO_DURATION_SECONDS = 15;
+
+export type SeedanceCreditCostParams = {
+  resolution: SeedanceCreateTaskInput["resolution"];
+  /** Output video duration in seconds (4–15). */
+  duration: number;
+  /** True when the request includes one or more reference videos. */
+  hasReferenceVideo: boolean;
+  /**
+   * Total duration of all reference videos in seconds.
+   * When hasReferenceVideo and missing/0, falls back to max (15s) so we never undercharge.
+   */
+  referenceVideoDurationSeconds?: number;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -205,12 +235,47 @@ function parseResultJson(payload: Record<string, unknown>) {
   }
 }
 
+/**
+ * Calculate user-facing credit cost for a Seedance generation.
+ * Maps 1:1 to KIE Seedance 2.0 rates (ceil so fractional rates never undercharge).
+ */
 export function calculateSeedanceCreditCost(
-  resolution: SeedanceCreateTaskInput["resolution"],
-  generateAudio: boolean,
+  params: SeedanceCreditCostParams,
 ): number {
-  const baseCost = CREDIT_COST_BY_RESOLUTION[resolution];
-  return generateAudio ? Math.ceil(baseCost * 1.5) : baseCost;
+  const { resolution, duration, hasReferenceVideo } = params;
+  const rates = CREDIT_RATE_PER_SECOND[resolution];
+
+  if (hasReferenceVideo) {
+    const reported = params.referenceVideoDurationSeconds ?? 0;
+    // Missing/zero duration would undercharge; use max allowed input as floor.
+    const inputSeconds =
+      reported > 0
+        ? Math.min(reported, MAX_REFERENCE_VIDEO_DURATION_SECONDS)
+        : MAX_REFERENCE_VIDEO_DURATION_SECONDS;
+    const billableSeconds = inputSeconds + duration;
+    return Math.ceil(rates.withVideo * billableSeconds);
+  }
+
+  return Math.ceil(rates.noVideo * duration);
+}
+
+/** Derive credit params from a validated create-task input. */
+export function getSeedanceCreditCostFromInput(
+  input: SeedanceCreateTaskInput,
+): number {
+  const hasReferenceVideo =
+    input.mode === "multi-reference" &&
+    (input.referenceVideoUrls?.length ?? 0) > 0;
+
+  return calculateSeedanceCreditCost({
+    resolution: input.resolution,
+    duration: input.duration,
+    hasReferenceVideo,
+    referenceVideoDurationSeconds:
+      input.mode === "multi-reference"
+        ? input.referenceVideoDurationSeconds
+        : undefined,
+  });
 }
 
 export function buildSeedanceInput(

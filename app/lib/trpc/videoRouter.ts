@@ -3,7 +3,9 @@ import { z } from "zod";
 import { createKieSeedanceTask, queryKieJob } from "~/lib/ai/kie.server";
 import {
   calculateSeedanceCreditCost,
+  getSeedanceCreditCostFromInput,
   getTaskResultMedia,
+  MAX_REFERENCE_VIDEO_DURATION_SECONDS,
   SEEDANCE_MODEL,
   seedanceCreateTaskInputSchema,
   seedanceResolutionSchema,
@@ -63,15 +65,23 @@ export const videoRouter = router({
     .input(
       z.object({
         resolution: seedanceResolutionSchema,
-        generateAudio: z.boolean(),
+        duration: z.number().int().min(4).max(15),
+        hasReferenceVideo: z.boolean(),
+        referenceVideoDurationSeconds: z
+          .number()
+          .nonnegative()
+          .max(MAX_REFERENCE_VIDEO_DURATION_SECONDS)
+          .optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const credits = await getTotalAvailableCredits(ctx.user.id);
-      const creditCost = calculateSeedanceCreditCost(
-        input.resolution,
-        input.generateAudio,
-      );
+      const creditCost = calculateSeedanceCreditCost({
+        resolution: input.resolution,
+        duration: input.duration,
+        hasReferenceVideo: input.hasReferenceVideo,
+        referenceVideoDurationSeconds: input.referenceVideoDurationSeconds,
+      });
 
       return {
         creditCost,
@@ -83,10 +93,7 @@ export const videoRouter = router({
   createSeedanceTask: authedProcedure
     .input(seedanceCreateTaskInputSchema)
     .mutation(async ({ ctx, input }) => {
-      const creditCost = calculateSeedanceCreditCost(
-        input.resolution,
-        input.generateAudio,
-      );
+      const creditCost = getSeedanceCreditCostFromInput(input);
       const credits = await getTotalAvailableCredits(ctx.user.id);
 
       if (credits.total < creditCost) {

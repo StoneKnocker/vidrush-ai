@@ -2,19 +2,179 @@ import { describe, expect, it } from "vitest";
 import {
   buildSeedanceInput,
   calculateSeedanceCreditCost,
+  getSeedanceCreditCostFromInput,
   getTaskResultMedia,
   parseKieSeedanceResult,
   seedanceCreateTaskInputSchema,
 } from "./seedance.shared";
 
 describe("Seedance shared helpers", () => {
-  it("calculates resolution costs and adds 50 percent for generated audio", () => {
-    expect(calculateSeedanceCreditCost("480p", false)).toBe(10);
-    expect(calculateSeedanceCreditCost("720p", false)).toBe(20);
-    expect(calculateSeedanceCreditCost("1080p", false)).toBe(40);
-    expect(calculateSeedanceCreditCost("4k", false)).toBe(80);
-    expect(calculateSeedanceCreditCost("720p", true)).toBe(30);
-    expect(calculateSeedanceCreditCost("4k", true)).toBe(120);
+  it("calculates no-video cost as rate × output duration", () => {
+    // 19 * 5 = 95
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "480p",
+        duration: 5,
+        hasReferenceVideo: false,
+      }),
+    ).toBe(95);
+    // 41 * 5 = 205
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "720p",
+        duration: 5,
+        hasReferenceVideo: false,
+      }),
+    ).toBe(205);
+    // 102 * 8 = 816
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "1080p",
+        duration: 8,
+        hasReferenceVideo: false,
+      }),
+    ).toBe(816);
+    // 208 * 4 = 832
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "4k",
+        duration: 4,
+        hasReferenceVideo: false,
+      }),
+    ).toBe(832);
+  });
+
+  it("calculates with-video cost as rate × (input + output)", () => {
+    // 11.5 * (3 + 5) = 92
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "480p",
+        duration: 5,
+        hasReferenceVideo: true,
+        referenceVideoDurationSeconds: 3,
+      }),
+    ).toBe(92);
+    // 25 * (2 + 8) = 250
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "720p",
+        duration: 8,
+        hasReferenceVideo: true,
+        referenceVideoDurationSeconds: 2,
+      }),
+    ).toBe(250);
+    // 62 * (5 + 10) = 930
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "1080p",
+        duration: 10,
+        hasReferenceVideo: true,
+        referenceVideoDurationSeconds: 5,
+      }),
+    ).toBe(930);
+    // 128 * (1 + 4) = 640
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "4k",
+        duration: 4,
+        hasReferenceVideo: true,
+        referenceVideoDurationSeconds: 1,
+      }),
+    ).toBe(640);
+  });
+
+  it("ceils fractional credit totals", () => {
+    // 11.5 * (1.1 + 5) = 11.5 * 6.1 = 70.15 → 71
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "480p",
+        duration: 5,
+        hasReferenceVideo: true,
+        referenceVideoDurationSeconds: 1.1,
+      }),
+    ).toBe(71);
+  });
+
+  it("uses max input duration when with-video but duration missing or zero", () => {
+    // 11.5 * (15 + 5) = 230
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "480p",
+        duration: 5,
+        hasReferenceVideo: true,
+      }),
+    ).toBe(230);
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "480p",
+        duration: 5,
+        hasReferenceVideo: true,
+        referenceVideoDurationSeconds: 0,
+      }),
+    ).toBe(230);
+  });
+
+  it("caps reported input duration at 15s", () => {
+    // 11.5 * (15 + 5) = 230 even if client reports 20
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "480p",
+        duration: 5,
+        hasReferenceVideo: true,
+        referenceVideoDurationSeconds: 20,
+      }),
+    ).toBe(230);
+  });
+
+  it("does not factor generateAudio into cost", () => {
+    // Pricing is independent of generate_audio; same no-video 720p/5s.
+    expect(
+      calculateSeedanceCreditCost({
+        resolution: "720p",
+        duration: 5,
+        hasReferenceVideo: false,
+      }),
+    ).toBe(205);
+  });
+
+  it("derives cost from create-task input including multi-reference videos", () => {
+    expect(
+      getSeedanceCreditCostFromInput({
+        mode: "text-to-video",
+        prompt: "A cinematic city flyover",
+        resolution: "720p",
+        aspectRatio: "16:9",
+        duration: 5,
+        generateAudio: true,
+      }),
+    ).toBe(205);
+
+    expect(
+      getSeedanceCreditCostFromInput({
+        mode: "multi-reference",
+        prompt: "Blend these references",
+        resolution: "480p",
+        aspectRatio: "9:16",
+        duration: 5,
+        generateAudio: false,
+        referenceImageUrls: ["https://cdn.example.com/a.png"],
+        referenceVideoUrls: ["https://cdn.example.com/a.mp4"],
+        referenceVideoDurationSeconds: 3,
+      }),
+    ).toBe(92);
+
+    // Image-only multi-reference uses no-video rate
+    expect(
+      getSeedanceCreditCostFromInput({
+        mode: "multi-reference",
+        prompt: "Use this image",
+        resolution: "480p",
+        aspectRatio: "9:16",
+        duration: 5,
+        generateAudio: false,
+        referenceImageUrls: ["https://cdn.example.com/a.png"],
+      }),
+    ).toBe(95);
   });
 
   it("builds text-to-video input without media reference fields", () => {
@@ -67,6 +227,7 @@ describe("Seedance shared helpers", () => {
       referenceImageUrls: ["https://cdn.example.com/a.png"],
       referenceVideoUrls: ["https://cdn.example.com/a.mp4"],
       referenceAudioUrls: ["https://cdn.example.com/a.mp3"],
+      referenceVideoDurationSeconds: 3.5,
     });
 
     expect(input).toMatchObject({
@@ -74,6 +235,9 @@ describe("Seedance shared helpers", () => {
       reference_video_urls: ["https://cdn.example.com/a.mp4"],
       reference_audio_urls: ["https://cdn.example.com/a.mp3"],
     });
+    // Billing field must not leak to KIE payload
+    expect(input).not.toHaveProperty("referenceVideoDurationSeconds");
+    expect(input).not.toHaveProperty("reference_video_duration_seconds");
     expect(input).not.toHaveProperty("first_frame_url");
     expect(input).not.toHaveProperty("last_frame_url");
   });

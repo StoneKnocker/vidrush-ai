@@ -40,7 +40,12 @@ import {
   replaceFrameAsset,
   type UploadedAsset,
 } from "./asset-state";
-import { ASSET_LIMITS, validateMediaFile } from "./media-validation";
+import {
+  ASSET_LIMITS,
+  MAX_REFERENCE_MEDIA_DURATION_SECONDS,
+  readMediaDurationSeconds,
+  validateMediaFile,
+} from "./media-validation";
 import type { PortraitItem } from "./portrait-library";
 import { PortraitLibrary } from "./portrait-library";
 import { SettingsPanel } from "./settings-panel";
@@ -151,10 +156,35 @@ export function GenerationForm({
     },
   );
 
+  // Only multi-reference mode can attach reference videos for KIE with-video pricing.
+  const referenceVideoAssets = React.useMemo(
+    () =>
+      activeTab === "multi-reference"
+        ? assets.filter(
+            (asset) =>
+              asset.kind === "video" &&
+              (asset.status === "pending" ||
+                asset.status === "uploading" ||
+                asset.status === "success"),
+          )
+        : [],
+    [activeTab, assets],
+  );
+  const hasReferenceVideo = referenceVideoAssets.length > 0;
+  const referenceVideoDurationSeconds = React.useMemo(() => {
+    const total = referenceVideoAssets.reduce(
+      (sum, asset) => sum + (asset.durationSeconds ?? 0),
+      0,
+    );
+    return Math.min(total, MAX_REFERENCE_MEDIA_DURATION_SECONDS);
+  }, [referenceVideoAssets]);
+
   const creditCostQuery = trpc.video.getCreditsForSettings.useQuery(
     {
       resolution: toApiResolution(resolution),
-      generateAudio,
+      duration,
+      hasReferenceVideo,
+      ...(hasReferenceVideo ? { referenceVideoDurationSeconds } : {}),
     },
     { enabled: isAuthenticated },
   );
@@ -229,30 +259,62 @@ export function GenerationForm({
       setFormError(`You can upload up to ${limit.maxFiles} ${kind} files.`);
     }
 
-    selectedFiles.forEach((file) => {
-      const formatError = validateMediaFile(file, kind);
-      if (formatError) {
-        setFormError(formatError);
-        return;
-      }
+    void (async () => {
+      for (const file of selectedFiles) {
+        const formatError = validateMediaFile(file, kind);
+        if (formatError) {
+          setFormError(formatError);
+          continue;
+        }
 
-      const id = crypto.randomUUID();
-      const previewUrl =
-        kind === "image" ? URL.createObjectURL(file) : undefined;
-      pendingFilesRef.current.set(id, file);
-      setAssets((current) => [
-        ...current,
-        {
-          id,
-          name: file.name,
-          url: "",
-          kind,
-          progress: 0,
-          status: "pending",
-          previewUrl,
-        },
-      ]);
-    });
+        let durationSeconds: number | undefined;
+        if (kind === "video" || kind === "audio") {
+          durationSeconds = await readMediaDurationSeconds(file);
+        }
+
+        const id = crypto.randomUUID();
+        const previewUrl =
+          kind === "image" ? URL.createObjectURL(file) : undefined;
+        pendingFilesRef.current.set(id, file);
+        setAssets((current) => {
+          if (
+            (kind === "video" || kind === "audio") &&
+            durationSeconds != null &&
+            durationSeconds > 0
+          ) {
+            const existingDuration = current
+              .filter((asset) => asset.kind === kind)
+              .reduce((sum, asset) => sum + (asset.durationSeconds ?? 0), 0);
+            if (
+              existingDuration + durationSeconds >
+              MAX_REFERENCE_MEDIA_DURATION_SECONDS
+            ) {
+              setFormError(
+                `Total ${kind} duration must be ≤ ${MAX_REFERENCE_MEDIA_DURATION_SECONDS}s.`,
+              );
+              pendingFilesRef.current.delete(id);
+              return current;
+            }
+          }
+
+          return [
+            ...current,
+            {
+              id,
+              name: file.name,
+              url: "",
+              kind,
+              progress: 0,
+              status: "pending" as const,
+              previewUrl,
+              ...(durationSeconds != null && durationSeconds > 0
+                ? { durationSeconds }
+                : {}),
+            },
+          ];
+        });
+      }
+    })();
   };
 
   /**
@@ -420,11 +482,30 @@ export function GenerationForm({
       throw new Error("Upload at least one image or video reference.");
     }
 
+    const referenceVideoDurationSeconds = Math.min(
+      resolvedAssets
+        .filter(
+          (asset) =>
+            asset.kind === "video" &&
+            asset.status === "success" &&
+            asset.url.length > 0,
+        )
+        .reduce((sum, asset) => sum + (asset.durationSeconds ?? 0), 0),
+      MAX_REFERENCE_MEDIA_DURATION_SECONDS,
+    );
+
     return {
       ...base,
       mode: "multi-reference" as const,
       ...(referenceImageUrls.length > 0 ? { referenceImageUrls } : {}),
-      ...(referenceVideoUrls.length > 0 ? { referenceVideoUrls } : {}),
+      ...(referenceVideoUrls.length > 0
+        ? {
+            referenceVideoUrls,
+            ...(referenceVideoDurationSeconds > 0
+              ? { referenceVideoDurationSeconds }
+              : {}),
+          }
+        : {}),
       ...(referenceAudioUrls.length > 0 ? { referenceAudioUrls } : {}),
     };
   };

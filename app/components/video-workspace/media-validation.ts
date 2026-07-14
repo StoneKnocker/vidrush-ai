@@ -32,6 +32,9 @@ export const ASSET_LIMITS = {
   },
 } as const;
 
+/** KIE constraint: total reference video/audio duration must not exceed 15s. */
+export const MAX_REFERENCE_MEDIA_DURATION_SECONDS = 15;
+
 export function getFileExtension(fileName: string): string {
   const parts = fileName.split(".");
   if (parts.length < 2) return "";
@@ -55,4 +58,42 @@ export function validateMediaFile(file: File, kind: MediaKind): string | null {
   }
 
   return null;
+}
+
+/**
+ * Read media duration (seconds) from a local File via HTML media element metadata.
+ * Returns 0 if duration is unavailable or non-finite.
+ */
+export function readMediaDurationSeconds(file: File): Promise<number> {
+  return new Promise((resolve) => {
+    const isVideo =
+      file.type.startsWith("video/") || /\.(mp4|mov)$/i.test(file.name);
+    const isAudio =
+      file.type.startsWith("audio/") || /\.(mp3|wav)$/i.test(file.name);
+    if (!isVideo && !isAudio) {
+      resolve(0);
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    const el = document.createElement(isVideo ? "video" : "audio");
+    el.preload = "metadata";
+
+    const cleanup = () => {
+      el.removeAttribute("src");
+      el.load();
+      URL.revokeObjectURL(url);
+    };
+
+    el.onloadedmetadata = () => {
+      const duration = el.duration;
+      cleanup();
+      resolve(Number.isFinite(duration) && duration > 0 ? duration : 0);
+    };
+    el.onerror = () => {
+      cleanup();
+      resolve(0);
+    };
+    el.src = url;
+  });
 }

@@ -16,7 +16,7 @@
     "items": [
       {
         "question": "How many credits does it take to generate one video with Seedance 2.0?",
-        "answer": "The credit cost isn't fixed — it depends on the output resolution and whether you enable audio generation.\n\n**Resolution (base cost per video)**\n\n480p costs 10 credits, 720p costs 20 credits, 1080p costs 40 credits, and 4K costs 80 credits.\n\n**Audio**\n\nWhen audio generation is enabled, the cost is 1.5× the base resolution cost (rounded up)."
+        "answer": "Credits are charged **per second** of billable duration. The rate depends on output resolution and whether you include **reference video(s)**. Enabling AI audio does **not** change the credit cost.\n\n**Rates (credits per second)**\n\n- **480p** — 19/s without reference video · 11.5/s with reference video\n- **720p** — 41/s without reference video · 25/s with reference video\n- **1080p** — 102/s without reference video · 62/s with reference video\n- **4K** — 208/s without reference video · 128/s with reference video\n\n**How billable seconds are counted**\n\n- **Without reference video** (text-to-video, image-to-video, or multi-reference using only images/audio): rate × output length (4–15 seconds).\n- **With reference video**: rate × (total reference-video length + output length). Reference videos can total up to 15 seconds.\n\n**Examples**\n\n- 5s at 720p, no reference video → 41 × 5 = **205 credits**\n- 5s at 720p with a 3s reference video → 25 × (3 + 5) = **200 credits**\n- 8s at 1080p, no reference video → 102 × 8 = **816 credits**\n\nThe generation form always shows the exact credit cost for your current settings before you create a video."
       },
       {
         "question": "Do unused credits accumulate?",

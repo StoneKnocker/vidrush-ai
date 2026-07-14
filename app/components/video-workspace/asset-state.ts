@@ -16,6 +16,8 @@ export interface UploadedAsset {
   error?: string;
   /** Image-to-video dual-frame mode: which frame this image fills. */
   frameSlot?: FrameSlot;
+  /** Media duration in seconds (video/audio). Used for billing + validation. */
+  durationSeconds?: number;
 }
 
 export function addPortraitAsset({

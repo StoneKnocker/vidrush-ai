@@ -45,7 +45,12 @@ const FAQS = [
   {
     question: "What video lengths and resolutions are supported?",
     answer:
-      "Seedance 2.0 generates videos from 4 to 15 seconds in length. Multiple aspect ratios are supported including 16:9, 9:16, 4:3, 3:4, 21:9, and 1:1. The model supports various resolutions up to 1080p for production-ready output.",
+      "Seedance 2.0 generates videos from 4 to 15 seconds in length. Multiple aspect ratios are supported including 16:9, 9:16, 4:3, 3:4, 21:9, and 1:1. Output resolutions include 480p, 720p, 1080p, and 4K.",
+  },
+  {
+    question: "How are credits charged for video generation?",
+    answer:
+      "Credits are charged per second based on resolution and whether you upload reference video(s). Without reference video: rate × output length. With reference video: rate × (reference video length + output length). AI audio does not change the cost. Example: 5s at 720p with no reference video costs 205 credits. Exact rates and live estimates are shown on the Pricing page and in the generation form.",
   },
   {
     question: "How is character consistency maintained?",
@@ -106,7 +111,10 @@ function FAQItem({
       </button>
       <div
         className="overflow-hidden transition-all duration-300 ease-in-out"
-        style={{ maxHeight: isOpen ? "500px" : "0px", opacity: isOpen ? 1 : 0 }}
+        style={{
+          maxHeight: isOpen ? "1200px" : "0px",
+          opacity: isOpen ? 1 : 0,
+        }}
       >
         <div className="pb-6 pl-9 pr-4 leading-relaxed text-muted-foreground">
           {item.answer}
