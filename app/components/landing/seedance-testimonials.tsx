@@ -161,14 +161,13 @@ function MarqueeColumn({
   direction: "up" | "down";
   speed: "fast" | "slow" | "normal";
 }) {
-  const speedClass =
-    speed === "fast"
-      ? "animate-sd-scroll-up"
+  // direction 决定方向；speed 仅影响向上滚动时的时长（CSS 仅有 up 的速度变体）
+  const animationClass =
+    direction === "down"
+      ? "animate-sd-scroll-down"
       : speed === "slow"
         ? "animate-sd-scroll-up-slow"
-        : "animate-sd-scroll-down";
-  const animationClass =
-    direction === "up" ? speedClass : "animate-sd-scroll-down";
+        : "animate-sd-scroll-up";
 
   return (
     <div className="flex flex-col gap-6 pb-6 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]">
