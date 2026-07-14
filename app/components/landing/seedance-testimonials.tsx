@@ -3,14 +3,14 @@ import { Sparkles } from "lucide-react";
 const TESTIMONIALS = [
   {
     quote:
-      "VidRush AI's multi-modal input is a game-changer. I can finally reference a dance video and apply it to any character I want. The motion replication is incredibly accurate!",
+      "With VidRush AI, I can copy a dance move and put it on any character. The motion looks real. This tool changed how I make videos!",
     name: "Sarah Chen",
     role: "Content Creator",
     avatar: "https://cdn.vidrushai.com/seedance2-assets/avatars/sarah-chen.jpg",
   },
   {
     quote:
-      "The reference capability is mind-blowing. I uploaded a film clip and the model perfectly replicated the camera movement and pacing. This is what AI video should be.",
+      "I uploaded a movie clip to VidRush AI, and it copied the camera moves perfectly. This is what AI video should feel like.",
     name: "Marcus Rodriguez",
     role: "Filmmaker",
     avatar:
@@ -18,7 +18,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "Finally, character consistency that actually works! Faces, clothing, even small text - everything stays consistent throughout the video. VidRush AI solved our biggest problem.",
+      "Faces, clothes, even small text stay the same in every shot. VidRush AI fixed our biggest problem—characters that keep changing!",
     name: "Emily Watson",
     role: "Art Director",
     avatar:
@@ -26,14 +26,14 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "The video extension feature is seamless. I can extend clips naturally and even merge different scenes together. It's like having an AI editor that understands continuity.",
+      "VidRush AI can make my clips longer or join scenes together. It feels like a smart video editor that just gets what I want.",
     name: "David Kim",
     role: "Video Editor",
     avatar: "https://cdn.vidrushai.com/seedance2-assets/avatars/david-kim.jpg",
   },
   {
     quote:
-      "Being able to reference trending video templates and recreate them with my own style has 10x'd my content output. The multi-modal approach just makes sense.",
+      "I take trending video styles and remake them in my own way with VidRush AI. I post way more content now—and it still looks great.",
     name: "Priya Sharma",
     role: "Social Media Manager",
     avatar:
@@ -41,7 +41,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "The audio generation feature is incredibly useful. I can generate videos with perfectly synced soundtracks without searching for stock music.",
+      "VidRush AI adds music that matches the video. No more hunting for stock tracks. Sound and picture just work together.",
     name: "Alex Turner",
     role: "Music Producer",
     avatar:
@@ -49,7 +49,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "As an educator, VidRush AI helps me create engaging visual explanations for complex topics. My students love the animated lessons.",
+      "I use VidRush AI to turn hard topics into clear, fun videos. My students love the lessons—and so do I.",
     name: "Jessica Liu",
     role: "Online Educator",
     avatar:
@@ -57,7 +57,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "The consistency across multiple shots is unmatched. I can generate a full brand campaign and every video looks like it came from the same production house.",
+      "With VidRush AI, every video in our brand campaign looks like it came from the same team. Clean, clear, and on-brand every time.",
     name: "Mohammed Hassan",
     role: "Brand Strategist",
     avatar:
@@ -65,7 +65,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "Real estate walkthroughs used to take days. Now I can turn a few photos into a cinematic tour in minutes. My clients are amazed.",
+      "House tours used to take days. With VidRush AI, a few photos become a nice video tour in minutes. My clients are amazed!",
     name: "Olivia Martinez",
     role: "Real Estate Agent",
     avatar:
@@ -73,7 +73,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "I use VidRush AI for pre-visualization on every project. It saves thousands in pre-production costs and helps me communicate ideas clearly.",
+      "I use VidRush AI on every project to show ideas before we shoot. It saves money and helps the whole team understand the plan.",
     name: "Thomas Anderson",
     role: "Creative Director",
     avatar:
@@ -81,7 +81,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "The multi-modal input lets me combine reference videos, images, and music all at once. It's the most intuitive AI video tool I've ever used.",
+      "VidRush AI lets me mix reference videos, photos, and music in one place. It's the easiest AI video tool I've ever used.",
     name: "Dr. Linda Park",
     role: "Research Scientist",
     avatar:
@@ -89,7 +89,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "We create training videos at scale now. The ability to edit existing footage instead of reshooting saves our team countless hours.",
+      "Our team makes training videos much faster with VidRush AI. We edit what we have instead of filming everything again.",
     name: "Robert Chen",
     role: "Corporate Trainer",
     avatar:
@@ -97,7 +97,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "The motion replication is scary good. I uploaded a choreography clip and VidRush AI applied the exact movements to my character on the first try.",
+      "I uploaded a dance clip, and VidRush AI put the same moves on my character on the first try. The motion is almost scary good!",
     name: "Aria Johnson",
     role: "Dance Choreographer",
     avatar:
@@ -105,7 +105,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "From concept to final video, VidRush AI has become an essential part of my creative workflow. The quality keeps getting better.",
+      "From first idea to finished video, VidRush AI is part of how I work every day. The quality just keeps getting better.",
     name: "Jake Morrison",
     role: "YouTuber",
     avatar:
@@ -113,7 +113,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "I create recipe and food content. The camera movement replication helps me achieve professional-looking shots without a film crew.",
+      "I make food videos. With VidRush AI, my shots look pro—like I have a film crew—even when it's just me in the kitchen.",
     name: "Chef Maria Santos",
     role: "Culinary Creator",
     avatar:
