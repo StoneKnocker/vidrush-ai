@@ -460,18 +460,42 @@ export function GenerationForm({
     }
 
     if (activeTab === "image-to-video") {
-      const { firstFrameUrl, lastFrameUrl } = getI2vFrameUrls(
-        resolvedAssets,
-        addEndFrame,
-      );
-      if (!firstFrameUrl) {
-        throw new Error("Upload a first frame image.");
+      if (addEndFrame) {
+        const { firstFrameUrl, lastFrameUrl } = getI2vFrameUrls(
+          resolvedAssets,
+          true,
+        );
+        if (!firstFrameUrl) {
+          throw new Error("Upload a first frame image.");
+        }
+        if (!lastFrameUrl) {
+          throw new Error("Upload a last frame image.");
+        }
+        return {
+          ...base,
+          mode: "image-to-video" as const,
+          firstFrameUrl,
+          lastFrameUrl,
+        };
+      }
+
+      // End frame off: multi-upload — every successful image participates (none dropped).
+      // 1 image → classic I2V first-frame; 2+ → multi-reference so all images are used.
+      const referenceImageUrls = getSuccessfulUrls(resolvedAssets, "image");
+      if (referenceImageUrls.length === 0) {
+        throw new Error("Upload at least one image.");
+      }
+      if (referenceImageUrls.length === 1) {
+        return {
+          ...base,
+          mode: "image-to-video" as const,
+          firstFrameUrl: referenceImageUrls[0]!,
+        };
       }
       return {
         ...base,
-        mode: "image-to-video" as const,
-        firstFrameUrl,
-        ...(addEndFrame && lastFrameUrl ? { lastFrameUrl } : {}),
+        mode: "multi-reference" as const,
+        referenceImageUrls,
       };
     }
 

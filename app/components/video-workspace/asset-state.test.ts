@@ -3,6 +3,7 @@ import {
   addPortraitAsset,
   getPendingAssetsForGeneration,
   getSuccessfulUrls,
+  mapAssetsForEndFrameToggle,
   mergeUploadedUrls,
   removeAssetById,
   type UploadedAsset,
@@ -85,18 +86,26 @@ describe("video workspace asset state", () => {
     ).toEqual([]);
   });
 
-  test("uploads only image-to-video pending frames needed by the current frame settings", () => {
-    const firstFrame: UploadedAsset = {
-      id: "first-frame",
-      name: "first.png",
-      url: "https://cdn.example.com/first.png",
+  test("uploads all pending images when image-to-video end frame is off (multi-upload)", () => {
+    const readyImage: UploadedAsset = {
+      id: "ready-image",
+      name: "ready.png",
+      url: "https://cdn.example.com/ready.png",
       kind: "image",
       progress: 100,
       status: "success",
     };
-    const unusedPendingImage: UploadedAsset = {
-      id: "unused-pending-image",
-      name: "unused.png",
+    const pendingA: UploadedAsset = {
+      id: "pending-a",
+      name: "a.png",
+      url: "",
+      kind: "image",
+      progress: 0,
+      status: "pending",
+    };
+    const pendingB: UploadedAsset = {
+      id: "pending-b",
+      name: "b.png",
       url: "",
       kind: "image",
       progress: 0,
@@ -113,14 +122,14 @@ describe("video workspace asset state", () => {
 
     expect(
       getPendingAssetsForGeneration({
-        assets: [firstFrame, unusedPendingImage, unusedPendingVideo],
+        assets: [readyImage, pendingA, pendingB, unusedPendingVideo],
         activeTab: "image-to-video",
         addEndFrame: false,
       }),
-    ).toEqual([]);
+    ).toEqual([pendingA, pendingB]);
   });
 
-  test("uploads the pending end frame when image-to-video end frame is enabled", () => {
+  test("uploads only slotted pending frames when image-to-video end frame is enabled", () => {
     const firstFrame: UploadedAsset = {
       id: "first-frame",
       name: "first.png",
@@ -155,6 +164,51 @@ describe("video workspace asset state", () => {
         addEndFrame: true,
       }),
     ).toEqual([endFrame]);
+  });
+
+  test("mapAssetsForEndFrameToggle keeps images beyond the two dual slots", () => {
+    const images: UploadedAsset[] = [
+      {
+        id: "i1",
+        name: "1.png",
+        url: "https://cdn.example.com/1.png",
+        kind: "image",
+        progress: 100,
+        status: "success",
+      },
+      {
+        id: "i2",
+        name: "2.png",
+        url: "https://cdn.example.com/2.png",
+        kind: "image",
+        progress: 100,
+        status: "success",
+      },
+      {
+        id: "i3",
+        name: "3.png",
+        url: "https://cdn.example.com/3.png",
+        kind: "image",
+        progress: 100,
+        status: "success",
+      },
+    ];
+
+    const dual = mapAssetsForEndFrameToggle({
+      assets: images,
+      addEndFrame: true,
+    });
+    expect(dual).toHaveLength(3);
+    expect(dual.find((a) => a.id === "i1")?.frameSlot).toBe("first");
+    expect(dual.find((a) => a.id === "i2")?.frameSlot).toBe("last");
+    expect(dual.find((a) => a.id === "i3")?.frameSlot).toBeUndefined();
+
+    const single = mapAssetsForEndFrameToggle({
+      assets: dual,
+      addEndFrame: false,
+    });
+    expect(single).toHaveLength(3);
+    expect(single.every((a) => a.frameSlot === undefined)).toBe(true);
   });
 
   test("mergeUploadedUrls applies just-uploaded urls without waiting for React state", () => {

@@ -134,11 +134,15 @@ export function mapAssetsForEndFrameToggle({
   const nonImages = assets.filter((asset) => asset.kind !== "image");
 
   if (addEndFrame) {
+    // Assign first two images to dual slots; keep the rest without slots (not discarded).
     const mapped = images.slice(0, 2).map((image, index) => ({
       ...image,
       frameSlot: (index === 0 ? "first" : "last") as FrameSlot,
     }));
-    return [...nonImages, ...mapped];
+    const remainder = images
+      .slice(2)
+      .map(({ frameSlot: _slot, ...image }) => image);
+    return [...nonImages, ...mapped, ...remainder];
   }
 
   return [
@@ -194,6 +198,7 @@ export function getPendingAssetsForGeneration({
 
   if (activeTab === "image-to-video") {
     if (addEndFrame) {
+      // Dual-frame mode only needs the two slotted frames uploaded.
       return assets.filter(
         (asset) =>
           asset.kind === "image" &&
@@ -202,9 +207,8 @@ export function getPendingAssetsForGeneration({
       );
     }
 
-    return getImageAssets(assets)
-      .slice(0, 1)
-      .filter((asset) => asset.status === "pending");
+    // End-frame off: multi-upload — upload every pending image (none discarded).
+    return getImageAssets(assets).filter((asset) => asset.status === "pending");
   }
 
   return assets.filter(
