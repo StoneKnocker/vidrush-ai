@@ -21,7 +21,7 @@
     "lastModified": "Last modified: "
   },
   "header": {
-    "studio": "Studio",
+    "studio": "AI Video Studio",
     "showcase": "Showcase",
     "guide": "Guide",
     "pricing": "Pricing",
@@ -48,6 +48,9 @@
     "contact": "Contact",
     "community": "Community",
     "legal": "Legal",
+    "multiReference": "Multi Reference",
+    "imageToVideo": "Image to Video",
+    "textToVideo": "Text to Video",
     "allRightsReserved": "All rights reserved.",
     "language": "Language",
     "poweredBy": "VidRush AI powered by Seedance"

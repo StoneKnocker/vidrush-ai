@@ -162,12 +162,17 @@ export default function Footer() {
       title: t("footer.service"),
       links: [
         { label: t("header.showcase"), to: "/showcase" },
-        { label: t("header.pricing"), to: "/pricing" },
+        { label: t("footer.multiReference"), to: "/#workspace" },
+        { label: t("footer.imageToVideo"), to: "/#workspace" },
+        { label: t("footer.textToVideo"), to: "/#workspace" },
       ],
     },
     {
       title: t("footer.resources"),
-      links: [{ label: t("footer.contact"), href: `mailto:${supportEmail}` }],
+      links: [
+        { label: t("header.pricing"), to: "/pricing" },
+        { label: t("footer.contact"), href: `mailto:${supportEmail}` },
+      ],
     },
     {
       title: t("footer.legal"),
