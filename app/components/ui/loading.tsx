@@ -39,22 +39,24 @@ export function Loading({
       className={cn(
         "flex items-center gap-2",
         !text && "justify-center",
-        fullScreen && "flex-col",
+        fullScreen && "flex-col gap-4",
         className,
       )}
     >
       <Spinner
         className={cn(
-          "text-primary drop-shadow-[0_0_10px_rgba(0,217,146,0.35)]",
+          "text-primary drop-shadow-[0_0_12px_rgba(0,217,146,0.4)]",
           sizeClasses[size],
-          fullScreen && "h-12 w-12",
+          fullScreen && "h-11 w-11",
         )}
       />
       {text && (
         <span
           className={cn(
-            "font-medium text-primary",
-            textSizeClasses[size],
+            "font-medium",
+            fullScreen
+              ? "text-sm tracking-wide text-muted-foreground"
+              : cn("text-primary", textSizeClasses[size]),
             textClassName,
           )}
         >
@@ -68,17 +70,20 @@ export function Loading({
     return (
       <div
         className={cn(
-          "fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-sm",
-          overlay && "bg-background/75",
+          "fixed inset-0 z-50 flex items-center justify-center",
+          overlay ? "bg-background" : "bg-transparent",
           overlayClassName,
         )}
         role="status"
         aria-live="polite"
         aria-label={text || "Loading"}
       >
-        <div className="flex flex-col items-center gap-4 rounded-lg border border-primary/25 bg-card/95 p-8 shadow-[0_0_40px_rgba(0,217,146,0.14)]">
-          {LoadingContent}
-        </div>
+        {/* Soft ambient glow — no card / border chrome for popup windows */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 size-44 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/15 blur-3xl"
+        />
+        <div className="relative">{LoadingContent}</div>
       </div>
     );
   }

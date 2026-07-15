@@ -51,5 +51,5 @@ export default function PopupAuth() {
     void initiateOAuth();
   }, [searchParams]);
 
-  return <Loading fullScreen />;
+  return <Loading fullScreen text="Signing in..." size="lg" />;
 }

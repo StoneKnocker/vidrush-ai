@@ -76,5 +76,5 @@ export default function OAuthCallback() {
     void handleCallback();
   }, [searchParams]);
 
-  return <Loading fullScreen />;
+  return <Loading fullScreen text="Completing sign-in..." size="lg" />;
 }
