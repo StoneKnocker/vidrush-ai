@@ -1,18 +1,19 @@
 import {
   ArrowUpRight,
   ChevronDown,
-  Github,
+  Facebook,
   Globe,
+  Instagram,
   Mail,
-  MessageCircleMore,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useParams } from "react-router";
 import { i18nConfig, languageDisplayNames } from "@/lib/config";
-import { useAppName, useSupportEmail } from "@/lib/public-env";
+import { useAppName, usePublicEnv, useSupportEmail } from "@/lib/public-env";
 import { cn } from "@/lib/utils";
 import { AppLogo } from "./app-logo";
 import { Link } from "./i18n-link";
+import { XSocialIcon } from "./icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -144,9 +145,11 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
   const appName = useAppName();
   const supportEmail = useSupportEmail();
+  const appUrl = usePublicEnv()?.APP_URL ?? "";
+  const socialHref = `${appUrl}/#`;
   const languageLinks = i18nConfig.supportLanguages;
   const currentLocale = params.locale || i18nConfig.defaultLanguage;
-  const showBacklinkRail = location.pathname === "/";
+  const showBacklinkRail = false;
   const normalizedPathname =
     currentLocale !== i18nConfig.defaultLanguage &&
     (location.pathname === `/${currentLocale}` ||
@@ -230,33 +233,22 @@ export default function Footer() {
               >
                 <Mail className="size-4" />
               </a>
-              <a
-                href={`mailto:${supportEmail}`}
-                aria-label={t("footer.community")}
-                className={socialLinkClass}
-              >
-                <MessageCircleMore className="size-4" />
+              <a href={socialHref} aria-label="X" className={socialLinkClass}>
+                <XSocialIcon className="size-4" />
               </a>
               <a
-                href="https://huggingface.co/collections/prism-ml/bonsai-image"
-                target="_blank"
-                rel="noopener noreferrer"
+                href={socialHref}
+                aria-label="Instagram"
                 className={socialLinkClass}
               >
-                <img
-                  src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg"
-                  alt="Hugging Face"
-                  className="size-4"
-                />
+                <Instagram className="size-4" />
               </a>
               <a
-                href="https://github.com/singulainthony/Cyber-Realistic-Pony-Prompt-Generator"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
+                href={socialHref}
+                aria-label="Facebook"
                 className={socialLinkClass}
               >
-                <Github className="size-4" />
+                <Facebook className="size-4" />
               </a>
             </div>
             {showBacklinkRail ? (
