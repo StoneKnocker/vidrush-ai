@@ -136,34 +136,31 @@ export function VideoPreview({
                     </>
                   ) : null}
                 </div>
+                {showExampleCarousel ? (
+                  <div className="mt-3 flex justify-center gap-2">
+                    {EXAMPLE_VIDEOS.map((video, index) => (
+                      <button
+                        key={video.id}
+                        type="button"
+                        aria-label={`Go to video ${index + 1}`}
+                        aria-current={
+                          index === exampleIndex ? "true" : undefined
+                        }
+                        onClick={() => setExampleIndex(index)}
+                        className={cn(
+                          "rounded-full transition-all duration-200",
+                          index === exampleIndex
+                            ? "h-2 w-6 bg-primary"
+                            : "h-2 w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60",
+                        )}
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
         </div>
-
-        {showExampleCarousel ? (
-          <div className="mt-4 flex justify-center gap-2">
-            {EXAMPLE_VIDEOS.map((video, index) => (
-              <button
-                key={video.id}
-                type="button"
-                aria-label={`Go to video ${index + 1}`}
-                aria-current={index === exampleIndex ? "true" : undefined}
-                onClick={() => setExampleIndex(index)}
-                className={cn(
-                  "rounded-full transition-all duration-200",
-                  index === exampleIndex
-                    ? "h-2 w-6 bg-primary"
-                    : "h-2 w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60",
-                )}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="mt-4 flex justify-center gap-2">
-            <span className="h-2 w-6 rounded-full bg-primary transition-all duration-200" />
-          </div>
-        )}
       </div>
 
       {showGuide && (
