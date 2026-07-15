@@ -24,8 +24,8 @@ const serverEnvSchema = z.object({
   // better-auth session signing / encryption — must be ≥32 chars
   BETTER_AUTH_SECRET: z.string().min(32),
   UNOSEND_API_KEY: z.string().min(1),
-  CREEM_API_KEY: z.string().min(1),
-  CREEM_WEBHOOK_SECRET: z.string().min(1),
+  CREEM_API_KEY: z.string().optional(),
+  CREEM_WEBHOOK_SECRET: z.string().optional(),
   KIE_API_KEY: z.string().min(1),
   KIE_WEBHOOK_HMAC_KEY: z.string().min(1),
   /** Optional public base for KIE webhooks (e.g. ngrok in local dev). Falls back to APP_URL. */
