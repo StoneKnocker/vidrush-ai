@@ -74,7 +74,7 @@ export default function HomeRoute({ loaderData }: Route.ComponentProps) {
       <section className="relative px-4 pt-8 pb-2 text-center sm:px-6 lg:px-8">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,_rgba(0,217,146,0.12),transparent_60%)]" />
         <div className="relative mx-auto max-w-3xl">
-          <h1 className="text-balance font-display font-normal text-3xl text-foreground tracking-[-0.02em] sm:text-4xl md:text-5xl">
+          <h1 className="text-balance font-display font-extrabold text-[34px] leading-[1.2] tracking-[-0.07em] text-foreground sm:text-[44px] sm:leading-[1.3] sm:tracking-[-0.04em] md:text-[56px] md:font-bold md:leading-[1.2]">
             {contentData.hero.title}
           </h1>
           <p className="mx-auto mt-4 text-base text-muted-foreground leading-snug sm:text-lg sm:leading-6">
