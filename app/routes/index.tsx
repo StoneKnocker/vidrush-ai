@@ -77,7 +77,7 @@ export default function HomeRoute({ loaderData }: Route.ComponentProps) {
           <h1 className="text-balance font-display font-normal text-3xl text-foreground tracking-[-0.02em] sm:text-4xl md:text-5xl">
             {contentData.hero.title}
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-balance text-base text-muted-foreground leading-7 sm:text-lg sm:leading-8">
+          <p className="mx-auto mt-4 text-base text-muted-foreground leading-snug sm:text-lg sm:leading-6">
             {contentData.hero.description}
           </p>
         </div>
