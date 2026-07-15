@@ -72,6 +72,10 @@
     },
     "prod": {
       "name": "vidrush-ai",
+			"routes": [
+				{ "pattern": "vidrushai.com", "custom_domain": true },
+				{ "pattern": "www.vidrushai.com", "custom_domain": true }
+			],
       "vars": {
         "APP_NAME": "VidRush AI",
         "APP_URL": "https://vidrushai.com",
