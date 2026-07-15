@@ -9,6 +9,7 @@ import {
   Share2,
   Sparkles,
 } from "lucide-react";
+import { useAppName } from "~/lib/public-env";
 
 const USE_CASES = [
   {
@@ -107,6 +108,8 @@ const USE_CASES = [
 ];
 
 export function SeedanceUseCases() {
+  const appName = useAppName();
+
   return (
     <section className="relative overflow-hidden bg-background py-20">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -126,7 +129,7 @@ export function SeedanceUseCases() {
             Endless Possibilities For Every Creator
           </h2>
           <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-muted-foreground">
-            From viral content to professional productions, VidRush AI empowers
+            From viral content to professional productions, {appName} empowers
             creators across industries to bring their multi-modal visions to
             life.
           </p>

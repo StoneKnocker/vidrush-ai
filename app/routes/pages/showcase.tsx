@@ -6,12 +6,12 @@ import type { Route } from "./+types/showcase";
 
 export const meta: Route.MetaFunction = ({ loaderData }) => {
   const locale = loaderData?.locale ?? "en";
+  const appName = loaderData?.appName ?? "VidRush AI";
   return [
-    { title: "Video Showcases | VidRush AI" },
+    { title: `Video Showcases | ${appName}` },
     {
       name: "description",
-      content:
-        "Explore a curated collection of stunning AI-generated videos. Each clip demonstrates the creative power and versatility of VidRush AI.",
+      content: `Explore a curated collection of stunning AI-generated videos. Each clip demonstrates the creative power and versatility of ${appName}.`,
     },
     {
       tagName: "link",
@@ -23,13 +23,17 @@ export const meta: Route.MetaFunction = ({ loaderData }) => {
 };
 
 export const loader = async ({ context }: Route.LoaderArgs) => {
+  const publicEnv = getPublicEnv();
   return {
-    appUrl: getPublicEnv().APP_URL,
+    appName: publicEnv.APP_NAME,
+    appUrl: publicEnv.APP_URL,
     locale: getLocale(context),
   };
 };
 
-export default function ShowcaseRoute() {
+export default function ShowcaseRoute({ loaderData }: Route.ComponentProps) {
+  const appName = loaderData.appName;
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-background pb-24 pt-28 text-foreground">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,_rgba(0,217,146,0.16),transparent_58%)]" />
@@ -53,7 +57,7 @@ export default function ShowcaseRoute() {
             className="mt-5 text-balance text-lg leading-8 text-muted-foreground opacity-0"
             style={{ animation: "fade-in-up 0.6s ease-out 0.3s forwards" }}
           >
-            Explore stunning clips made with VidRush AI — from cinematic scenes
+            Explore stunning clips made with {appName} — from cinematic scenes
             to artistic animations. Tap any thumbnail to play.
           </p>
         </section>

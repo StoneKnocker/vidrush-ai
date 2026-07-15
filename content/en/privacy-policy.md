@@ -16,13 +16,13 @@ This Privacy Policy describes how {{appName}} collects and uses the information,
 
 To grant you access and to use our Services, {{appName}} requests you to provide the following information, some of which may be Personal Data:
 
-### Core Service Data (AI Image Generation)
+### Core Service Data (AI Video Generation)
 
-- **Reference Images:** We collect the reference images you upload for image generation (image-to-image or style reference inputs).
-- **Text Prompts:** We collect the text descriptions, tags, and settings you provide to generate images.
-- **Generated Images:** We store the generated images, illustrations, and their derivatives.
+- **Reference Media:** We collect the images, videos, and audio files you upload as references for video generation (for example, first/last frames, motion references, style references, or audio sync inputs).
+- **Text Prompts:** We collect the text descriptions, tags, and generation settings you provide to create videos.
+- **Generated Videos:** We store the generated videos and related outputs (such as preview frames) and their derivatives needed to deliver the Services.
 
-**Crucially, {{appName}} does not use your uploaded reference images or the generated images to train our public AI models or share them with third parties without your explicit consent.**
+**Crucially, {{appName}} does not use your uploaded reference media or the generated videos to train public AI models or share them with third parties without your explicit consent.**
 
 ### Account and Contact Details
 
@@ -50,15 +50,15 @@ We use the information you provide, some of which may be Personal Data, for the 
 
 **A. Registration and Account Administration:** To register your account and allow you to administer and manage the Services offered.
 
-**B. Providing and Improving our Services:** We use your uploaded reference images, text prompts, and generated images (internally) to deliver the AI image generation service, facilitate its performance, and continuously improve the speed and quality of the image generation engine and platform features.
+**B. Providing and Improving our Services:** We use your uploaded reference media, text prompts, and generated videos (internally) to deliver the AI video generation service, facilitate its performance, and continuously improve the speed and quality of the video generation engine and platform features.
 
 **C. Analyze the use of Services:** We monitor usage history and volume to ensure compliance with our Terms of Service (ToS) and Service Level Agreement (SLA).
 
-**D. Customer Service:** To provide you with technical support and customer success services, such as responding to your requests and providing best practices for AI image generation.
+**D. Customer Service:** To provide you with technical support and customer success services, such as responding to your requests and providing best practices for AI video generation.
 
 **E. Marketing/Communications:** To send our newsletter, marketing communications, and updates about new features or offers. We always include an unsubscribe link in direct marketing emails.
 
-**F. Security, Fraud Detection, and Prevention:** We analyze usage patterns, IP addresses, and media inputs to prevent fraudulent, illegal, or infringing activities, including misuse of the AI image generation tools.
+**F. Security, Fraud Detection, and Prevention:** We analyze usage patterns, IP addresses, and media inputs to prevent fraudulent, illegal, or infringing activities, including misuse of the AI video generation tools.
 
 **G. Analytics and Research:** We use the information to conduct research and analysis to assess business needs, improve our Services, and refine our marketing efforts. Results of such research may be shared in an anonymous, aggregated form.
 
@@ -66,8 +66,8 @@ We use the information you provide, some of which may be Personal Data, for the 
 
 ## LEGAL BASIS
 
-- **Performance of Contract (A, B, C, D):** Processing is necessary to perform our agreement with you (e.g., creating and managing your account, delivering the AI-generated images).
-- **Legitimate Interest (E, F, G, H):** Processing is based on our legitimate commercial business interest to market our services, prevent fraud, and improve the quality of the AI image generation service.
+- **Performance of Contract (A, B, C, D):** Processing is necessary to perform our agreement with you (e.g., creating and managing your account, delivering the AI-generated videos).
+- **Legitimate Interest (E, F, G, H):** Processing is based on our legitimate commercial business interest to market our services, prevent fraud, and improve the quality of the AI video generation service.
 - **Legal Obligation (H):** Processing is necessary for compliance with a legal obligation (e.g., lawful law enforcement requests).
 
 ## DATA SHARING
@@ -77,7 +77,7 @@ We share your information, which may include Personal Data, with third parties o
 - **Service Providers:** We share information with third-party service providers (e.g., cloud hosting, analytics, email marketing platforms, AI generation providers) to provide and maintain our Services.
 - **Payment Providers:** To process payments, relevant financial information is shared with secure third-party payment providers.
 - **Compelled Disclosure:** When legally required, strictly necessary for the performance of the Services, or to protect our rights, we disclose information to legal authorities.
-- **Sharing of Aggregate Data:** We may share anonymous, aggregated data (e.g., the total number of images generated this month) with third parties for industry and demographic analysis.
+- **Sharing of Aggregate Data:** We may share anonymous, aggregated data (e.g., the total number of videos generated this month) with third parties for industry and demographic analysis.
 
 ## YOUR RIGHTS AND CHOICES (GDPR & CCPA)
 

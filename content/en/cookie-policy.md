@@ -30,7 +30,7 @@ These technologies may be used to:
 
 ### Essential cookies
 
-These cookies are required for the website to function properly. They may help with session management, security, and basic product features like image generation workflows.
+These cookies are required for the website to function properly. They may help with session management, security, and basic product features like video generation workflows.
 
 ### Preference cookies
 
@@ -38,7 +38,7 @@ These cookies remember choices such as language, interface preferences, or your 
 
 ### Analytics and performance cookies
 
-These cookies help us understand how visitors use the site so we can improve performance, usability, and content related to AI image generation features.
+These cookies help us understand how visitors use the site so we can improve performance, usability, and content related to AI video generation features.
 
 ## Third-party services
 

@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useWorkspace } from "~/contexts/workspace-context";
+import { useAppName } from "~/lib/public-env";
 
 const STEPS = [
   {
@@ -41,13 +42,14 @@ function StepCard({ step }: { step: (typeof STEPS)[number] }) {
 
 export function SeedanceSteps() {
   const { showWorkspaceWithTemplate } = useWorkspace();
+  const appName = useAppName();
 
   return (
     <section className="relative overflow-hidden bg-background py-20">
       <div className="container relative z-10 mx-auto px-4">
         <div className="mb-20 text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
-            How to Create AI Videos with VidRush AI
+            How to Create AI Videos with {appName}
           </h2>
         </div>
 

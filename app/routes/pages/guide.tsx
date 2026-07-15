@@ -8,10 +8,9 @@ import type { Route } from "./+types/guide";
 export const meta: Route.MetaFunction = ({ loaderData }) => {
   const locale = loaderData?.locale ?? "en";
   const appUrl = loaderData?.appUrl;
-  const title =
-    "VidRush AI Prompt Guide - Master Seedance 2.0 Video Generation";
-  const description =
-    "Master the art of prompting to create stunning AI-generated videos on VidRush AI. Prompt techniques, multimodal references, and real-world examples for Seedance 2.0.";
+  const appName = loaderData?.appName ?? "VidRush AI";
+  const title = `${appName} Prompt Guide - Master Seedance 2.0 Video Generation`;
+  const description = `Master the art of prompting to create stunning AI-generated videos on ${appName}. Prompt techniques, multimodal references, and real-world examples for Seedance 2.0.`;
   const canonicalUrl = getCanonicalUrl(locale, "/guide", appUrl);
 
   return [
@@ -27,15 +26,16 @@ export const meta: Route.MetaFunction = ({ loaderData }) => {
       title,
       description,
       url: canonicalUrl,
-      imageUrl: "https://cdn.cyberrealistic.org/cyberrealistic/og-home.webp",
       type: "website",
     }),
   ];
 };
 
 export const loader = async ({ context }: Route.LoaderArgs) => {
+  const publicEnv = getPublicEnv();
   return {
-    appUrl: getPublicEnv().APP_URL,
+    appName: publicEnv.APP_NAME,
+    appUrl: publicEnv.APP_URL,
     locale: getLocale(context),
   };
 };

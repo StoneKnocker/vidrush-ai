@@ -6,6 +6,7 @@ import {
   Scissors,
   Wand2,
 } from "lucide-react";
+import { useAppName } from "~/lib/public-env";
 
 const FEATURES = [
   {
@@ -47,6 +48,8 @@ const FEATURES = [
 ];
 
 export function SeedanceFeatures() {
+  const appName = useAppName();
+
   return (
     <section className="relative overflow-hidden bg-background py-20 lg:py-28">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -58,7 +61,7 @@ export function SeedanceFeatures() {
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-16 text-center lg:mb-20">
           <h2 className="mb-6 text-3xl font-extrabold leading-tight text-foreground md:text-4xl">
-            Key Features of VidRush AI
+            Key Features of {appName}
           </h2>
           <p className="mx-auto max-w-3xl text-lg leading-relaxed text-muted-foreground lg:text-xl">
             Powered by Seedance 2.0 — a truly controllable multi-modal AI video

@@ -18,7 +18,7 @@ If you are accessing or using our Service on behalf of a company or other entity
 
 ## 1. Your Right to Use Our Services
 
-{{appName}} grants you a limited, worldwide, non-exclusive, non-transferable, non-sublicensable, revocable right to access and use the Services for the purpose of generating high-fidelity images using optimized AI models.
+{{appName}} grants you a limited, worldwide, non-exclusive, non-transferable, non-sublicensable, revocable right to access and use the Services for the purpose of generating AI videos using third-party and platform-hosted AI models.
 
 You shall not distribute, hire out, modify, reverse engineer, decompose, disassemble, or otherwise attempt to decipher the source code of the Services. Reproduction that goes beyond what is necessary for the access and use of the Services is not permitted.
 
@@ -34,27 +34,27 @@ You agree not to use the Services or Your Content (defined below) for any purpos
 
 - **Violates Intellectual Property:** Infringes or misappropriates the proprietary rights, including copyright or trademark, of any third party.
 - **Generates Illegal Content:** Includes or promotes hate speech, violence, harassment, discrimination, or explicit sexual content.
-- **Generates Infringing Images:** Creates images that impersonate real individuals' likeness without consent or infringe on intellectual property rights owned by third parties.
-- **Unauthorized Model Redistribution:** Redistribute, resell, or sublicense the {{appName}} model weights or derivatives in violation of the applicable open-source license terms.
+- **Generates Infringing Media:** Creates videos or other media that impersonate real individuals' likeness without consent or infringe on intellectual property rights owned by third parties.
+- **Unauthorized Access or Resale:** Attempt to scrape, resell, or otherwise misuse the Services, credits, or API access beyond what is expressly permitted.
 - **Security Interference:** Attempts to interfere with, compromise the system integrity or security of, or decipher any transmissions to or from, the servers running our Services.
 
 ## 4. Ownership of Your Content
 
 ### A. Your Ownership
 
-**As between us and you, you own all rights, title, and interest in and to the reference images or text prompts you provide (Your Content) AND the final generated images and illustrations you create and download from the Services (Your Generated Content).**
+**As between us and you, you own all rights, title, and interest in and to the reference media or text prompts you provide (Your Content) AND the final generated videos you create and download from the Services (Your Generated Content).**
 
 ### B. Our License to Your Content
 
 You grant to {{appName}} a royalty-free, worldwide license to use, copy, store, modify, and reproduce **Your Content and Your Generated Content only for the following limited purposes:**
 
-1. To maintain and provide the Services (e.g., storing generated images, processing variations, applying refinements).
+1. To maintain and provide the Services (e.g., storing generated videos, processing variations, applying refinements).
 2. Solely in **de-identified and aggregated form**, to improve our AI models and Services.
 3. If you grant explicit consent, to use as examples in our marketing materials (which you can revoke at any time).
 
 ### C. Commercial Rights
 
-You affirm and warrant that you own **100% of the commercial rights** to use Your Generated Content for digital art, illustration, content creation, and all other lawful purposes. You are solely responsible for ensuring your generated images comply with the terms of service of any platforms where they are used.
+You affirm and warrant that you own **100% of the commercial rights** to use Your Generated Content for video production, content creation, marketing, and all other lawful purposes. You are solely responsible for ensuring your generated videos comply with the terms of service of any platforms where they are used.
 
 ## 5. Paid Services
 
@@ -62,7 +62,7 @@ All fees are non-refundable unless otherwise stated in these Terms or required b
 
 ## 6. Intellectual Property
 
-The Website and all Services, including the underlying AI models and software, are the intellectual property of {{appName}} and its licensors. These Terms do not transfer any of our Intellectual Property to you. All rights, title, and interest will remain solely with {{appName}} and its licensors.
+The Website and all Services, including the underlying software and platform features (and, where applicable, licenses to third-party AI models), are the intellectual property of {{appName}} and its licensors. These Terms do not transfer any of our Intellectual Property to you. All rights, title, and interest will remain solely with {{appName}} and its licensors.
 
 ## 7. Feedback
 
@@ -70,7 +70,7 @@ You may provide us with comments, feedback, or ideas about our Services ("Feedba
 
 ## 8. Trademarks
 
-You consent to {{appName}}'s use of your username and generated image creations (if applicable) in our marketing materials and website to indicate that you are a customer. To decline this license, you must email **<{{supportEmail}}>** stating that you do not wish to be used as a reference.
+You consent to {{appName}}'s use of your username and generated video creations (if applicable) in our marketing materials and website to indicate that you are a customer. To decline this license, you must email **<{{supportEmail}}>** stating that you do not wish to be used as a reference.
 
 ## 9. Changes and Termination
 
@@ -80,7 +80,7 @@ You consent to {{appName}}'s use of your username and generated image creations 
 
 ## 10. Disclaimer and Warranties
 
-**OUR SERVICES ARE PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS.** YOUR USE OF OUR SERVICES IS AT YOUR OWN RISK. WE EXPRESSLY DISCLAIM ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE AI-GENERATED IMAGES WILL MEET YOUR SPECIFIC EXPECTATIONS, THAT THEY WILL BE COMPATIBLE WITH SPECIFIC CREATIVE TOOLS OR PLATFORMS, OR THAT THE SERVICES WILL BE UNINTERRUPTED OR ERROR-FREE.
+**OUR SERVICES ARE PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS.** YOUR USE OF OUR SERVICES IS AT YOUR OWN RISK. WE EXPRESSLY DISCLAIM ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE AI-GENERATED VIDEOS WILL MEET YOUR SPECIFIC EXPECTATIONS, THAT THEY WILL BE COMPATIBLE WITH SPECIFIC CREATIVE TOOLS OR PLATFORMS, OR THAT THE SERVICES WILL BE UNINTERRUPTED OR ERROR-FREE.
 
 ## 11. Limitation of Liability
 
@@ -88,7 +88,7 @@ TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL WE BE LIABLE
 
 ## 12. Indemnification
 
-You agree to indemnify and hold us harmless from and against any and all claims, damages, obligations, losses, liabilities, costs, or debt, and expenses (including attorney's fees) arising from: (a) your access to or use of our Services; (b) your violation of these Terms; (c) your violation of any third-party right, including any right of privacy or intellectual property rights; or **(d) Your Content or Your Generated Content, including any claim that your generated images violate any third-party rights.**
+You agree to indemnify and hold us harmless from and against any and all claims, damages, obligations, losses, liabilities, costs, or debt, and expenses (including attorney's fees) arising from: (a) your access to or use of our Services; (b) your violation of these Terms; (c) your violation of any third-party right, including any right of privacy or intellectual property rights; or **(d) Your Content or Your Generated Content, including any claim that your generated videos violate any third-party rights.**
 
 ## 13. Dispute Resolution and Governing Law
 

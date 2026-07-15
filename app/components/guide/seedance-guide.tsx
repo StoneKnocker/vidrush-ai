@@ -6,6 +6,7 @@ import {
   Type,
   Video,
 } from "lucide-react";
+import { useAppName } from "@/lib/public-env";
 import { cn } from "@/lib/utils";
 import {
   FORMULA_CARDS,
@@ -93,6 +94,13 @@ function FormulaNote({ text }: { text: string }) {
 }
 
 export function SeedanceGuide() {
+  const appName = useAppName();
+  const heroTitle = GUIDE_HERO.title.replaceAll("{{appName}}", appName);
+  const heroDescription = GUIDE_HERO.description.replaceAll(
+    "{{appName}}",
+    appName,
+  );
+
   return (
     <div className="landing-theme relative min-h-screen bg-background text-foreground">
       {/* Ambient atmosphere */}
@@ -111,11 +119,11 @@ export function SeedanceGuide() {
                 <Layers className="h-6 w-6" />
               </span>
               <h1 className="text-balance font-display font-normal text-3xl text-foreground tracking-[-0.02em] sm:text-4xl md:text-5xl">
-                {GUIDE_HERO.title}
+                {heroTitle}
               </h1>
             </div>
             <p className="mx-auto max-w-2xl text-balance text-base text-muted-foreground leading-7 sm:text-lg sm:leading-8">
-              {GUIDE_HERO.description}
+              {heroDescription}
             </p>
           </div>
         </section>

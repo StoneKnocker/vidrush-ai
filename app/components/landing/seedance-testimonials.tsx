@@ -1,16 +1,22 @@
 import { Sparkles } from "lucide-react";
+import { useMemo } from "react";
+import { useAppName } from "~/lib/public-env";
+
+function withAppName(text: string, appName: string) {
+  return text.replaceAll("{{appName}}", appName);
+}
 
 const TESTIMONIALS = [
   {
     quote:
-      "With VidRush AI, I can copy a dance move and put it on any character. The motion looks real. This tool changed how I make videos!",
+      "With {{appName}}, I can copy a dance move and put it on any character. The motion looks real. This tool changed how I make videos!",
     name: "Sarah Chen",
     role: "Content Creator",
     avatar: "https://cdn.vidrushai.com/seedance2-assets/avatars/sarah-chen.jpg",
   },
   {
     quote:
-      "I uploaded a movie clip to VidRush AI, and it copied the camera moves perfectly. This is what AI video should feel like.",
+      "I uploaded a movie clip to {{appName}}, and it copied the camera moves perfectly. This is what AI video should feel like.",
     name: "Marcus Rodriguez",
     role: "Filmmaker",
     avatar:
@@ -18,7 +24,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "Faces, clothes, even small text stay the same in every shot. VidRush AI fixed our biggest problem—characters that keep changing!",
+      "Faces, clothes, even small text stay the same in every shot. {{appName}} fixed our biggest problem—characters that keep changing!",
     name: "Emily Watson",
     role: "Art Director",
     avatar:
@@ -26,14 +32,14 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "VidRush AI can make my clips longer or join scenes together. It feels like a smart video editor that just gets what I want.",
+      "{{appName}} can make my clips longer or join scenes together. It feels like a smart video editor that just gets what I want.",
     name: "David Kim",
     role: "Video Editor",
     avatar: "https://cdn.vidrushai.com/seedance2-assets/avatars/david-kim.jpg",
   },
   {
     quote:
-      "I take trending video styles and remake them in my own way with VidRush AI. I post way more content now—and it still looks great.",
+      "I take trending video styles and remake them in my own way with {{appName}}. I post way more content now—and it still looks great.",
     name: "Priya Sharma",
     role: "Social Media Manager",
     avatar:
@@ -41,7 +47,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "VidRush AI adds music that matches the video. No more hunting for stock tracks. Sound and picture just work together.",
+      "{{appName}} adds music that matches the video. No more hunting for stock tracks. Sound and picture just work together.",
     name: "Alex Turner",
     role: "Music Producer",
     avatar:
@@ -49,7 +55,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "I use VidRush AI to turn hard topics into clear, fun videos. My students love the lessons—and so do I.",
+      "I use {{appName}} to turn hard topics into clear, fun videos. My students love the lessons—and so do I.",
     name: "Jessica Liu",
     role: "Online Educator",
     avatar:
@@ -57,7 +63,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "With VidRush AI, every video in our brand campaign looks like it came from the same team. Clean, clear, and on-brand every time.",
+      "With {{appName}}, every video in our brand campaign looks like it came from the same team. Clean, clear, and on-brand every time.",
     name: "Mohammed Hassan",
     role: "Brand Strategist",
     avatar:
@@ -65,7 +71,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "House tours used to take days. With VidRush AI, a few photos become a nice video tour in minutes. My clients are amazed!",
+      "House tours used to take days. With {{appName}}, a few photos become a nice video tour in minutes. My clients are amazed!",
     name: "Olivia Martinez",
     role: "Real Estate Agent",
     avatar:
@@ -73,7 +79,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "I use VidRush AI on every project to show ideas before we shoot. It saves money and helps the whole team understand the plan.",
+      "I use {{appName}} on every project to show ideas before we shoot. It saves money and helps the whole team understand the plan.",
     name: "Thomas Anderson",
     role: "Creative Director",
     avatar:
@@ -81,7 +87,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "VidRush AI lets me mix reference videos, photos, and music in one place. It's the easiest AI video tool I've ever used.",
+      "{{appName}} lets me mix reference videos, photos, and music in one place. It's the easiest AI video tool I've ever used.",
     name: "Dr. Linda Park",
     role: "Research Scientist",
     avatar:
@@ -89,7 +95,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "Our team makes training videos much faster with VidRush AI. We edit what we have instead of filming everything again.",
+      "Our team makes training videos much faster with {{appName}}. We edit what we have instead of filming everything again.",
     name: "Robert Chen",
     role: "Corporate Trainer",
     avatar:
@@ -97,7 +103,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "I uploaded a dance clip, and VidRush AI put the same moves on my character on the first try. The motion is almost scary good!",
+      "I uploaded a dance clip, and {{appName}} put the same moves on my character on the first try. The motion is almost scary good!",
     name: "Aria Johnson",
     role: "Dance Choreographer",
     avatar:
@@ -105,7 +111,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "From first idea to finished video, VidRush AI is part of how I work every day. The quality just keeps getting better.",
+      "From first idea to finished video, {{appName}} is part of how I work every day. The quality just keeps getting better.",
     name: "Jake Morrison",
     role: "YouTuber",
     avatar:
@@ -113,7 +119,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "I make food videos. With VidRush AI, my shots look pro—like I have a film crew—even when it's just me in the kitchen.",
+      "I make food videos. With {{appName}}, my shots look pro—like I have a film crew—even when it's just me in the kitchen.",
     name: "Chef Maria Santos",
     role: "Culinary Creator",
     avatar:
@@ -121,10 +127,17 @@ const TESTIMONIALS = [
   },
 ];
 
+type ResolvedTestimonial = {
+  quote: string;
+  name: string;
+  role: string;
+  avatar: string;
+};
+
 function TestimonialCard({
   testimonial,
 }: {
-  testimonial: (typeof TESTIMONIALS)[number];
+  testimonial: ResolvedTestimonial;
 }) {
   return (
     <div className="w-full max-w-xs rounded-2xl border border-border bg-card p-10 shadow-[0_0_15px_rgba(92,88,85,0.12)]">
@@ -157,7 +170,7 @@ function MarqueeColumn({
   direction,
   speed,
 }: {
-  items: typeof TESTIMONIALS;
+  items: ResolvedTestimonial[];
   direction: "up" | "down";
   speed: "fast" | "slow" | "normal";
 }) {
@@ -184,9 +197,18 @@ function MarqueeColumn({
 }
 
 export function SeedanceTestimonials() {
-  const col1 = TESTIMONIALS.slice(0, 5);
-  const col2 = TESTIMONIALS.slice(5, 10);
-  const col3 = TESTIMONIALS.slice(10, 15);
+  const appName = useAppName();
+  const testimonials = useMemo(
+    () =>
+      TESTIMONIALS.map((item) => ({
+        ...item,
+        quote: withAppName(item.quote, appName),
+      })),
+    [appName],
+  );
+  const col1 = testimonials.slice(0, 5);
+  const col2 = testimonials.slice(5, 10);
+  const col3 = testimonials.slice(10, 15);
 
   return (
     <section className="relative bg-background py-20">
@@ -207,8 +229,8 @@ export function SeedanceTestimonials() {
             Loved by Creators Worldwide
           </h2>
           <p className="mt-6 max-w-3xl text-center text-lg leading-relaxed text-muted-foreground">
-            See what our customers have to say about VidRush AI and how
-            it&apos;s transforming their creative workflows.
+            See what our customers have to say about {appName} and how it&apos;s
+            transforming their creative workflows.
           </p>
         </div>
 

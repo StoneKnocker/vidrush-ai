@@ -1,8 +1,10 @@
 import { Button } from "~/components/ui/button";
 import { useWorkspace } from "~/contexts/workspace-context";
+import { useAppName } from "~/lib/public-env";
 
 export function SeedanceCTA() {
   const { showWorkspaceWithTemplate } = useWorkspace();
+  const appName = useAppName();
 
   return (
     <section className="relative overflow-hidden border-y border-border bg-background py-20">
@@ -20,7 +22,7 @@ export function SeedanceCTA() {
           </h2>
           <p className="mb-10 text-lg text-muted-foreground md:text-xl">
             Join thousands of creators who are already transforming their ideas
-            into stunning videos with VidRush AI.
+            into stunning videos with {appName}.
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Button

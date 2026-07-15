@@ -1,16 +1,21 @@
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useAppName } from "~/lib/public-env";
+
+function withAppName(text: string, appName: string) {
+  return text.replaceAll("{{appName}}", appName);
+}
 
 const FAQS = [
   {
-    question: "What is VidRush AI?",
+    question: "What is {{appName}}?",
     answer:
-      "VidRush AI is a multi-modal AI video creation platform powered by Seedance 2.0. It supports image, video, audio, and text inputs so you can reference motion, effects, camera movements, characters, scenes, and sounds with natural language — for truly controllable video creation.",
+      "{{appName}} is a multi-modal AI video creation platform powered by Seedance 2.0. It supports image, video, audio, and text inputs so you can reference motion, effects, camera movements, characters, scenes, and sounds with natural language — for truly controllable video creation.",
   },
   {
     question: "What is Seedance 2.0?",
     answer:
-      "Seedance 2.0 is the multi-modal AI video generation model that powers VidRush AI. It combines image, video, audio, and text inputs for production-ready video generation with strong consistency and precise motion control.",
+      "Seedance 2.0 is the multi-modal AI video generation model that powers {{appName}}. It combines image, video, audio, and text inputs for production-ready video generation with strong consistency and precise motion control.",
   },
   {
     question: "Do you support API access?",
@@ -73,12 +78,12 @@ const FAQS = [
       "We take privacy seriously. Your uploaded assets and generated content are processed securely and are not used to train models without your consent. Private generation options are available on paid plans.",
   },
   {
-    question: "Does VidRush AI support NSFW content?",
+    question: "Does {{appName}} support NSFW content?",
     answer:
-      "No. VidRush AI does not allow the generation of adult, violent, or otherwise prohibited content. We have safety filters in place and actively monitor usage to ensure compliance with our content policies.",
+      "No. {{appName}} does not allow the generation of adult, violent, or otherwise prohibited content. We have safety filters in place and actively monitor usage to ensure compliance with our content policies.",
   },
   {
-    question: "How do I get started with VidRush AI?",
+    question: "How do I get started with {{appName}}?",
     answer:
       "Simply sign up for an account, choose a plan or credit pack, and start creating. You can upload your assets, describe your vision in natural language, and generate your first video in minutes.",
   },
@@ -89,7 +94,7 @@ function FAQItem({
   isOpen,
   onToggle,
 }: {
-  item: (typeof FAQS)[number];
+  item: { question: string; answer: string };
   isOpen: boolean;
   onToggle: () => void;
 }) {
@@ -126,6 +131,15 @@ function FAQItem({
 
 export function SeedanceFAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const appName = useAppName();
+  const faqs = useMemo(
+    () =>
+      FAQS.map((item) => ({
+        question: withAppName(item.question, appName),
+        answer: withAppName(item.answer, appName),
+      })),
+    [appName],
+  );
 
   return (
     <section className="bg-background px-4 py-16">
@@ -136,7 +150,7 @@ export function SeedanceFAQ() {
           </h2>
         </div>
         <div className="space-y-0">
-          {FAQS.map((item, index) => (
+          {faqs.map((item, index) => (
             <FAQItem
               key={item.question}
               item={item}

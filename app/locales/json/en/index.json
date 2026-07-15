@@ -4,7 +4,7 @@
     "description": "Create multi-modal AI videos with {{appName}}. Combine images, video, audio, and text for controllable, production-ready video generation."
   },
   "hero": {
-    "title": "VidRush AI Video Generator",
+    "title": "{{appName}} Video Generator",
     "description": "Combine images, clips, audio, and text in one workspace. {{appName}} keeps characters, motion, and style consistent so you can ship production-ready video faster."
   }
 }

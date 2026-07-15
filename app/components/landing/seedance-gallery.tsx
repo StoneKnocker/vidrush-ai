@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "~/components/i18n-link";
 import { Button } from "~/components/ui/button";
 import { VideoLightbox } from "~/components/video-lightbox";
+import { useAppName } from "~/lib/public-env";
 
 const VIDEO_BASE = "https://cdn.vidrushai.com/seedance2-assets";
 
@@ -11,85 +12,85 @@ const GALLERY_ITEMS = [
     id: 1,
     videoNum: 1,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-1.webp",
-    alt: "VidRush AI Video 1",
+    alt: "AI video example 1",
   },
   {
     id: 2,
     videoNum: 2,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-2.webp",
-    alt: "VidRush AI Video 2",
+    alt: "AI video example 2",
   },
   {
     id: 3,
     videoNum: 19,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-19.webp",
-    alt: "VidRush AI Video 3",
+    alt: "AI video example 3",
   },
   {
     id: 4,
     videoNum: 4,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-4.webp",
-    alt: "VidRush AI Video 4",
+    alt: "AI video example 4",
   },
   {
     id: 5,
     videoNum: 5,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-5.webp",
-    alt: "VidRush AI Video 5",
+    alt: "AI video example 5",
   },
   {
     id: 6,
     videoNum: 17,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-17.webp",
-    alt: "VidRush AI Video 6",
+    alt: "AI video example 6",
   },
   {
     id: 7,
     videoNum: 40,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-40.webp",
-    alt: "VidRush AI Video 7",
+    alt: "AI video example 7",
   },
   {
     id: 8,
     videoNum: 8,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-8.webp",
-    alt: "VidRush AI Video 8",
+    alt: "AI video example 8",
   },
   {
     id: 9,
     videoNum: 14,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-14.webp",
-    alt: "VidRush AI Video 9",
+    alt: "AI video example 9",
   },
   {
     id: 10,
     videoNum: 10,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-10.webp",
-    alt: "VidRush AI Video 10",
+    alt: "AI video example 10",
   },
   {
     id: 11,
     videoNum: 30,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-30.webp",
-    alt: "VidRush AI Video 11",
+    alt: "AI video example 11",
   },
   {
     id: 12,
     videoNum: 38,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-38.webp",
-    alt: "VidRush AI Video 12",
+    alt: "AI video example 12",
   },
   {
     id: 13,
     videoNum: 16,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-16.webp",
-    alt: "VidRush AI Video 13",
+    alt: "AI video example 13",
   },
   {
     id: 14,
     videoNum: 45,
     poster: "https://cdn.vidrushai.com/seedance2-assets/poster-45.webp",
-    alt: "VidRush AI Video 14",
+    alt: "AI video example 14",
   },
 ];
 
@@ -131,6 +132,7 @@ function GalleryCard({
 
 export function SeedanceGallery() {
   const [activeItem, setActiveItem] = useState<GalleryItem | null>(null);
+  const appName = useAppName();
 
   return (
     <section className="bg-background py-20">
@@ -140,7 +142,7 @@ export function SeedanceGallery() {
             Get Inspired
           </h2>
           <p className="mx-auto mt-6 max-w-4xl text-lg leading-relaxed text-muted-foreground">
-            Explore stunning video examples created with VidRush AI&apos;s
+            Explore stunning video examples created with {appName}&apos;s
             multi-modal capabilities.
           </p>
         </div>

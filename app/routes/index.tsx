@@ -33,7 +33,6 @@ export const meta: Route.MetaFunction = ({
       title: contentData.meta.title,
       description: contentData.meta.description,
       url: canonicalUrl,
-      imageUrl: "https://cdn.cyberrealistic.org/cyberrealistic/og-home.webp",
       type: "website",
     }),
   ];

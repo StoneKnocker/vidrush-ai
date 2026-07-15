@@ -229,7 +229,7 @@ export function policyMeta({
     },
     {
       name: "description",
-      content: `${title} for AI Photography service`,
+      content: `${title} for ${appName} AI video generation service`,
     },
     {
       name: "language",
