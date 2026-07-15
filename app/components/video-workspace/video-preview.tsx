@@ -7,8 +7,29 @@ import {
   Loader2,
 } from "lucide-react";
 import type * as React from "react";
+import { useState } from "react";
 import { cn } from "~/lib/utils";
 import type { WorkspaceTaskState } from "./workspace-types";
+
+const EXAMPLE_ASSET_BASE = "https://cdn.vidrushai.com/seedance2-assets";
+
+const EXAMPLE_VIDEOS = [
+  {
+    id: 1,
+    src: `${EXAMPLE_ASSET_BASE}/example-video.mp4`,
+    poster: `${EXAMPLE_ASSET_BASE}/example-poster.webp`,
+  },
+  {
+    id: 2,
+    src: `${EXAMPLE_ASSET_BASE}/example-video-2.mp4`,
+    poster: `${EXAMPLE_ASSET_BASE}/example-poster-2.webp`,
+  },
+  {
+    id: 3,
+    src: `${EXAMPLE_ASSET_BASE}/example-video-3.mp4`,
+    poster: `${EXAMPLE_ASSET_BASE}/example-poster-3.webp`,
+  },
+] as const;
 
 export interface VideoPreviewProps {
   showGuide?: boolean;
@@ -19,10 +40,24 @@ export function VideoPreview({
   showGuide = false,
   taskState = { status: "idle", videoUrls: [], imageUrls: [] },
 }: VideoPreviewProps) {
+  const [exampleIndex, setExampleIndex] = useState(0);
   const activeVideoUrl = taskState.videoUrls[0];
   const isWorking =
     taskState.status === "pending" || taskState.status === "processing";
   const isFailed = taskState.status === "failed";
+  const showExampleCarousel = !activeVideoUrl && !isWorking && !isFailed;
+  const exampleVideo = EXAMPLE_VIDEOS[exampleIndex] ?? EXAMPLE_VIDEOS[0];
+
+  const goToPrevious = () => {
+    setExampleIndex(
+      (current) =>
+        (current - 1 + EXAMPLE_VIDEOS.length) % EXAMPLE_VIDEOS.length,
+    );
+  };
+
+  const goToNext = () => {
+    setExampleIndex((current) => (current + 1) % EXAMPLE_VIDEOS.length);
+  };
 
   return (
     <div className="flex w-full flex-1 flex-col gap-4 lg:w-auto">
@@ -57,61 +92,78 @@ export function VideoPreview({
                     </div>
                   ) : (
                     <video
-                      key={activeVideoUrl ?? "example-video"}
+                      key={activeVideoUrl ?? exampleVideo.src}
                       className="h-full w-full object-contain"
                       controls
-                      poster={
-                        activeVideoUrl
-                          ? undefined
-                          : "https://cdn.vidrushai.com/seedance2-assets/example-poster.webp"
-                      }
+                      poster={activeVideoUrl ? undefined : exampleVideo.poster}
                       preload="metadata"
                       playsInline
                     >
                       <source
-                        src={
-                          activeVideoUrl ??
-                          "https://cdn.vidrushai.com/seedance2-assets/example-video.mp4"
-                        }
+                        src={activeVideoUrl ?? exampleVideo.src}
                         type="video/mp4"
                       />
                     </video>
                   )}
-                  <button
-                    type="button"
-                    aria-label="Previous video"
-                    className={cn(
-                      "-translate-y-1/2 absolute top-1/2 left-2 md:left-4",
-                      "rounded-full bg-black/50 p-1.5 text-white md:p-2",
-                      "transition-all duration-200 hover:scale-110 hover:bg-black/70",
-                      "opacity-70 md:opacity-0 md:group-hover:opacity-100",
-                    )}
-                  >
-                    <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Next video"
-                    className={cn(
-                      "-translate-y-1/2 absolute top-1/2 right-2 md:right-4",
-                      "rounded-full bg-black/50 p-1.5 text-white md:p-2",
-                      "transition-all duration-200 hover:scale-110 hover:bg-black/70",
-                      "opacity-70 md:opacity-0 md:group-hover:opacity-100",
-                    )}
-                  >
-                    <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
-                  </button>
+                  {showExampleCarousel ? (
+                    <>
+                      <button
+                        type="button"
+                        aria-label="Previous video"
+                        onClick={goToPrevious}
+                        className={cn(
+                          "-translate-y-1/2 absolute top-1/2 left-2 md:left-4",
+                          "rounded-full bg-black/50 p-1.5 text-white md:p-2",
+                          "transition-all duration-200 hover:scale-110 hover:bg-black/70",
+                          "opacity-70 md:opacity-0 md:group-hover:opacity-100",
+                        )}
+                      >
+                        <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Next video"
+                        onClick={goToNext}
+                        className={cn(
+                          "-translate-y-1/2 absolute top-1/2 right-2 md:right-4",
+                          "rounded-full bg-black/50 p-1.5 text-white md:p-2",
+                          "transition-all duration-200 hover:scale-110 hover:bg-black/70",
+                          "opacity-70 md:opacity-0 md:group-hover:opacity-100",
+                        )}
+                      >
+                        <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
+                      </button>
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 flex justify-center gap-2">
-          <span className="h-2 w-6 rounded-full bg-primary transition-all duration-200" />
-          <span className="h-2 w-2 rounded-full bg-muted-foreground/30 transition-all duration-200 hover:bg-muted-foreground/60" />
-          <span className="h-2 w-2 rounded-full bg-muted-foreground/30 transition-all duration-200 hover:bg-muted-foreground/60" />
-        </div>
+        {showExampleCarousel ? (
+          <div className="mt-4 flex justify-center gap-2">
+            {EXAMPLE_VIDEOS.map((video, index) => (
+              <button
+                key={video.id}
+                type="button"
+                aria-label={`Go to video ${index + 1}`}
+                aria-current={index === exampleIndex ? "true" : undefined}
+                onClick={() => setExampleIndex(index)}
+                className={cn(
+                  "rounded-full transition-all duration-200",
+                  index === exampleIndex
+                    ? "h-2 w-6 bg-primary"
+                    : "h-2 w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60",
+                )}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-4 flex justify-center gap-2">
+            <span className="h-2 w-6 rounded-full bg-primary transition-all duration-200" />
+          </div>
+        )}
       </div>
 
       {showGuide && (
