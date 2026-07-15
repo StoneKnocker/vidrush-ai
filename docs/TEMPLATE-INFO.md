@@ -8,39 +8,6 @@
 - 上线部署的时候，将密钥设置在worker的环境变量中.
 
 
-## R2
-### 自定义域名配置
-cdn.xxx.com
-
-### CROS 配置
-```
-[
-  {
-    "AllowedOrigins": [
-      "http://localhost:3000",
-      "https://xxx.com"
-    ],
-    "AllowedMethods": [
-      "GET",
-      "DELETE",
-      "POST",
-      "PUT",
-      "HEAD"
-    ],
-    "AllowedHeaders": [
-      "*"
-    ],
-    "ExposeHeaders": [
-      "ETag"
-    ]
-  }
-]
-```
-
-### key
-titsdrop里的 key/secret 对所有bucket有效，直接复制即可
-
-
 ## 新站上线步骤
 ### P1
 - cf 域名解析,

@@ -95,13 +95,23 @@ const Header: React.FC = () => {
             )}
             {showUserNav && <UserNav />}
             {showGuestCta && (
-              <Button
-                size="sm"
-                asChild
-                className="hidden rounded-md border border-primary/60 bg-card font-semibold text-primary shadow-[0_0_20px_rgba(0,217,146,0.12)] hover:bg-black/20 hover:text-primary md:inline-flex"
-              >
-                <Link to="/#workspace">{t("header.startGenerating")}</Link>
-              </Button>
+              <div className="hidden items-center gap-1 md:flex">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  asChild
+                  className="rounded-md text-muted-foreground hover:bg-card hover:text-primary"
+                >
+                  <Link to="/sign-in">{t("header.signIn")}</Link>
+                </Button>
+                <Button
+                  size="sm"
+                  asChild
+                  className="rounded-md border border-primary/60 bg-card font-semibold text-primary shadow-[0_0_20px_rgba(0,217,146,0.12)] hover:bg-black/20 hover:text-primary"
+                >
+                  <Link to="/#workspace">{t("header.startGenerating")}</Link>
+                </Button>
+              </div>
             )}
             <Button
               variant="ghost"
@@ -154,6 +164,15 @@ const Header: React.FC = () => {
 
           {showGuestCta && (
             <div className="mt-4 flex flex-col gap-3 border-t pt-4">
+              <Button
+                variant="ghost"
+                asChild
+                className="rounded-md text-muted-foreground hover:bg-card hover:text-primary"
+              >
+                <Link to="/sign-in" onClick={() => setIsMobileMenuOpen(false)}>
+                  {t("header.signIn")}
+                </Link>
+              </Button>
               <Button
                 asChild
                 className="rounded-md border border-primary/60 bg-card font-semibold text-primary hover:bg-black/20 hover:text-primary"
