@@ -33,7 +33,7 @@
     "@trpc/server": "^11.7.2",
     "@unosend/node": "^2.0.0",
     "aws4fetch": "^1.0.20",
-    "better-auth": "^1.4.3",
+    "better-auth": "^1.6.23",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "creem_io": "^0.4.0",
