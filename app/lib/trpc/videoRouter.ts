@@ -9,7 +9,10 @@ import {
   SEEDANCE_MODEL,
   seedanceCreateTaskInputSchema,
   seedanceResolutionSchema,
+  type SeedanceCreateTaskInput,
 } from "~/lib/ai/seedance.shared";
+import { moderateImage, moderateText } from "~/lib/ai/wavespeed.server";
+import { isModerationNsfw } from "~/lib/ai/wavespeed.shared";
 import { TASK_STATUS } from "~/lib/consts";
 import { serverEnv } from "~/lib/env.server";
 import {
@@ -39,6 +42,19 @@ class TaskSubmissionAbortedError extends Error {
 function getKieCallbackUrl() {
   const baseUrl = serverEnv.KIE_CALLBACK_BASE_URL ?? serverEnv.APP_URL;
   return new URL("/api/ai/kie/callback", baseUrl).toString();
+}
+
+/** Collect image URLs from a Seedance input for pre-generation moderation. */
+function getSeedanceImageUrls(input: SeedanceCreateTaskInput): string[] {
+  if (input.mode === "image-to-video") {
+    return [input.firstFrameUrl, input.lastFrameUrl].filter(
+      (url): url is string => typeof url === "string" && url.length > 0,
+    );
+  }
+  if (input.mode === "multi-reference") {
+    return input.referenceImageUrls ?? [];
+  }
+  return [];
 }
 
 function toTaskStatusResponse(task: {
@@ -100,6 +116,44 @@ export const videoRouter = router({
         throw new TRPCError({
           code: "PAYMENT_REQUIRED",
           message: "Insufficient credits",
+        });
+      }
+
+      // Pre-moderate prompt and reference images before creating the task.
+      // Reference videos/audio are skipped (moderation API is image-only).
+      // Fail-closed: any leg failing means safety cannot be guaranteed, so we
+      // block creation rather than silently letting potentially NSFW content through.
+      const imageUrls = getSeedanceImageUrls(input);
+      const settled = await Promise.allSettled([
+        moderateText(input.prompt),
+        ...imageUrls.map((url) => moderateImage(url, input.prompt)),
+      ]);
+
+      const failures = settled.filter(
+        (r): r is PromiseRejectedResult => r.status === "rejected",
+      );
+      const fulfilledOutputs = settled.flatMap((r) =>
+        r.status === "fulfilled" ? r.value : [],
+      );
+
+      // NSFW hit takes priority — report the real reason even if other legs failed.
+      if (isModerationNsfw(fulfilledOutputs)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Content moderation blocked: inappropriate content detected",
+        });
+      }
+
+      // No NSFW found, but some legs failed → block so a broken moderation
+      // service can never become a silent bypass.
+      if (failures.length > 0) {
+        console.error(
+          "[video.createSeedanceTask] moderation service failed, failing closed",
+          failures.map((f) => f.reason),
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Content moderation unavailable, please try again",
         });
       }
 

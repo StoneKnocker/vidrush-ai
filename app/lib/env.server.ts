@@ -30,6 +30,8 @@ const serverEnvSchema = z.object({
   KIE_WEBHOOK_HMAC_KEY: z.string().min(1),
   /** Optional public base for KIE webhooks (e.g. ngrok in local dev). Falls back to APP_URL. */
   KIE_CALLBACK_BASE_URL: z.string().url().optional(),
+  /** WaveSpeed content moderator API key (text/image moderation before video generation). */
+  WAVESPEED_API_KEY: z.string().min(1),
 
   // PayPal (optional — enable with PAYPAL_ENABLED=true + credentials)
   PAYPAL_ENABLED: z.string().optional().default("false"),

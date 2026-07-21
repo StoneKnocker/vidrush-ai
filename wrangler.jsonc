@@ -66,16 +66,17 @@
           "CREEM_API_KEY",
           "CREEM_WEBHOOK_SECRET",
           "KIE_API_KEY",
-          "KIE_WEBHOOK_HMAC_KEY"
+          "KIE_WEBHOOK_HMAC_KEY",
+          "WAVESPEED_API_KEY"
         ]
       }
     },
     "prod": {
       "name": "vidrush-ai",
-			"routes": [
-				{ "pattern": "vidrushai.com", "custom_domain": true },
-				{ "pattern": "www.vidrushai.com", "custom_domain": true }
-			],
+      "routes": [
+        { "pattern": "vidrushai.com", "custom_domain": true },
+        { "pattern": "www.vidrushai.com", "custom_domain": true }
+      ],
       "vars": {
         "APP_NAME": "VidRush AI",
         "APP_URL": "https://vidrushai.com",
@@ -122,7 +123,8 @@
           "GOOGLE_CLIENT_SECRET",
           "UNOSEND_API_KEY",
           "KIE_API_KEY",
-          "KIE_WEBHOOK_HMAC_KEY"
+          "KIE_WEBHOOK_HMAC_KEY",
+          "WAVESPEED_API_KEY"
         ]
       }
     }
