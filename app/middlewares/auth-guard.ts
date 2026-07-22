@@ -71,7 +71,7 @@ async function processSession(
       ? `/${firstSegment}`
       : "";
     throw redirect(
-      `${localePrefix}/signin?redirectTo=${encodeURIComponent(pathname)}`,
+      `${localePrefix}/sign-inin?redirectTo=${encodeURIComponent(pathname)}`,
     );
   }
 

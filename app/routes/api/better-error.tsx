@@ -53,7 +53,7 @@ export default function BetterError() {
 
         <div className="mt-6 flex w-full shrink-0 items-center justify-center space-x-3">
           <Button variant="outline" asChild>
-            <Link to="/signin">
+            <Link to="/sign-in">
               <ArrowLeftIcon className="size-4" />
               {t("authError.goToSignIn")}
             </Link>
