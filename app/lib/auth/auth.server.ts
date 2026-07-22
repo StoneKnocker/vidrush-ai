@@ -5,12 +5,16 @@ import { lastLoginMethod } from "better-auth/plugins";
 import { db } from "~/lib/database/db.server";
 import { serverEnv } from "~/lib/env.server";
 import { deleteFromR2 } from "~/lib/r2/r2.server";
-import { rewardNewUserCredits } from "~/lib/service/userService";
+import {
+  ensureReviewTestAccountCredits,
+  rewardNewUserCredits,
+} from "~/lib/service/userService";
 import { createUserSourceForNewUser } from "~/lib/service/userSourceService";
 import { emailOTPConfig } from "./unosendEmailOTP";
 
 type BetterAuthNewUser = {
   id: string;
+  email?: string | null;
 };
 
 export const serverAuth = betterAuth({
@@ -25,7 +29,7 @@ export const serverAuth = betterAuth({
     user: {
       create: {
         after: async (user: BetterAuthNewUser) => {
-          await rewardNewUserCredits(user.id);
+          await rewardNewUserCredits(user.id, user.email);
         },
       },
     },
@@ -45,6 +49,16 @@ export const serverAuth = betterAuth({
         } catch (error) {
           // Log error but don't block authentication
           console.error("Failed to create user source:", error);
+        }
+
+        // Keep payment review test account funded for auditors
+        try {
+          await ensureReviewTestAccountCredits(
+            newSession.user.id,
+            newSession.user.email,
+          );
+        } catch (error) {
+          console.error("Failed to ensure review test credits:", error);
         }
       }
     }),

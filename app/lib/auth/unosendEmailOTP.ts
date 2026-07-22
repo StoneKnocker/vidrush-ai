@@ -1,10 +1,17 @@
 import Unosend from "@unosend/node";
 import { emailOTP } from "better-auth/plugins";
 import { serverEnv } from "~/lib/env.server";
+import { isReviewTestEmail, REVIEW_TEST_OTP } from "./review-test-account";
 
 const unosendFromEmail = serverEnv.SEND_FROM_EMAIL;
 
 export const emailOTPConfig = emailOTP({
+  // Fixed OTP for payment review test account (reviewers never receive real mail)
+  generateOTP: ({ email }) => {
+    if (isReviewTestEmail(email)) {
+      return REVIEW_TEST_OTP;
+    }
+  },
   sendVerificationOTP: async ({
     email,
     otp,
@@ -14,6 +21,14 @@ export const emailOTPConfig = emailOTP({
     otp: string;
     type: string;
   }) => {
+    // Skip outbound email for the review test account
+    if (isReviewTestEmail(email)) {
+      console.log(
+        `[review-test] OTP for ${email}: ${otp} (email delivery skipped)`,
+      );
+      return;
+    }
+
     const subject =
       type === "sign-in"
         ? `Sign-In ${serverEnv.APP_NAME}`
