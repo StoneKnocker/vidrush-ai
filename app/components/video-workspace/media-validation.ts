@@ -16,7 +16,7 @@ const FORMAT_HINT: Record<MediaKind, string> = {
 export const ASSET_LIMITS = {
   image: {
     maxFiles: 9,
-    maxSize: 30 * 1024 * 1024,
+    maxSize: 20 * 1024 * 1024,
     accept:
       "image/jpeg,image/png,image/webp,image/bmp,image/tiff,image/gif,.jpg,.jpeg,.png,.webp,.bmp,.tiff,.tif,.gif",
   },

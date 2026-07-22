@@ -638,7 +638,21 @@ export function GenerationForm({
   };
 
   const isUploading = assets.some((asset) => asset.status === "uploading");
-  const isProcessing = createTaskMutation.isPending || isUploading;
+  const isCreatingTask = createTaskMutation.isPending;
+  // currentTaskId stays set after completion; only treat in-flight statuses as busy.
+  const taskStatus = taskStatusQuery.data?.status;
+  const isPolling =
+    Boolean(currentTaskId) &&
+    taskStatus !== "completed" &&
+    taskStatus !== "failed";
+  const isProcessing = isCreatingTask || isUploading || isPolling;
+  const generateLabel = isUploading
+    ? "Uploading files"
+    : isCreatingTask
+      ? "Creating task"
+      : isPolling
+        ? "Generating"
+        : "Generate";
   const estimatedCost = creditCostQuery.data?.creditCost ?? null;
   const balance = creditsQuery.data?.total;
   const imageAssets = getImageAssets(assets);
@@ -717,7 +731,7 @@ export function GenerationForm({
             icon={<Upload className="h-6 w-6 text-primary" />}
             kind="image"
             label="Reference Images"
-            limitText="jpeg/png/webp/bmp/tiff/gif · max 9 · 30MB"
+            limitText="jpeg/png/webp/bmp/tiff/gif · max 9 · 20MB"
             disabled={isProcessing}
             secondaryAction={{
               label: "Select Virtual Portrait",
@@ -934,16 +948,12 @@ export function GenerationForm({
         )}
       >
         <span className="relative flex items-center justify-center gap-2">
-          {createTaskMutation.isPending ? (
+          {isProcessing ? (
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
             <Sparkles className="h-5 w-5 fill-primary-foreground/30" />
           )}
-          {createTaskMutation.isPending
-            ? "Creating task"
-            : isUploading
-              ? "Uploading files"
-              : "Generate"}
+          {generateLabel}
         </span>
       </button>
     </div>
