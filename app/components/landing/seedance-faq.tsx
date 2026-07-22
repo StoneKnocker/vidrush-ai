@@ -80,7 +80,7 @@ const FAQS = [
   {
     question: "Does {{appName}} support NSFW content?",
     answer:
-      "No. {{appName}} does not allow the generation of adult, violent, or otherwise prohibited content. We have safety filters in place and actively monitor usage to ensure compliance with our content policies.",
+      "No. {{appName}} does not allow adult sexual content (NSFW), pornography, or other prohibited content under our Terms. We use safety filters and may refuse generation, withhold credits for blocked requests, and suspend accounts that violate our content policies.",
   },
   {
     question: "How do I get started with {{appName}}?",

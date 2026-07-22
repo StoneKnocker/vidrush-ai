@@ -1,12 +1,12 @@
 ---
 title: "Terms & Conditions"
 lang: "en"
-lastModified: "2026-05-27T00:00:00.000Z"
+lastModified: "2026-07-22T00:00:00.000Z"
 ---
 
 # Terms & Conditions
 
-**Effective Date:** May 27, 2026
+**Effective Date:** July 22, 2026
 
 **PLEASE READ THESE TERMS CAREFULLY BEFORE ACCESSING OR USING THE SERVICES.** BY ACCESSING OR USING ANY OF THE SERVICES, YOU EXPRESSLY AGREE TO BECOME BOUND BY THESE TERMS. IF YOU DO NOT AGREE TO ALL THE TERMS, YOU MAY NOT ACCESS THE WEBSITE OR USE OUR SERVICES.
 
@@ -33,10 +33,22 @@ You agree to use the Services for their intended purposes only and not for any p
 You agree not to use the Services or Your Content (defined below) for any purpose that:
 
 - **Violates Intellectual Property:** Infringes or misappropriates the proprietary rights, including copyright or trademark, of any third party.
-- **Generates Illegal Content:** Includes or promotes hate speech, violence, harassment, discrimination, or explicit sexual content.
+- **Generates Illegal Content:** Creates, uploads, or promotes content that is illegal under applicable law, including child sexual abuse material (CSAM), content that sexualizes minors, and content that facilitates serious crimes.
+- **Generates Prohibited Content (including NSFW):** Creates, uploads, or promotes adult sexual content, pornography, explicit sexual content, or other content we classify as NSFW. Hate speech, harassment, discrimination, and graphic violence are also prohibited.
 - **Generates Infringing Media:** Creates videos or other media that impersonate real individuals' likeness without consent or infringe on intellectual property rights owned by third parties.
 - **Unauthorized Access or Resale:** Attempt to scrape, resell, or otherwise misuse the Services, credits, or API access beyond what is expressly permitted.
 - **Security Interference:** Attempts to interfere with, compromise the system integrity or security of, or decipher any transmissions to or from, the servers running our Services.
+
+### Enforcement and Refusal of Service
+
+We may use automated tools and/or human review to detect prohibited or illegal content. If we determine (in our sole discretion) that a request, upload, or generation violates these Terms, we may, without prior notice:
+
+1. Refuse to process or complete the generation request;
+2. Withhold, reverse, or not refund credits or fees associated with blocked or refused requests;
+3. Remove or disable access to Your Content or Your Generated Content; and
+4. Suspend or terminate your account, including for repeated or severe violations.
+
+Enforcement actions under this Section do not limit our rights under Section 9 (Changes and Termination).
 
 ## 4. Ownership of Your Content
 
