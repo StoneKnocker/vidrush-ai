@@ -43,10 +43,6 @@ export function isSubotizEnabled(): boolean {
   );
 }
 
-export function isCreemEnabled(): boolean {
-  return serverEnv.CREEM_ENABLED === "true" && Boolean(serverEnv.CREEM_API_KEY);
-}
-
 /**
  * Verify Subotiz webhook signature.
  * Signature string: `${X-Timestamp}.${raw_body}`

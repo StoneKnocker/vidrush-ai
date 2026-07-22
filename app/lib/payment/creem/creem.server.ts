@@ -15,6 +15,11 @@ export const creem = createCreem({
   testMode: isDevelopment,
 });
 
+/** Explicit opt-in: CREEM_ENABLED=true and API key present. */
+export function isCreemEnabled(): boolean {
+  return serverEnv.CREEM_ENABLED === "true" && Boolean(serverEnv.CREEM_API_KEY);
+}
+
 export async function createCheckout(planId: string, userId: string) {
   const product = getProduct(planId);
 
