@@ -135,15 +135,23 @@ export const videoRouter = router({
       // Reference videos/audio are skipped (moderation API is image-only).
       // >2 images: only first + last are checked to cut API volume (rate limits).
       // Serial calls only — WaveSpeed rate-limits concurrent requests.
-      // When images exist, prompt is attached to each image moderation call,
-      // so a separate text moderation is redundant and skipped.
+      // Text is moderated independently first; if NSFW, image checks are skipped.
       // Fail-closed: any leg failing means safety cannot be guaranteed, so we
       // block creation rather than silently letting potentially NSFW content through.
       const imageUrls = selectImagesForModeration(getSeedanceImageUrls(input));
       const fulfilledOutputs: ModerationOutput[] = [];
       const failures: unknown[] = [];
 
-      if (imageUrls.length > 0) {
+      // Text is always moderated independently first.
+      try {
+        const textOutputs = await moderateText(input.prompt);
+        fulfilledOutputs.push(...textOutputs);
+      } catch (err) {
+        failures.push(err);
+      }
+
+      // Short-circuit on NSFW: skip remaining image checks if text already flagged.
+      if (!isModerationNsfw(fulfilledOutputs)) {
         for (const url of imageUrls) {
           try {
             const outputs = await moderateImage(url, input.prompt);
@@ -153,13 +161,6 @@ export const videoRouter = router({
           } catch (err) {
             failures.push(err);
           }
-        }
-      } else {
-        try {
-          const outputs = await moderateText(input.prompt);
-          fulfilledOutputs.push(...outputs);
-        } catch (err) {
-          failures.push(err);
         }
       }
 
