@@ -57,6 +57,15 @@ function getSeedanceImageUrls(input: SeedanceCreateTaskInput): string[] {
   return [];
 }
 
+/**
+ * Latency trade-off: moderate all images when ≤2; otherwise only first + last.
+ * Middle reference images are skipped intentionally.
+ */
+function selectImagesForModeration(urls: string[]): string[] {
+  if (urls.length <= 2) return urls;
+  return [urls[0]!, urls[urls.length - 1]!];
+}
+
 function toTaskStatusResponse(task: {
   id: string;
   status: string;
@@ -121,9 +130,10 @@ export const videoRouter = router({
 
       // Pre-moderate prompt and reference images before creating the task.
       // Reference videos/audio are skipped (moderation API is image-only).
+      // >2 images: only first + last are checked to cut parallel moderation latency.
       // Fail-closed: any leg failing means safety cannot be guaranteed, so we
       // block creation rather than silently letting potentially NSFW content through.
-      const imageUrls = getSeedanceImageUrls(input);
+      const imageUrls = selectImagesForModeration(getSeedanceImageUrls(input));
       const settled = await Promise.allSettled([
         moderateText(input.prompt),
         ...imageUrls.map((url) => moderateImage(url, input.prompt)),
