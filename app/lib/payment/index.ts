@@ -1,10 +1,16 @@
-import { PAYMENT_PROVIDER, type PaymentProvider } from "@/lib/consts";
+import {
+  CREDIT_TYPE,
+  PAYMENT_PROVIDER,
+  type PaymentProvider,
+} from "@/lib/consts";
+import { getActiveSubscriptionByUserId } from "@/lib/model/subscription";
 import { serverEnv } from "~/lib/env.server";
 import {
   createCheckout as createCreemCheckout,
   isCreemEnabled,
 } from "./creem/creem.server";
 import { createPaypalCheckout, isPaypalEnabled } from "./paypal/paypal.server";
+import { getProduct } from "./product";
 import {
   createSubotizCheckout,
   isSubotizEnabled,
@@ -14,6 +20,20 @@ export interface CheckoutResult {
   url: string;
   id: string;
   publicId?: string;
+}
+
+/** Thrown when user tries to start a second subscription while one is active. */
+export class AlreadySubscribedError extends Error {
+  readonly code = "ALREADY_SUBSCRIBED" as const;
+
+  constructor(existingPlanId?: string) {
+    super(
+      existingPlanId
+        ? `You already have an active subscription (${existingPlanId}). Cancel it or wait until it ends before starting a new plan.`
+        : "You already have an active subscription. Cancel it or wait until it ends before starting a new plan.",
+    );
+    this.name = "AlreadySubscribedError";
+  }
 }
 
 function getPrimaryProvider(): PaymentProvider {
@@ -79,6 +99,16 @@ export async function createCheckoutForPlan(
 ): Promise<CheckoutResult> {
   if (!isProviderEnabled(provider)) {
     throw new Error(`Payment provider '${provider}' is not enabled`);
+  }
+
+  // Single-subscription model: subscription pocket is one SET per user.
+  // Block stacking plans; one-time credit packs remain allowed.
+  const product = getProduct(planId);
+  if (product.creditType === CREDIT_TYPE.SUBSCRIPTION) {
+    const active = await getActiveSubscriptionByUserId(userId);
+    if (active) {
+      throw new AlreadySubscribedError(active.planId);
+    }
   }
 
   if (provider === PAYMENT_PROVIDER.SUBOTIZ) {

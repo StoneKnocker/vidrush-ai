@@ -136,7 +136,8 @@
   },
   "pricing": {
     "processing": "Processing...",
-    "genericError": "An error occurred. Please try again."
+    "genericError": "An error occurred. Please try again.",
+    "alreadySubscribed": "You already have an active subscription. Cancel it or wait until it ends before starting a new plan. Credit packs can still be purchased anytime."
   },
   "creations": {
     "title": "Your {{appName}} Creations",

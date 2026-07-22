@@ -1,3 +1,4 @@
+import { TRPCClientError } from "@trpc/client";
 import { Check, Gift, Zap } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -94,7 +95,13 @@ export function SeedancePricing({
         window.location.href = result.checkoutUrl;
       } catch (error) {
         console.error("Error creating checkout:", error);
-        toast.error(getTrpcErrorMessage(error, t("pricing.genericError")));
+        const isAlreadySubscribed =
+          error instanceof TRPCClientError && error.data?.code === "CONFLICT";
+        toast.error(
+          isAlreadySubscribed
+            ? t("pricing.alreadySubscribed")
+            : getTrpcErrorMessage(error, t("pricing.genericError")),
+        );
         setActivePlanId(null);
       }
     },

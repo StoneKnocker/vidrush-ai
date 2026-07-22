@@ -6,6 +6,7 @@ import {
   getPaymentBySessionId,
 } from "~/lib/model/payment";
 import {
+  AlreadySubscribedError,
   type CheckoutResult,
   createCheckoutForPlan,
   getEnabledPaymentProviders,
@@ -88,6 +89,13 @@ export const paymentRouter = router({
         };
       } catch (error) {
         console.error("Checkout creation failed:", error);
+
+        if (error instanceof AlreadySubscribedError) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: error.message,
+          });
+        }
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

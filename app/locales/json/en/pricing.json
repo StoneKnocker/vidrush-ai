@@ -27,16 +27,12 @@
         "answer": "You can cancel your subscription at any time from your account billing settings. If you have any questions or need assistance, please contact our support team."
       },
       {
-        "question": "How can I upgrade my subscription?",
-        "answer": "You can switch your plan at any time — just choose a higher-tier plan on this pricing page. Upgrades take effect according to your payment provider; you typically only pay the prorated difference for the rest of your current billing period. Downgrades usually take effect at the end of the current period."
-      },
-      {
-        "question": "How many credits do I receive after upgrading my subscription?",
-        "answer": "When you upgrade, you typically pay only the prorated difference between your current plan and the new plan, and receive a matching prorated amount of additional credits for the remainder of the current billing period. Starting from the next billing cycle, you'll receive the full monthly credit allocation of your new plan."
+        "question": "How can I upgrade or change my subscription?",
+        "answer": "Only one subscription can be active at a time. To change plans, cancel your current subscription and start a new plan after it ends (or contact support if you need help switching sooner). You can still buy one-time credit packs anytime while subscribed."
       },
       {
         "question": "How can I purchase more credits?",
-        "answer": "There are two ways to get additional credits:\n\n**One-time Credit Packages**\n\nPurchase our one-time payment packages to get credits instantly. These can be purchased multiple times and work alongside any existing subscription.\n\n**Subscription Upgrade**\n\nIf you're already subscribed, switch to a higher-tier plan on this page to receive more monthly credits."
+        "answer": "There are two ways to get additional credits:\n\n**One-time Credit Packages**\n\nPurchase our one-time payment packages to get credits instantly. These can be purchased multiple times and work alongside any existing subscription.\n\n**Higher subscription tier**\n\nCancel your current plan when you are ready, then subscribe to a higher-tier plan on this page for a larger monthly credit allocation."
       },
       {
         "question": "What refund policy do you have?",

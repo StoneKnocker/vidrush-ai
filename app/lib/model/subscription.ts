@@ -1,7 +1,16 @@
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, inArray, ne } from "drizzle-orm";
+import { SUBSCRIPTION_STATUS } from "@/lib/consts";
 import { db } from "@/lib/database/db.server";
 import type { InsertSubscription } from "@/lib/database/schema";
 import { subscription } from "@/lib/database/schema";
+
+/** Statuses that mean the user is still on a plan (blocks a second subscription). */
+const ACTIVE_LIKE_STATUSES = [
+  SUBSCRIPTION_STATUS.ACTIVE,
+  SUBSCRIPTION_STATUS.TRIALING,
+  SUBSCRIPTION_STATUS.PAST_DUE,
+  SUBSCRIPTION_STATUS.PAUSED,
+] as const;
 
 export async function createSubscription(
   data: Omit<
@@ -18,6 +27,25 @@ export async function createSubscription(
   }
 
   return result[0].id;
+}
+
+/**
+ * Returns one active-like subscription for the user, if any.
+ * Used to enforce single-subscription (no stacked plans).
+ */
+export async function getActiveSubscriptionByUserId(userId: string) {
+  const result = await db
+    .select()
+    .from(subscription)
+    .where(
+      and(
+        eq(subscription.userId, userId),
+        inArray(subscription.status, [...ACTIVE_LIKE_STATUSES]),
+      ),
+    )
+    .limit(1);
+
+  return result[0] || null;
 }
 
 export async function getSubscriptionById(id: number) {

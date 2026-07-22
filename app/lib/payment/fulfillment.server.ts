@@ -16,6 +16,7 @@ import {
 } from "@/lib/model/payment";
 import {
   createSubscription,
+  getActiveSubscriptionByUserId,
   getSubscriptionByProviderId,
   updateSubscriptionPeriod,
   updateSubscriptionStatus,
@@ -140,6 +141,30 @@ export async function fulfillNewSubscription(
       await linkPaymentToSubscription(payment.id, existing.id);
     }
     return { granted: false, subscriptionId: existing.id };
+  }
+
+  // Defense in depth: refuse a second stacked plan (checkout should already block).
+  // Mark paid so webhooks do not retry forever; ops must refund if this path is hit.
+  const activeForUser = await getActiveSubscriptionByUserId(payment.userId);
+  if (activeForUser) {
+    console.error(
+      "User already has an active subscription; refusing second plan grant",
+      {
+        userId: payment.userId,
+        existingSubscriptionId: activeForUser.id,
+        existingPlanId: activeForUser.planId,
+        attemptedProviderSubscriptionId: options.providerSubscriptionId,
+        paymentId: payment.id,
+      },
+    );
+    if (payment.status !== PAYMENT_STATUS.PAID) {
+      await updatePaymentStatus(payment.id, PAYMENT_STATUS.PAID, {
+        providerSessionId: sessionId,
+        providerTransactionId: transactionId ?? undefined,
+        paidAt: new Date(),
+      });
+    }
+    return { granted: false, subscriptionId: activeForUser.id };
   }
 
   if (payment.status !== PAYMENT_STATUS.PAID) {
