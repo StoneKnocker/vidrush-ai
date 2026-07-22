@@ -26,6 +26,16 @@ const serverEnvSchema = z.object({
   UNOSEND_API_KEY: z.string().min(1),
   CREEM_API_KEY: z.string().optional(),
   CREEM_WEBHOOK_SECRET: z.string().optional(),
+  /** Primary payment provider: subotiz | creem */
+  PAYMENT_PROVIDER: z.enum(["subotiz", "creem"]).optional().default("subotiz"),
+  // Subotiz (default payment provider)
+  SUBOTIZ_API_KEY: z.string().optional(),
+  /** Override API base; defaults to sandbox in development, prod in production */
+  SUBOTIZ_API_BASE: z.string().url().optional(),
+  /** Set false to disable Subotiz even if key is present */
+  SUBOTIZ_ENABLED: z.string().optional().default("true"),
+  /** Explicitly re-enable Creem as a selectable provider */
+  CREEM_ENABLED: z.string().optional().default("false"),
   KIE_API_KEY: z.string().min(1),
   KIE_WEBHOOK_HMAC_KEY: z.string().min(1),
   /** Optional public base for KIE webhooks (e.g. ngrok in local dev). Falls back to APP_URL. */

@@ -59,6 +59,7 @@ export const TASK_STATUS = {
 } as const;
 
 export const PAYMENT_PROVIDER = {
+  SUBOTIZ: "subotiz",
   CREEM: "creem",
   PAYPAL: "paypal",
   STRIPE: "stripe",

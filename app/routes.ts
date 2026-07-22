@@ -52,6 +52,7 @@ export default [
     route("trpc/*", "routes/api/trpc.ts"),
     route("payment/webhook/creem", "routes/api/payment/webhook/creem.ts"),
     route("payment/webhook/paypal", "routes/api/payment/webhook/paypal.ts"),
+    route("payment/webhook/subotiz", "routes/api/payment/webhook/subotiz.ts"),
     route("ai/kie/callback", "routes/api/ai/kie/callback.ts"),
   ]),
 

@@ -10,8 +10,8 @@ import { isDevelopment, serverEnv } from "~/lib/env.server";
 import { getProduct, priceToCents } from "~/lib/payment/product";
 
 export const creem = createCreem({
-  apiKey: serverEnv.CREEM_API_KEY,
-  webhookSecret: serverEnv.CREEM_WEBHOOK_SECRET,
+  apiKey: serverEnv.CREEM_API_KEY ?? "",
+  webhookSecret: serverEnv.CREEM_WEBHOOK_SECRET ?? "",
   testMode: isDevelopment,
 });
 

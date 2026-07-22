@@ -103,6 +103,46 @@ function getPaypalPlanId(planId: string): string | null {
   }
 }
 
+/**
+ * Subotiz price IDs (sandbox vs production).
+ * Sandbox catalog bootstrapped 2026-07-22. Prod IDs: replace nulls after prod catalog setup.
+ */
+function getSubotizPriceId(planId: string): string | null {
+  const isDev = isDevelopment;
+  switch (planId) {
+    case "basic-monthly":
+      return isDev ? "669427039337492399" : null;
+    case "basic-yearly":
+      return isDev ? "669427857272909743" : null;
+    case "standard-monthly":
+      return isDev ? "669427869604163503" : null;
+    case "standard-yearly":
+      return isDev ? "669427883168542639" : null;
+    case "pro-monthly":
+      return isDev ? "669427894518329263" : null;
+    case "pro-yearly":
+      return isDev ? "669427908476972975" : null;
+    case "max-monthly":
+      return isDev ? "669427922003603375" : null;
+    case "max-yearly":
+      return isDev ? "669427933076565935" : null;
+    case "pack-starter":
+      return isDev ? "669428498036699055" : null;
+    case "pack-creator":
+      return isDev ? "669427944547954607" : null;
+    case "pack-professional":
+      return isDev ? "669427960356286383" : null;
+    case "pack-advanced":
+      return isDev ? "669427972310052783" : null;
+    case "pack-ultra":
+      return isDev ? "669427989250846639" : null;
+    case "pack-max":
+      return isDev ? "669428008091660207" : null;
+    default:
+      return null;
+  }
+}
+
 export type ProductInfo = {
   /** Creem catalog product id; null when not configured yet */
   creemProductId: string | null;
@@ -111,6 +151,8 @@ export type ProductInfo = {
    * null when not configured yet. One-time packs always null.
    */
   paypalPlanId: string | null;
+  /** Subotiz catalog price id; null when not configured yet */
+  subotizPriceId: string | null;
   creditsAmount: number;
   /** USD dollars (e.g. 29.9) */
   price: number;
@@ -119,7 +161,7 @@ export type ProductInfo = {
 
 const PRODUCTS: Record<
   string,
-  Omit<ProductInfo, "creemProductId" | "paypalPlanId">
+  Omit<ProductInfo, "creemProductId" | "paypalPlanId" | "subotizPriceId">
 > = {
   // Legacy subscription plans (keep for existing subscriptions)
   "creator-monthly": {
@@ -230,6 +272,7 @@ export function getProduct(planId: string): ProductInfo {
     ...product,
     creemProductId: getCreemProductId(planId),
     paypalPlanId: getPaypalPlanId(planId),
+    subotizPriceId: getSubotizPriceId(planId),
   };
 }
 

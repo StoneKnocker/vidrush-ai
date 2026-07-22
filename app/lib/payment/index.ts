@@ -1,6 +1,12 @@
 import { PAYMENT_PROVIDER, type PaymentProvider } from "@/lib/consts";
+import { serverEnv } from "~/lib/env.server";
 import { createCheckout as createCreemCheckout } from "./creem/creem.server";
 import { createPaypalCheckout, isPaypalEnabled } from "./paypal/paypal.server";
+import {
+  createSubotizCheckout,
+  isCreemEnabled,
+  isSubotizEnabled,
+} from "./subotiz/subotiz.server";
 
 export interface CheckoutResult {
   url: string;
@@ -8,16 +14,58 @@ export interface CheckoutResult {
   publicId?: string;
 }
 
+function getPrimaryProvider(): PaymentProvider {
+  const configured = serverEnv.PAYMENT_PROVIDER;
+  if (configured === PAYMENT_PROVIDER.CREEM && isCreemEnabled()) {
+    return PAYMENT_PROVIDER.CREEM;
+  }
+  if (isSubotizEnabled()) {
+    return PAYMENT_PROVIDER.SUBOTIZ;
+  }
+  if (isCreemEnabled()) {
+    return PAYMENT_PROVIDER.CREEM;
+  }
+  // Fall back to configured primary even if keys missing (caller will error clearly)
+  return configured === PAYMENT_PROVIDER.CREEM
+    ? PAYMENT_PROVIDER.CREEM
+    : PAYMENT_PROVIDER.SUBOTIZ;
+}
+
 export function getEnabledPaymentProviders(): PaymentProvider[] {
-  const providers: PaymentProvider[] = [PAYMENT_PROVIDER.CREEM];
+  const providers: PaymentProvider[] = [];
+  const primary = getPrimaryProvider();
+
+  if (primary === PAYMENT_PROVIDER.SUBOTIZ && isSubotizEnabled()) {
+    providers.push(PAYMENT_PROVIDER.SUBOTIZ);
+  } else if (primary === PAYMENT_PROVIDER.CREEM && isCreemEnabled()) {
+    providers.push(PAYMENT_PROVIDER.CREEM);
+  } else if (isSubotizEnabled()) {
+    providers.push(PAYMENT_PROVIDER.SUBOTIZ);
+  } else if (isCreemEnabled()) {
+    providers.push(PAYMENT_PROVIDER.CREEM);
+  }
+
+  // Secondary card provider (optional)
+  if (isCreemEnabled() && !providers.includes(PAYMENT_PROVIDER.CREEM)) {
+    providers.push(PAYMENT_PROVIDER.CREEM);
+  }
+  if (isSubotizEnabled() && !providers.includes(PAYMENT_PROVIDER.SUBOTIZ)) {
+    // only add subotiz as secondary when creem is primary
+    if (primary === PAYMENT_PROVIDER.CREEM) {
+      providers.push(PAYMENT_PROVIDER.SUBOTIZ);
+    }
+  }
+
   if (isPaypalEnabled()) {
     providers.push(PAYMENT_PROVIDER.PAYPAL);
   }
-  return providers;
+
+  return providers.length > 0 ? providers : [PAYMENT_PROVIDER.SUBOTIZ];
 }
 
 export function isProviderEnabled(provider: PaymentProvider): boolean {
-  if (provider === PAYMENT_PROVIDER.CREEM) return true;
+  if (provider === PAYMENT_PROVIDER.SUBOTIZ) return isSubotizEnabled();
+  if (provider === PAYMENT_PROVIDER.CREEM) return isCreemEnabled();
   if (provider === PAYMENT_PROVIDER.PAYPAL) return isPaypalEnabled();
   return false;
 }
@@ -25,10 +73,19 @@ export function isProviderEnabled(provider: PaymentProvider): boolean {
 export async function createCheckoutForPlan(
   planId: string,
   userId: string,
-  provider: PaymentProvider = PAYMENT_PROVIDER.CREEM,
+  provider: PaymentProvider = getPrimaryProvider(),
 ): Promise<CheckoutResult> {
   if (!isProviderEnabled(provider)) {
     throw new Error(`Payment provider '${provider}' is not enabled`);
+  }
+
+  if (provider === PAYMENT_PROVIDER.SUBOTIZ) {
+    const checkout = await createSubotizCheckout(planId, userId);
+    return {
+      url: checkout.checkoutUrl,
+      id: checkout.id,
+      publicId: checkout.publicId,
+    };
   }
 
   if (provider === PAYMENT_PROVIDER.PAYPAL) {

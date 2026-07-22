@@ -8,15 +8,17 @@ import {
 } from "~/components/ui/dialog";
 import { cn } from "~/lib/utils";
 
-export type CheckoutProvider = "creem" | "paypal";
+export type CheckoutProvider = "subotiz" | "creem" | "paypal";
 
 const PROVIDER_LABELS: Record<CheckoutProvider, string> = {
+  subotiz: "Card",
   creem: "Card / Creem",
   paypal: "PayPal",
 };
 
 const PROVIDER_DESCRIPTIONS: Record<CheckoutProvider, string> = {
-  creem: "Pay with credit or debit card",
+  subotiz: "Pay with credit or debit card",
+  creem: "Pay with credit or debit card (Creem)",
   paypal: "Pay with your PayPal account",
 };
 

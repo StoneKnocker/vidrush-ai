@@ -27,7 +27,9 @@
         "R2_ACCOUNT_ID": "d6fd0c73bd457f8cf7bacd8f66ac63a4",
         "R2_ACCESS_KEY_ID": "9ab844348a065605623905aaa51505f9",
         "R2_BUCKET_NAME": "vidrush-ai",
-        "PAYMENT_PROVIDER": "creem",
+        "PAYMENT_PROVIDER": "subotiz",
+        "SUBOTIZ_ENABLED": "true",
+        "CREEM_ENABLED": "false",
         "PAYPAL_ENABLED": "false",
         "PAYPAL_ENVIRONMENT": "sandbox",
         // Fixed ngrok domain so KIE can POST callbacks to local dev
@@ -63,8 +65,7 @@
           "BETTER_AUTH_SECRET",
           "GOOGLE_CLIENT_SECRET",
           "UNOSEND_API_KEY",
-          "CREEM_API_KEY",
-          "CREEM_WEBHOOK_SECRET",
+          "SUBOTIZ_API_KEY",
           "KIE_API_KEY",
           "KIE_WEBHOOK_HMAC_KEY",
           "WAVESPEED_API_KEY"
@@ -88,7 +89,9 @@
         "R2_ACCOUNT_ID": "d6fd0c73bd457f8cf7bacd8f66ac63a4",
         "R2_ACCESS_KEY_ID": "9ab844348a065605623905aaa51505f9",
         "R2_BUCKET_NAME": "vidrush-ai",
-        "PAYMENT_PROVIDER": "creem",
+        "PAYMENT_PROVIDER": "subotiz",
+        "SUBOTIZ_ENABLED": "true",
+        "CREEM_ENABLED": "false",
         "PAYPAL_ENABLED": "false",
         "PAYPAL_ENVIRONMENT": "production"
       },
@@ -122,6 +125,7 @@
           "BETTER_AUTH_SECRET",
           "GOOGLE_CLIENT_SECRET",
           "UNOSEND_API_KEY",
+          "SUBOTIZ_API_KEY",
           "KIE_API_KEY",
           "KIE_WEBHOOK_HMAC_KEY",
           "WAVESPEED_API_KEY"

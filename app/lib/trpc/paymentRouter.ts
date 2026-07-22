@@ -15,13 +15,14 @@ import { authedProcedure, publicProcedure, router } from "./init";
 import type { CheckoutCreateResult, PaymentStatusResult } from "./types";
 
 const providerSchema = z.enum([
+  PAYMENT_PROVIDER.SUBOTIZ,
   PAYMENT_PROVIDER.CREEM,
   PAYMENT_PROVIDER.PAYPAL,
 ]);
 
 const createCheckoutSchema = z.object({
   planId: z.string(),
-  provider: providerSchema.default(PAYMENT_PROVIDER.CREEM),
+  provider: providerSchema.default(PAYMENT_PROVIDER.SUBOTIZ),
 });
 
 const checkStatusSchema = z
@@ -135,6 +136,7 @@ export const paymentRouter = router({
       // sessionId lookup needs provider; try known providers when only session is given
       if (!payment && input.sessionId) {
         for (const provider of [
+          PAYMENT_PROVIDER.SUBOTIZ,
           PAYMENT_PROVIDER.CREEM,
           PAYMENT_PROVIDER.PAYPAL,
           PAYMENT_PROVIDER.STRIPE,

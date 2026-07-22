@@ -80,11 +80,11 @@ export function SeedancePricing({
   });
 
   const enabledProviders = (providersQuery.data?.providers ?? [
-    "creem",
+    "subotiz",
   ]) as CheckoutProvider[];
 
   const proceedWithCheckout = useCallback(
-    async (planId: string, provider: CheckoutProvider = "creem") => {
+    async (planId: string, provider: CheckoutProvider = "subotiz") => {
       setActivePlanId(planId);
       try {
         const result = await checkoutMutation.mutateAsync({
@@ -104,7 +104,7 @@ export function SeedancePricing({
   const startCheckoutFlow = useCallback(
     async (planId: string) => {
       if (enabledProviders.length <= 1) {
-        await proceedWithCheckout(planId, enabledProviders[0] ?? "creem");
+        await proceedWithCheckout(planId, enabledProviders[0] ?? "subotiz");
         return;
       }
       setPlanAwaitingProvider(planId);
