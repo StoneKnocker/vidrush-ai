@@ -4,7 +4,6 @@ const completeTaskMock = vi.fn();
 const setTaskFailedMock = vi.fn();
 const downloadAndUploadMock = vi.fn();
 const markTaskProcessingMock = vi.fn();
-const touchTaskUpdatedAtMock = vi.fn();
 const getTaskByIdMock = vi.fn();
 const updateNonTerminalResultDataMock = vi.fn();
 
@@ -15,7 +14,6 @@ vi.mock("~/lib/model/userTask", () => ({
   isTaskTerminal: (status: string) =>
     status === "completed" || status === "failed" || status === "canceled",
   markTaskProcessing: markTaskProcessingMock,
-  touchTaskUpdatedAt: touchTaskUpdatedAtMock,
   updateNonTerminalResultData: updateNonTerminalResultDataMock,
 }));
 
@@ -50,7 +48,6 @@ describe("KIE callback service", () => {
     setTaskFailedMock.mockReset();
     downloadAndUploadMock.mockReset();
     markTaskProcessingMock.mockReset();
-    touchTaskUpdatedAtMock.mockReset();
     getTaskByIdMock.mockReset();
     updateNonTerminalResultDataMock.mockReset();
     downloadAndUploadMock.mockResolvedValue(true);
@@ -189,5 +186,33 @@ describe("KIE callback service", () => {
       "r2_persist_exhausted",
     );
     expect(completeTaskMock).not.toHaveBeenCalled();
+  });
+
+  it("marks pending→processing once", async () => {
+    getTaskByIdMock.mockResolvedValue(nonTerminalTask({ status: "pending" }));
+    const { applyKieJobToTask } = await import("./kieCallbackService");
+
+    const outcome = await applyKieJobToTask({
+      taskId: "task-1",
+      body: { data: { state: "generating" } },
+    });
+
+    expect(outcome).toBe("processing");
+    expect(markTaskProcessingMock).toHaveBeenCalledWith("task-1");
+  });
+
+  it("does not write while already processing", async () => {
+    getTaskByIdMock.mockResolvedValue(
+      nonTerminalTask({ status: "processing" }),
+    );
+    const { applyKieJobToTask } = await import("./kieCallbackService");
+
+    const outcome = await applyKieJobToTask({
+      taskId: "task-1",
+      body: { data: { state: "generating" } },
+    });
+
+    expect(outcome).toBe("processing");
+    expect(markTaskProcessingMock).not.toHaveBeenCalled();
   });
 });

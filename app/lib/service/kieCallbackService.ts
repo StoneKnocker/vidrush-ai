@@ -11,7 +11,6 @@ import {
   getTaskByProviderTaskId,
   isTaskTerminal,
   markTaskProcessing,
-  touchTaskUpdatedAt,
   updateNonTerminalResultData,
 } from "~/lib/model/userTask";
 import { downloadAndUpload, getServerR2Url } from "~/lib/r2/r2.server";
@@ -302,8 +301,12 @@ export async function applyKieJobToTask({
     localStatus === TASK_STATUS.PROCESSING ||
     localStatus === TASK_STATUS.PENDING
   ) {
-    await markTaskProcessing(taskId);
-    await touchTaskUpdatedAt(taskId);
+    // Only transition pending → processing. While still running, poll/callback
+    // are pure reads for local DB; terminal success/fail is applied below /
+    // on later polls. No updatedAt lease refresh needed here.
+    if (existing.status === TASK_STATUS.PENDING) {
+      await markTaskProcessing(taskId);
+    }
     return "processing";
   }
 
