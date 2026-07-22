@@ -5,17 +5,9 @@ import { lastLoginMethod } from "better-auth/plugins";
 import { db } from "~/lib/database/db.server";
 import { serverEnv } from "~/lib/env.server";
 import { deleteFromR2 } from "~/lib/r2/r2.server";
-import {
-  ensureReviewTestAccountCredits,
-  rewardNewUserCredits,
-} from "~/lib/service/userService";
+import { ensureReviewTestAccountCredits } from "~/lib/service/userService";
 import { createUserSourceForNewUser } from "~/lib/service/userSourceService";
 import { emailOTPConfig } from "./unosendEmailOTP";
-
-type BetterAuthNewUser = {
-  id: string;
-  email?: string | null;
-};
 
 export const serverAuth = betterAuth({
   // Explicit secret from validated env — do not rely on process.env alone on Workers
@@ -25,15 +17,6 @@ export const serverAuth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "sqlite",
   }),
-  databaseHooks: {
-    user: {
-      create: {
-        after: async (user: BetterAuthNewUser) => {
-          await rewardNewUserCredits(user.id, user.email);
-        },
-      },
-    },
-  },
   hooks: {
     after: createAuthMiddleware(async (ctx) => {
       // Handle user source creation after successful authentication
