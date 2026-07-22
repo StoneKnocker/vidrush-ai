@@ -12,7 +12,10 @@ import {
   type SeedanceCreateTaskInput,
 } from "~/lib/ai/seedance.shared";
 import { moderateImage, moderateText } from "~/lib/ai/wavespeed.server";
-import { isModerationNsfw } from "~/lib/ai/wavespeed.shared";
+import {
+  isModerationNsfw,
+  type ModerationOutput,
+} from "~/lib/ai/wavespeed.shared";
 import { TASK_STATUS } from "~/lib/consts";
 import { serverEnv } from "~/lib/env.server";
 import {
@@ -58,7 +61,7 @@ function getSeedanceImageUrls(input: SeedanceCreateTaskInput): string[] {
 }
 
 /**
- * Latency trade-off: moderate all images when ≤2; otherwise only first + last.
+ * Rate-limit trade-off: moderate all images when ≤2; otherwise only first + last.
  * Middle reference images are skipped intentionally.
  */
 function selectImagesForModeration(urls: string[]): string[] {
@@ -130,21 +133,35 @@ export const videoRouter = router({
 
       // Pre-moderate prompt and reference images before creating the task.
       // Reference videos/audio are skipped (moderation API is image-only).
-      // >2 images: only first + last are checked to cut parallel moderation latency.
+      // >2 images: only first + last are checked to cut API volume (rate limits).
+      // Serial calls only — WaveSpeed rate-limits concurrent requests.
+      // When images exist, prompt is attached to each image moderation call,
+      // so a separate text moderation is redundant and skipped.
       // Fail-closed: any leg failing means safety cannot be guaranteed, so we
       // block creation rather than silently letting potentially NSFW content through.
       const imageUrls = selectImagesForModeration(getSeedanceImageUrls(input));
-      const settled = await Promise.allSettled([
-        moderateText(input.prompt),
-        ...imageUrls.map((url) => moderateImage(url, input.prompt)),
-      ]);
+      const fulfilledOutputs: ModerationOutput[] = [];
+      const failures: unknown[] = [];
 
-      const failures = settled.filter(
-        (r): r is PromiseRejectedResult => r.status === "rejected",
-      );
-      const fulfilledOutputs = settled.flatMap((r) =>
-        r.status === "fulfilled" ? r.value : [],
-      );
+      if (imageUrls.length > 0) {
+        for (const url of imageUrls) {
+          try {
+            const outputs = await moderateImage(url, input.prompt);
+            fulfilledOutputs.push(...outputs);
+            // Early stop on NSFW — no need to burn more rate-limited calls.
+            if (isModerationNsfw(outputs)) break;
+          } catch (err) {
+            failures.push(err);
+          }
+        }
+      } else {
+        try {
+          const outputs = await moderateText(input.prompt);
+          fulfilledOutputs.push(...outputs);
+        } catch (err) {
+          failures.push(err);
+        }
+      }
 
       // NSFW hit takes priority — report the real reason even if other legs failed.
       if (isModerationNsfw(fulfilledOutputs)) {
@@ -159,7 +176,7 @@ export const videoRouter = router({
       if (failures.length > 0) {
         console.error(
           "[video.createSeedanceTask] moderation service failed, failing closed",
-          failures.map((f) => f.reason),
+          failures,
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
