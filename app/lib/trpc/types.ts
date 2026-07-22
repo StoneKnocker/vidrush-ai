@@ -21,3 +21,15 @@ export interface PaymentStatusResult {
   planId?: string;
   provider?: string;
 }
+
+export interface ActiveSubscriptionResult {
+  subscription: {
+    planId: string;
+    status: string;
+    provider: string;
+    periodEnd: string;
+    cancelAtPeriodEnd: boolean;
+    /** In-app cancel currently supported for Subotiz only */
+    canCancel: boolean;
+  } | null;
+}

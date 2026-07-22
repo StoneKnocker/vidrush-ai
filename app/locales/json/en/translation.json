@@ -137,7 +137,11 @@
   "pricing": {
     "processing": "Processing...",
     "genericError": "An error occurred. Please try again.",
-    "alreadySubscribed": "You already have an active subscription. Cancel it or wait until it ends before starting a new plan. Credit packs can still be purchased anytime."
+    "alreadySubscribed": "You already have an active subscription. Cancel it or wait until it ends before starting a new plan. Credit packs can still be purchased anytime.",
+    "currentPlan": "Current Plan",
+    "subscribed": "Subscribed",
+    "manageSubscription": "Manage on Credits page",
+    "activePlanBanner": "You're on {{plan}}. Only one subscription at a time — buy credit packs anytime for extra credits."
   },
   "creations": {
     "title": "Your {{appName}} Creations",
@@ -185,6 +189,19 @@
     "types": {
       "permanent": "Permanent",
       "subscription": "Subscription"
+    },
+    "subscription": {
+      "title": "Current Plan",
+      "renewsOn": "Renews on {{date}}",
+      "endsOn": "Access until {{date}} (will not renew)",
+      "cancel": "Cancel subscription",
+      "canceling": "Canceling...",
+      "cancelHint": "You keep access and subscription credits until the end of the billing period.",
+      "cancelConfirm": "Cancel auto-renewal? You can keep using your plan and credits until {{date}}. No further charges after that.",
+      "cancelSuccess": "Subscription canceled. Access continues until {{date}}.",
+      "cancelFailed": "Could not cancel subscription. Please try again or contact support.",
+      "cancelScheduledHint": "Cancellation is scheduled. You keep full access until {{date}}.",
+      "contactSupportToCancel": "This subscription cannot be canceled in-app. Please contact support."
     }
   }
 }

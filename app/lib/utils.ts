@@ -119,6 +119,14 @@ export function formatDate(
   return format(dateObj, formatString);
 }
 
+/** Convert a kebab-case plan id (e.g. "pro-monthly") to a display label ("Pro Monthly"). */
+export function formatPlanLabel(planId: string): string {
+  return planId
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export function getGuestId(): string | null {
   if (typeof window === "undefined") {
     return null;

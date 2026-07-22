@@ -12,7 +12,10 @@ import {
   getPaymentBySessionId,
   updatePaymentStatus,
 } from "@/lib/model/payment";
-import { getSubscriptionByProviderId } from "@/lib/model/subscription";
+import {
+  getSubscriptionByProviderId,
+  updateSubscriptionStatus,
+} from "@/lib/model/subscription";
 import {
   markWebhookFailed,
   markWebhookProcessed,
@@ -185,6 +188,11 @@ export async function action({ request }: Route.ActionArgs) {
         await handleSubscriptionCanceled(eventData);
         break;
       }
+      case "v2.subscription.cancellation_requested":
+      case "subscription.cancellation_requested": {
+        await handleSubscriptionCancellationRequested(eventData);
+        break;
+      }
       case "v2.subscription.past_due":
       case "v2.subscription.unpaid":
       case "v2.subscription.paused":
@@ -342,8 +350,31 @@ async function handleSubscriptionCanceled(eventData: Record<string, unknown>) {
   const subscriptionId = asString(eventData.id);
   if (!subscriptionId) return;
 
+  // Final termination (period ended or immediate cancel).
   await markSubscriptionCanceled(PROVIDER, subscriptionId, {
+    cancelAtPeriodEnd: false,
+    immediate: true,
+  });
+}
+
+/** User scheduled cancel at period end — keep access until periodEnd. */
+async function handleSubscriptionCancellationRequested(
+  eventData: Record<string, unknown>,
+) {
+  const subscriptionId = asString(eventData.id);
+  if (!subscriptionId) return;
+
+  const local = await getSubscriptionByProviderId(PROVIDER, subscriptionId);
+  if (!local) {
+    console.log("Subotiz cancellation_requested: local not found", {
+      subscriptionId,
+    });
+    return;
+  }
+
+  await updateSubscriptionStatus(PROVIDER, subscriptionId, local.status, {
     cancelAtPeriodEnd: true,
+    canceledAt: new Date(),
   });
 }
 
@@ -369,16 +400,18 @@ async function handleSubscriptionStatusSync(
   );
   const periodEnd = parseDate(eventData.current_period_end, local.periodEnd);
 
+  // Only manage cancelAtPeriodEnd/canceledAt when transitioning to CANCELED.
+  // For other statuses (past_due, paused, resumed) preserve values set by the
+  // dedicated handlers (cancellation_requested / canceled) so we don't clobber
+  // a scheduled cancel-at-period-end.
+  const isCanceled = mapped === SUBSCRIPTION_STATUS.CANCELED;
   await syncSubscriptionState(
     PROVIDER,
     subscriptionId,
     mapped,
     periodStart,
     periodEnd,
-    {
-      cancelAtPeriodEnd: mapped === SUBSCRIPTION_STATUS.CANCELED,
-      canceledAt: mapped === SUBSCRIPTION_STATUS.CANCELED ? new Date() : null,
-    },
+    isCanceled ? { cancelAtPeriodEnd: false, canceledAt: new Date() } : {},
   );
 }
 

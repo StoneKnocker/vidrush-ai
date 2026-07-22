@@ -3,6 +3,7 @@ import { Check, Gift, Zap } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { Link } from "@/components/i18n-link";
 import {
   type CheckoutProvider,
   PaymentProviderModal,
@@ -12,7 +13,7 @@ import { useAuth } from "~/hooks/use-auth";
 import { useLoginModal } from "~/hooks/use-login-modal";
 import { getTrpcErrorMessage } from "~/lib/trpc/error";
 import { trpc } from "~/lib/trpc/trpc-provider";
-import { cn } from "~/lib/utils";
+import { cn, formatPlanLabel } from "~/lib/utils";
 import type { CreditPack, SubscriptionPlan } from "~/types/pricing";
 
 function formatUsd(amount: number): string {
@@ -79,6 +80,15 @@ export function SeedancePricing({
   const providersQuery = trpc.payment.listProviders.useQuery(undefined, {
     staleTime: 60_000,
   });
+  const activeSubQuery = trpc.payment.getActiveSubscription.useQuery(
+    undefined,
+    {
+      enabled: isAuthenticated,
+      staleTime: 30_000,
+    },
+  );
+  const activeSubscription = activeSubQuery.data?.subscription ?? null;
+  const hasActiveSubscription = Boolean(activeSubscription);
 
   const enabledProviders = (providersQuery.data?.providers ?? [
     "subotiz",
@@ -120,10 +130,17 @@ export function SeedancePricing({
     [enabledProviders, proceedWithCheckout],
   );
 
-  const handleCheckout = async (planId: string) => {
+  const handleCheckout = async (
+    planId: string,
+    isSubscriptionPlan: boolean,
+  ) => {
     if (!isAuthenticated) {
       setPendingPlanId(planId);
       openLoginModal();
+      return;
+    }
+    if (isSubscriptionPlan && hasActiveSubscription) {
+      toast.error(t("pricing.alreadySubscribed"));
       return;
     }
     await startCheckoutFlow(planId);
@@ -132,12 +149,14 @@ export function SeedancePricing({
   useEffect(() => {
     if (isAuthenticated && pendingPlanId) {
       closeLoginModal();
+      // pendingPlanId may be a pack or a plan; packs never blocked client-side here
       void startCheckoutFlow(pendingPlanId);
       setPendingPlanId(null);
     }
   }, [isAuthenticated, pendingPlanId, closeLoginModal, startCheckoutFlow]);
 
   const isCheckingOut = checkoutMutation.isPending;
+  const activePlanIdFromSub = activeSubscription?.planId ?? null;
 
   return (
     <section
@@ -197,6 +216,25 @@ export function SeedancePricing({
       )}
 
       <div className={cn("mx-auto", compact ? "px-0" : "px-4 md:px-24")}>
+        {hasActiveSubscription && activePlanIdFromSub && (
+          <div
+            className={cn(
+              "mx-auto max-w-3xl rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-center text-foreground text-sm",
+              compact ? "mb-6" : "mb-8",
+            )}
+          >
+            {t("pricing.activePlanBanner", {
+              plan: formatPlanLabel(activePlanIdFromSub),
+            })}{" "}
+            <Link
+              to="/user/credits"
+              className="font-medium text-primary underline-offset-2 hover:underline"
+            >
+              {t("pricing.manageSubscription")}
+            </Link>
+          </div>
+        )}
+
         <div className={cn("flex justify-center", compact ? "mb-8" : "mb-12")}>
           <div className="inline-flex items-center gap-3 rounded-full border border-border bg-card p-1.5">
             <button
@@ -239,18 +277,32 @@ export function SeedancePricing({
             const loadingThis = isCheckingOut && activePlanId === planId;
             const originalAnnualPrice = monthlyPrice * 12;
             const annualCredits = plan.monthlyCredits * 12;
+            const isCurrentPlan =
+              activePlanIdFromSub === plan.cycles.monthly.id ||
+              activePlanIdFromSub === plan.cycles.yearly.id;
+            const subscriptionLocked = hasActiveSubscription;
 
             return (
               <div
                 key={plan.id}
                 className={`relative rounded-xl border-t-4 bg-card p-8 shadow-sm transition-all hover:border-primary ${
-                  plan.popular ? "border-primary" : "border-border"
+                  isCurrentPlan
+                    ? "border-primary ring-1 ring-primary/30"
+                    : plan.popular
+                      ? "border-primary"
+                      : "border-border"
                 }`}
               >
-                {plan.popular && (
+                {isCurrentPlan ? (
                   <div className="absolute top-[-1px] right-0 rounded-tr-lg rounded-bl-lg bg-primary px-3 py-1 text-primary-foreground text-xs">
-                    Most Popular
+                    {t("pricing.currentPlan")}
                   </div>
+                ) : (
+                  plan.popular && (
+                    <div className="absolute top-[-1px] right-0 rounded-tr-lg rounded-bl-lg bg-primary px-3 py-1 text-primary-foreground text-xs">
+                      Most Popular
+                    </div>
+                  )
                 )}
                 <div className="mb-2 font-semibold text-2xl text-foreground">
                   {plan.name}
@@ -322,12 +374,19 @@ export function SeedancePricing({
 
                 <LoadingButton
                   className="w-full rounded-md border border-border bg-card font-medium text-primary hover:bg-card/80 hover:text-primary"
-                  onClick={() => handleCheckout(planId)}
+                  onClick={() => handleCheckout(planId, true)}
                   loading={loadingThis}
                   loadingText={t("pricing.processing")}
-                  disabled={isCheckingOut && !loadingThis}
+                  disabled={
+                    subscriptionLocked || (isCheckingOut && !loadingThis)
+                  }
                 >
-                  {!loadingThis && plan.cta}
+                  {!loadingThis &&
+                    (isCurrentPlan
+                      ? t("pricing.currentPlan")
+                      : subscriptionLocked
+                        ? t("pricing.subscribed")
+                        : plan.cta)}
                 </LoadingButton>
               </div>
             );
@@ -367,7 +426,7 @@ export function SeedancePricing({
                   <LoadingButton
                     variant="outline"
                     className="w-full rounded-md border-border bg-card text-foreground hover:bg-card/80"
-                    onClick={() => handleCheckout(pack.id)}
+                    onClick={() => handleCheckout(pack.id, false)}
                     loading={loadingThis}
                     loadingText={t("pricing.processing")}
                     disabled={isCheckingOut && !loadingThis}

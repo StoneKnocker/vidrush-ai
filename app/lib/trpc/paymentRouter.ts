@@ -6,14 +6,23 @@ import {
   getPaymentBySessionId,
 } from "~/lib/model/payment";
 import {
+  getActiveSubscriptionByUserId,
+  updateSubscriptionStatus,
+} from "~/lib/model/subscription";
+import {
   AlreadySubscribedError,
   type CheckoutResult,
   createCheckoutForPlan,
   getEnabledPaymentProviders,
 } from "~/lib/payment";
 import { confirmPaypalPayment } from "~/lib/payment/paypal/paypal.server";
+import { cancelSubotizSubscription } from "~/lib/payment/subotiz/subotiz.server";
 import { authedProcedure, publicProcedure, router } from "./init";
-import type { CheckoutCreateResult, PaymentStatusResult } from "./types";
+import type {
+  ActiveSubscriptionResult,
+  CheckoutCreateResult,
+  PaymentStatusResult,
+} from "./types";
 
 const providerSchema = z.enum([
   PAYMENT_PROVIDER.SUBOTIZ,
@@ -71,6 +80,93 @@ export const paymentRouter = router({
   listProviders: publicProcedure.query(() => {
     return { providers: getEnabledPaymentProviders() };
   }),
+
+  /**
+   * Current active-like subscription for the signed-in user (single-plan model).
+   */
+  getActiveSubscription: authedProcedure.query(
+    async ({ ctx }): Promise<ActiveSubscriptionResult> => {
+      const sub = await getActiveSubscriptionByUserId(ctx.user.id);
+      if (!sub) {
+        return { subscription: null };
+      }
+
+      return {
+        subscription: {
+          planId: sub.planId,
+          status: sub.status,
+          provider: sub.provider,
+          periodEnd: sub.periodEnd.toISOString(),
+          cancelAtPeriodEnd: Boolean(sub.cancelAtPeriodEnd),
+          canCancel:
+            sub.provider === PAYMENT_PROVIDER.SUBOTIZ && !sub.cancelAtPeriodEnd,
+        },
+      };
+    },
+  ),
+
+  /**
+   * Cancel active subscription at period end (Subotiz only).
+   * Access and subscription credits remain until periodEnd.
+   */
+  cancelSubscription: authedProcedure.mutation(
+    async ({ ctx }): Promise<{ success: true; periodEnd: string }> => {
+      const sub = await getActiveSubscriptionByUserId(ctx.user.id);
+      if (!sub) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No active subscription to cancel",
+        });
+      }
+
+      if (sub.cancelAtPeriodEnd) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Subscription is already scheduled to cancel at period end",
+        });
+      }
+
+      if (sub.provider !== PAYMENT_PROVIDER.SUBOTIZ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "In-app cancellation is only available for Subotiz subscriptions. Please contact support.",
+        });
+      }
+
+      try {
+        await cancelSubotizSubscription(sub.providerSubscriptionId, {
+          cancelType: "end_of_period",
+          cancelReason: "user_requested",
+        });
+      } catch (error) {
+        console.error("Subotiz cancel subscription failed:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to cancel subscription",
+        });
+      }
+
+      // Keep status active until period ends; only stop auto-renewal.
+      await updateSubscriptionStatus(
+        sub.provider,
+        sub.providerSubscriptionId,
+        sub.status,
+        {
+          cancelAtPeriodEnd: true,
+          canceledAt: new Date(),
+        },
+      );
+
+      return {
+        success: true,
+        periodEnd: sub.periodEnd.toISOString(),
+      };
+    },
+  ),
 
   createCheckout: authedProcedure
     .input(createCheckoutSchema)

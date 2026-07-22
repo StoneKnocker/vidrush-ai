@@ -111,11 +111,36 @@ export async function subotizRequest<T>(
     );
   }
 
-  if (json.data === undefined) {
-    throw new Error(`Subotiz API missing data: ${text.slice(0, 200)}`);
+  // Some mutations (e.g. cancel) may return success with empty data.
+  return json.data as T;
+}
+
+export type SubotizCancelType = "end_of_period" | "immediate";
+
+/**
+ * Cancel a Subotiz subscription.
+ * API: POST /api/v1/subscription/{id}/cancel
+ * cancel_type: end_of_period (access until period end) | immediate
+ */
+export async function cancelSubotizSubscription(
+  providerSubscriptionId: string,
+  options: {
+    cancelType?: SubotizCancelType;
+    cancelReason?: string;
+  } = {},
+): Promise<unknown> {
+  if (!isSubotizEnabled()) {
+    throw new Error("Subotiz payment provider is not enabled");
   }
 
-  return json.data;
+  return subotizRequest<unknown>(
+    "POST",
+    `/api/v1/subscription/${providerSubscriptionId}/cancel`,
+    {
+      cancel_type: options.cancelType ?? "end_of_period",
+      cancel_reason: options.cancelReason ?? "user_requested",
+    },
+  );
 }
 
 export async function createSubotizCheckout(planId: string, userId: string) {
@@ -188,7 +213,7 @@ export async function createSubotizCheckout(planId: string, userId: string) {
       },
     );
 
-    if (!session.session_id || !session.session_url) {
+    if (!session || !session.session_id || !session.session_url) {
       throw new Error("Subotiz session missing session_id or session_url");
     }
 

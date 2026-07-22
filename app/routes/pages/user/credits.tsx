@@ -6,6 +6,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { SubscriptionManage } from "~/components/subscription-manage";
 import {
   Card,
   CardContent,
@@ -104,6 +105,14 @@ export default function CreditsPage({ loaderData }: Route.ComponentProps) {
             >
               {t("credits.description")}
             </p>
+          </div>
+
+          {/* Active subscription + cancel */}
+          <div
+            className="opacity-0"
+            style={{ animation: "fade-in-up 0.6s ease-out 0.25s forwards" }}
+          >
+            <SubscriptionManage />
           </div>
 
           {/* Balance Cards */}
